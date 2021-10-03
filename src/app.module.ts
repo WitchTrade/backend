@@ -1,10 +1,21 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import 'dotenv/config';
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    TypeOrmModule.forRoot({
+      type: 'mysql',
+      host: process.env.DATABASEHOST,
+      port: parseInt(process.env.DATABASEPORT),
+      username: process.env.DATABASEUSER,
+      password: process.env.DATABASEPW,
+      database: 'witchtrade',
+      entities: [],
+      synchronize: true,
+    }),
+  ],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
