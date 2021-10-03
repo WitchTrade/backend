@@ -3,10 +3,14 @@
 [![Stars](https://img.shields.io/github/stars/GiyoMoon/WitchTrade-BE.svg?color=ff67e4)](https://github.com/GiyoMoon/WitchTrade-BE/stargazers)
 [![Commits](https://img.shields.io/github/commit-activity/m/GiyoMoon/WitchTrade-BE?color=ff67e4)](https://github.com/GiyoMoon/WitchTrade-BE/commits)
 [![Gitmoji](https://img.shields.io/badge/gitmoji-%20😜%20😍-FFDD67.svg?color=ff67e4)](https://gitmoji.dev)
-[![License](https://img.shields.io/github/license/GiyoMoon/WitchTrade-BE.svg?color=ff67e4)](https://github.com/GiyoMoon/WitchTrade-BE/blob/master/LICENSE)
+[![License](https://img.shields.io/github/license/GiyoMoon/WitchTrade-BE.svg?color=ff67e4)](https://github.com/GiyoMoon/WitchTrade-BE/blob/main/COPYING)
 [![CodeFactor](https://www.codefactor.io/repository/github/GiyoMoon/WitchTrade-BE/badge)](https://www.codefactor.io/repository/github/GiyoMoon/WitchTrade-BE)
 
 WitchTrade (https://witchtrade.org) is a trading website for the hide and seek game [Witch It](https://store.steampowered.com/app/559650/Witch_It/). It provides many features to facilitate trading Witch It cosmetic items.
+
+## Backend
+
+This is the backend code of WitchTrade. If you want to see the frontend, visit [this](https://github.com/GiyoMoon/WitchTrade-FE) repository.
 
 ## Features
 **Search**
