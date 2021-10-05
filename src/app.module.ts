@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UsersModule } from './users/users.module';
 import 'dotenv/config';
+
+import { User } from './users/entities/user.entity';
 
 @Module({
   imports: [
@@ -11,11 +14,12 @@ import 'dotenv/config';
       username: process.env.DATABASEUSER,
       password: process.env.DATABASEPW,
       database: 'witchtrade',
-      entities: [],
+      entities: [User],
       synchronize: true,
     }),
+    UsersModule,
   ],
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }
