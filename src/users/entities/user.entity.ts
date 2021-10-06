@@ -41,6 +41,9 @@ export class User {
     usingSteamGuard: boolean;
 
     @Column({ default: false })
+    verified: boolean;
+
+    @Column({ default: false })
     hidden: boolean;
 
     @Column({ default: false })
@@ -76,6 +79,7 @@ export class User {
             steamTradeLink: this.steamTradeLink,
             discordTag: this.discordTag,
             usingSteamGuard: this.usingSteamGuard,
+            verified: this.verified,
             hidden: this.hidden
         };
     }
@@ -108,5 +112,6 @@ export class PublicUser {
     steamTradeLink: string;
     discordTag: string;
     usingSteamGuard: boolean;
+    verified: boolean;
     hidden: boolean;
 }

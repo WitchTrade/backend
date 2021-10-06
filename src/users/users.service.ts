@@ -100,11 +100,19 @@ export class UsersService {
             );
         }
 
+        if (
+            user.verified &&
+            (user.steamProfileLink !== data.steamProfileLink ||
+                user.steamTradeLink !== data.steamTradeLink)
+        ) {
+            user.verified = false;
+        }
+
         user.email = data.email;
         user.displayName = data.displayName;
-        user.steamProfileLink = data.steamProfileLink;
-        user.steamTradeLink = data.steamTradeLink;
-        user.discordTag = data.discordTag;
+        user.steamProfileLink = data.steamProfileLink ? data.steamProfileLink : null;
+        user.steamTradeLink = data.steamTradeLink ? data.steamTradeLink : null;
+        user.discordTag = data.discordTag ? data.discordTag : null;
         user.usingSteamGuard = data.usingSteamGuard;
         user.hidden = data.hidden;
 
