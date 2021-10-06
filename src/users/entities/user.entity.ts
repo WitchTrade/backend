@@ -66,6 +66,20 @@ export class User {
         return bcrypt.compare(attempt, this.password);
     }
 
+    public getPublicInfo(): PublicUser {
+        return {
+            username: this.username,
+            created: this.created,
+            lastOnline: this.lastOnline,
+            displayName: this.displayName,
+            steamProfileLink: this.steamProfileLink,
+            steamTradeLink: this.steamTradeLink,
+            discordTag: this.discordTag,
+            steamAuth: this.steamAuth,
+            hidden: this.hidden
+        };
+    }
+
     public tokenResponse() {
         const user = { ...this, token: this._generateToken() };
         delete user.password;
@@ -83,4 +97,16 @@ export class User {
 
 export class UserWithToken extends User {
     token: string;
+}
+
+export class PublicUser {
+    username: string;
+    created: Date;
+    lastOnline: Date;
+    displayName: string;
+    steamProfileLink: string;
+    steamTradeLink: string;
+    discordTag: string;
+    steamAuth: boolean;
+    hidden: boolean;
 }

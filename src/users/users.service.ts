@@ -4,11 +4,10 @@ import { Repository } from 'typeorm';
 
 import { UserRegisterDTO } from './dtos/register.dto';
 import { UserLoginDTO } from './dtos/login.dto';
-import { User, UserWithToken } from './entities/user.entity';
+import { PublicUser, User, UserWithToken } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
-
     constructor(
         @InjectRepository(User)
         private _userRepository: Repository<User>,
@@ -77,4 +76,15 @@ export class UsersService {
         return user;
     }
 
+    public async getPublicUser(username: string): Promise<PublicUser> {
+        const user = await this._userRepository.findOne({ where: { username, banned: false } });
+        if (!user) {
+            throw new HttpException(
+                'User not found or has been banned.',
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+
+        return user.getPublicInfo();
+    }
 }
