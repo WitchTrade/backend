@@ -57,6 +57,13 @@ export class UsersService {
             );
         }
 
+        if (dbUser.banned) {
+            throw new HttpException(
+                `This account has been banned! Reason: ${dbUser.banMessage}`,
+                HttpStatus.FORBIDDEN,
+            );
+        }
+
         return dbUser.tokenResponse();
     }
 
