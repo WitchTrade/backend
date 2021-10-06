@@ -38,7 +38,7 @@ export class User {
     discordTag: string;
 
     @Column({ default: false })
-    steamAuth: boolean;
+    usingSteamGuard: boolean;
 
     @Column({ default: false })
     hidden: boolean;
@@ -58,11 +58,11 @@ export class User {
     // badges
 
     @BeforeInsert()
-    private async hashPassword() {
+    private async hashPassword(): Promise<void> {
         this.password = await bcrypt.hash(this.password, 10);
     }
 
-    public comparePassword(attempt: string) {
+    public comparePassword(attempt: string): Promise<boolean> {
         return bcrypt.compare(attempt, this.password);
     }
 
@@ -75,12 +75,12 @@ export class User {
             steamProfileLink: this.steamProfileLink,
             steamTradeLink: this.steamTradeLink,
             discordTag: this.discordTag,
-            steamAuth: this.steamAuth,
+            usingSteamGuard: this.usingSteamGuard,
             hidden: this.hidden
         };
     }
 
-    public tokenResponse() {
+    public tokenResponse(): UserWithToken {
         const user = { ...this, token: this._generateToken() };
         delete user.password;
         return user;
@@ -107,6 +107,6 @@ export class PublicUser {
     steamProfileLink: string;
     steamTradeLink: string;
     discordTag: string;
-    steamAuth: boolean;
+    usingSteamGuard: boolean;
     hidden: boolean;
 }

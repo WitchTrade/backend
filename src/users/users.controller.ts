@@ -1,10 +1,11 @@
-import { Body, Controller, Get, HttpCode, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { UserDecorator } from './decorators/user.decorator';
 
 import { UserLoginDTO } from './dtos/login.dto';
 import { UserRegisterDTO } from './dtos/register.dto';
+import { UserUpdateDTO } from './dtos/update.dto';
 import { PublicUser, User, UserWithToken } from './entities/user.entity';
 import { UsersService } from './users.service';
 
@@ -29,6 +30,13 @@ export class UsersController {
     @Get('current')
     public getCurrentUser(@UserDecorator('id') uuid: string): Promise<User> {
         return this.usersService.getCurrentUser(uuid);
+    }
+
+    @ApiBearerAuth()
+    @UseGuards(AuthGuard)
+    @Put('')
+    public updateUser(@Body() user: UserUpdateDTO, @UserDecorator('id') uuid: string): Promise<UserWithToken> {
+        return this.usersService.updateUser(user, uuid);
     }
 
     @Get('get/:username')

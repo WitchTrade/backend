@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { UserRegisterDTO } from './dtos/register.dto';
 import { UserLoginDTO } from './dtos/login.dto';
 import { PublicUser, User, UserWithToken } from './entities/user.entity';
+import { UserUpdateDTO } from './dtos/update.dto';
 
 @Injectable()
 export class UsersService {
@@ -81,6 +82,35 @@ export class UsersService {
 
         delete user.password;
         return user;
+    }
+
+    public async updateUser(data: UserUpdateDTO, uuid: string): Promise<UserWithToken> {
+        const user = await this._userRepository.findOne(uuid);
+        if (!user) {
+            throw new HttpException(
+                'User not found.',
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+
+        if (!data.steamProfileLink && !data.steamTradeLink) {
+            throw new HttpException(
+                'Please provide either a steam profile link or trade link.',
+                HttpStatus.BAD_REQUEST
+            );
+        }
+
+        user.email = data.email;
+        user.displayName = data.displayName;
+        user.steamProfileLink = data.steamProfileLink;
+        user.steamTradeLink = data.steamTradeLink;
+        user.discordTag = data.discordTag;
+        user.usingSteamGuard = data.usingSteamGuard;
+        user.hidden = data.hidden;
+
+        const updatedUser = await this._userRepository.save(user);
+
+        return updatedUser.tokenResponse();
     }
 
     public async getPublicUser(username: string): Promise<PublicUser> {
