@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 
 import { UserRegisterDTO } from './dtos/register.dto';
 import { UserLoginDTO } from './dtos/login.dto';
-import { User } from './entities/user.entity';
+import { User, UserWithToken } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
@@ -14,7 +14,7 @@ export class UsersService {
         private _userRepository: Repository<User>,
     ) { }
 
-    public async register(user: UserRegisterDTO) {
+    public async register(user: UserRegisterDTO): Promise<UserWithToken> {
         if (!user.steamProfileLink && !user.steamTradeLink) {
             throw new HttpException(
                 'Please provide either a steam profile link or trade link.',
@@ -46,7 +46,7 @@ export class UsersService {
         return createdUser.tokenResponse();
     }
 
-    public async login(user: UserLoginDTO) {
+    public async login(user: UserLoginDTO): Promise<UserWithToken> {
         const username = user.username.toLowerCase();
         const password = user.password;
 
@@ -60,4 +60,21 @@ export class UsersService {
 
         return dbUser.tokenResponse();
     }
+
+    public async getCurrentUser(uuid: string): Promise<User> {
+        const user = await this._userRepository.findOne(uuid);
+        if (!user) {
+            throw new HttpException(
+                'User not found.',
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+
+        user.lastOnline = new Date();
+        await this._userRepository.save(user);
+
+        delete user.password;
+        return user;
+    }
+
 }

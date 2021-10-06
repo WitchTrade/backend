@@ -51,6 +51,8 @@ export class User {
 
     // inventory
 
+    // market
+
     // roles
 
     // badges
@@ -60,8 +62,8 @@ export class User {
         this.password = await bcrypt.hash(this.password, 10);
     }
 
-    public async comparePassword(attempt: string) {
-        return await bcrypt.compare(attempt, this.password);
+    public comparePassword(attempt: string) {
+        return bcrypt.compare(attempt, this.password);
     }
 
     public tokenResponse() {
@@ -77,4 +79,8 @@ export class User {
         }, process.env.SECRET,
             { expiresIn: '1y' });
     }
+}
+
+export class UserWithToken extends User {
+    token: string;
 }
