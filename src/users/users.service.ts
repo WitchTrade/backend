@@ -6,6 +6,7 @@ import { UserRegisterDTO } from './dtos/register.dto';
 import { UserLoginDTO } from './dtos/login.dto';
 import { PublicUser, User, UserWithToken } from './entities/user.entity';
 import { UserUpdateDTO } from './dtos/update.dto';
+import { UserChangePasswordDTO } from './dtos/changePassword.dto';
 
 @Injectable()
 export class UsersService {
@@ -115,6 +116,30 @@ export class UsersService {
         user.discordTag = data.discordTag ? data.discordTag : null;
         user.usingSteamGuard = data.usingSteamGuard;
         user.hidden = data.hidden;
+
+        const updatedUser = await this._userRepository.save(user);
+
+        return updatedUser.tokenResponse();
+    }
+
+    public async changePassword(data: UserChangePasswordDTO, uuid: string) {
+        const user = await this._userRepository.findOne(uuid);
+        if (!user) {
+            throw new HttpException(
+                'User not found.',
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+
+        if (!(await user.comparePassword(data.oldPassword))) {
+            throw new HttpException(
+                'Invalid old password.',
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+
+        user.password = data.password;
+        await user.hashPassword();
 
         const updatedUser = await this._userRepository.save(user);
 

@@ -61,7 +61,7 @@ export class User {
     // badges
 
     @BeforeInsert()
-    private async hashPassword(): Promise<void> {
+    public async hashPassword(): Promise<void> {
         this.password = await bcrypt.hash(this.password, 10);
     }
 

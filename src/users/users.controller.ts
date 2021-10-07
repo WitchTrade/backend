@@ -2,6 +2,7 @@ import { Body, Controller, Get, HttpCode, Param, Post, Put, UseGuards } from '@n
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { UserDecorator } from './decorators/user.decorator';
+import { UserChangePasswordDTO } from './dtos/changePassword.dto';
 
 import { UserLoginDTO } from './dtos/login.dto';
 import { UserRegisterDTO } from './dtos/register.dto';
@@ -35,8 +36,15 @@ export class UsersController {
     @ApiBearerAuth()
     @UseGuards(AuthGuard)
     @Put('')
-    public updateUser(@Body() user: UserUpdateDTO, @UserDecorator('id') uuid: string): Promise<UserWithToken> {
-        return this.usersService.updateUser(user, uuid);
+    public updateUser(@Body() data: UserUpdateDTO, @UserDecorator('id') uuid: string): Promise<UserWithToken> {
+        return this.usersService.updateUser(data, uuid);
+    }
+
+    @ApiBearerAuth()
+    @UseGuards(AuthGuard)
+    @Put('password')
+    public changePassword(@Body() data: UserChangePasswordDTO, @UserDecorator('id') uuid: string): Promise<UserWithToken> {
+        return this.usersService.changePassword(data, uuid);
     }
 
     @Get('get/:username')
