@@ -45,6 +45,7 @@ export class UsersService {
     await this._userRepository.save(createdUser);
 
     createdUser.roles = [];
+    createdUser.badges = [];
 
     return createdUser.tokenResponse();
   }
@@ -53,7 +54,7 @@ export class UsersService {
     const username = user.username.toLowerCase();
     const password = user.password;
 
-    const dbUser = await this._userRepository.findOne({ where: { username }, relations: ['roles'] });
+    const dbUser = await this._userRepository.findOne({ where: { username }, relations: ['roles', 'badges'] });
     if (!dbUser || !(await dbUser.comparePassword(password))) {
       throw new HttpException(
         'Invalid username or password.',
@@ -72,7 +73,7 @@ export class UsersService {
   }
 
   public async getCurrentUser(uuid: string): Promise<User> {
-    const user = await this._userRepository.findOne(uuid, { relations: ['roles'] });
+    const user = await this._userRepository.findOne(uuid, { relations: ['roles', 'badges'] });
     if (!user) {
       throw new HttpException(
         'User not found.',
@@ -88,7 +89,7 @@ export class UsersService {
   }
 
   public async updateUser(data: UserUpdateDTO, uuid: string): Promise<UserWithToken> {
-    const user = await this._userRepository.findOne(uuid, { relations: ['roles'] });
+    const user = await this._userRepository.findOne(uuid, { relations: ['roles', 'badges'] });
     if (!user) {
       throw new HttpException(
         'User not found.',
@@ -122,12 +123,13 @@ export class UsersService {
     const updatedUser = await this._userRepository.save(user);
 
     updatedUser.roles = user.roles;
+    updatedUser.badges = user.badges;
 
     return updatedUser.tokenResponse();
   }
 
   public async changePassword(data: UserChangePasswordDTO, uuid: string) {
-    const user = await this._userRepository.findOne(uuid, { relations: ['roles'] });
+    const user = await this._userRepository.findOne(uuid, { relations: ['roles', 'badges'] });
     if (!user) {
       throw new HttpException(
         'User not found.',
@@ -148,12 +150,13 @@ export class UsersService {
     const updatedUser = await this._userRepository.save(user);
 
     updatedUser.roles = user.roles;
+    updatedUser.badges = user.badges;
 
     return updatedUser.tokenResponse();
   }
 
   public async getPublicUser(username: string): Promise<PublicUser> {
-    const user = await this._userRepository.findOne({ where: { username, banned: false }, relations: ['roles'] });
+    const user = await this._userRepository.findOne({ where: { username, banned: false }, relations: ['roles', 'badges'] });
     if (!user) {
       throw new HttpException(
         'User not found or has been banned.',

@@ -7,6 +7,7 @@ import { AdminUser } from '../users/entities/user.entity';
 import { AdminService } from './admin.service';
 import { AdminBadgeDTO } from './dtos/badge.dto';
 import { AdminBanDTO } from './dtos/ban.dto';
+import { AdminRoleDTO } from './dtos/role.dto';
 import { AdminUnbanDTO } from './dtos/unban.dto';
 
 @Controller('admin')
@@ -55,8 +56,26 @@ export class AdminController {
     return this.adminService.removeBadge(uuid, badgeData);
   }
 
-  // add role
-  // remove role
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @Get('roles')
+  public getRoles(@UserDecorator('id') uuid: string): Promise<Badge[]> {
+    return this.adminService.getRoles(uuid);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @Post('role')
+  public addRole(@UserDecorator('id') uuid: string, @Body() roleData: AdminRoleDTO): Promise<AdminUser> {
+    return this.adminService.addRole(uuid, roleData);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @Delete('role')
+  public removeRole(@UserDecorator('id') uuid: string, @Body() roleData: AdminRoleDTO): Promise<AdminUser> {
+    return this.adminService.removeRole(uuid, roleData);
+  }
 
   // verify user
   // un-verify user

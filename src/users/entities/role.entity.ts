@@ -8,8 +8,6 @@ export class Role {
   @Column()
   description: string;
 
-  @Column({
-    unique: true,
-  })
+  @Column()
   rank: number;
 }
