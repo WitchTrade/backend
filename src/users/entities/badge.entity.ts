@@ -1,15 +1,10 @@
 import { Entity, Column, PrimaryColumn } from 'typeorm';
 
 @Entity()
-export class Role {
+export class Badge {
   @PrimaryColumn()
   id: string;
 
   @Column()
   description: string;
-
-  @Column({
-    unique: true,
-  })
-  rank: number;
 }

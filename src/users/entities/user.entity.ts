@@ -1,7 +1,9 @@
 import { Entity, Column, PrimaryGeneratedColumn, BeforeInsert, CreateDateColumn, JoinTable, ManyToMany } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
+
 import { Role } from './role.entity';
+import { Badge } from './badge.entity';
 
 @Entity()
 export class User {
@@ -61,7 +63,9 @@ export class User {
     @JoinTable()
     roles: Role[];
 
-    // badges
+    @ManyToMany(() => Badge)
+    @JoinTable()
+    badges: Badge[];
 
     @BeforeInsert()
     public async hashPassword(): Promise<void> {
@@ -84,7 +88,8 @@ export class User {
             usingSteamGuard: this.usingSteamGuard,
             verified: this.verified,
             hidden: this.hidden,
-            roles: this.roles
+            roles: this.roles,
+            badges: this.badges
         };
     }
 
@@ -119,6 +124,7 @@ export class PublicUser {
     verified: boolean;
     hidden: boolean;
     roles: Role[];
+    badges: Badge[];
 }
 
 export class AdminUser {
@@ -129,6 +135,7 @@ export class AdminUser {
     banned: boolean;
     banMessage: string;
     roles: Role[];
+    badges: Badge[];
 }
 
 export function createAdminUser(user: Partial<User>): AdminUser {
@@ -139,6 +146,7 @@ export function createAdminUser(user: Partial<User>): AdminUser {
         verified: user.verified ? user.verified : false,
         banned: user.banned ? user.banned : false,
         banMessage: user.banMessage ? user.banMessage : null,
-        roles: user.roles ? user.roles : []
+        roles: user.roles ? user.roles : [],
+        badges: user.badges ? user.badges : []
     };
 }

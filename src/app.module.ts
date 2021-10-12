@@ -6,6 +6,7 @@ import 'dotenv/config';
 import { User } from './users/entities/user.entity';
 import { AdminModule } from './admin/admin.module';
 import { Role } from './users/entities/role.entity';
+import { Badge } from './users/entities/badge.entity';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { Role } from './users/entities/role.entity';
       username: process.env.DATABASEUSER,
       password: process.env.DATABASEPW,
       database: 'witchtrade',
-      entities: [User, Role],
+      entities: [User, Role, Badge],
       synchronize: true,
     }),
     UsersModule,
