@@ -9,6 +9,7 @@ import { AdminBadgeDTO } from './dtos/badge.dto';
 import { AdminBanDTO } from './dtos/ban.dto';
 import { AdminRoleDTO } from './dtos/role.dto';
 import { AdminUnbanDTO } from './dtos/unban.dto';
+import { AdminVerifyDTO } from './dtos/verify.dto';
 
 @Controller('admin')
 export class AdminController {
@@ -77,6 +78,17 @@ export class AdminController {
     return this.adminService.removeRole(uuid, roleData);
   }
 
-  // verify user
-  // un-verify user
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @Post('verify')
+  public verifyUser(@UserDecorator('id') uuid: string, @Body() verifyData: AdminVerifyDTO): Promise<AdminUser> {
+    return this.adminService.verifyUser(uuid, verifyData);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @Delete('verify')
+  public unverifyUser(@UserDecorator('id') uuid: string, @Body() verifyData: AdminVerifyDTO): Promise<AdminUser> {
+    return this.adminService.unverifyUser(uuid, verifyData);
+  }
 }

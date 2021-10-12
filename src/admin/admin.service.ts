@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Role } from 'src/users/entities/role.entity';
+import { PERMISSION, Role } from 'src/users/entities/role.entity';
 import { Repository } from 'typeorm';
 import { Badge } from '../users/entities/badge.entity';
 import { createAdminUser, User } from '../users/entities/user.entity';
@@ -8,6 +8,7 @@ import { AdminBadgeDTO } from './dtos/badge.dto';
 import { AdminBanDTO } from './dtos/ban.dto';
 import { AdminRoleDTO } from './dtos/role.dto';
 import { AdminUnbanDTO } from './dtos/unban.dto';
+import { AdminVerifyDTO } from './dtos/verify.dto';
 
 @Injectable()
 export class AdminService {
@@ -49,7 +50,7 @@ export class AdminService {
 
   public async banUser(uuid: string, banData: AdminBanDTO) {
     const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
-    if (requestingUser.roles.length === 0) {
+    if (!this._hasPermission(requestingUser.roles, PERMISSION.BAN)) {
       throw new HttpException(
         'Permission denied.',
         HttpStatus.FORBIDDEN
@@ -64,7 +65,9 @@ export class AdminService {
       );
     }
 
-    if (userToBan.roles.length !== 0) {
+    if (
+      this._hasPermission(requestingUser.roles, PERMISSION.ADMIN)
+    ) {
       throw new HttpException(
         'User cannot be banned.',
         HttpStatus.FORBIDDEN
@@ -88,7 +91,7 @@ export class AdminService {
 
   public async unbanUser(uuid: string, unbanData: AdminUnbanDTO) {
     const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
-    if (requestingUser.roles.length === 0) {
+    if (!this._hasPermission(requestingUser.roles, PERMISSION.BAN)) {
       throw new HttpException(
         'Permission denied.',
         HttpStatus.FORBIDDEN
@@ -103,7 +106,9 @@ export class AdminService {
       );
     }
 
-    if (userToBan.roles.length !== 0) {
+    if (
+      this._hasPermission(requestingUser.roles, PERMISSION.ADMIN)
+    ) {
       throw new HttpException(
         'User cannot be unbanned.',
         HttpStatus.FORBIDDEN
@@ -142,10 +147,7 @@ export class AdminService {
   public async addBadge(uuid: string, badgeData: AdminBadgeDTO) {
     const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
 
-    if (
-      requestingUser.roles.length === 0 ||
-      this._getHighestRoleRank(requestingUser.roles) > 10
-    ) {
+    if (!this._hasPermission(requestingUser.roles, PERMISSION.BADGES)) {
       throw new HttpException(
         'Permission denied.',
         HttpStatus.FORBIDDEN
@@ -184,10 +186,7 @@ export class AdminService {
 
   public async removeBadge(uuid: string, badgeData: AdminBadgeDTO) {
     const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
-    if (
-      requestingUser.roles.length === 0 ||
-      this._getHighestRoleRank(requestingUser.roles) > 10
-    ) {
+    if (this._hasPermission(requestingUser.roles, PERMISSION.BADGES)) {
       throw new HttpException(
         'Permission denied.',
         HttpStatus.FORBIDDEN
@@ -240,9 +239,7 @@ export class AdminService {
 
   public async addRole(uuid: string, roleData: AdminRoleDTO) {
     const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
-    if (
-      requestingUser.roles.length === 0
-    ) {
+    if (this._hasPermission(requestingUser.roles, PERMISSION.ROLES)) {
       throw new HttpException(
         'Permission denied.',
         HttpStatus.FORBIDDEN
@@ -289,9 +286,7 @@ export class AdminService {
 
   public async removeRole(uuid: string, roleData: AdminRoleDTO) {
     const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
-    if (
-      requestingUser.roles.length === 0
-    ) {
+    if (this._hasPermission(requestingUser.roles, PERMISSION.ROLES)) {
       throw new HttpException(
         'Permission denied.',
         HttpStatus.FORBIDDEN
@@ -338,6 +333,79 @@ export class AdminService {
 
   private _getHighestRoleRank(roles: Role[]) {
     return Math.min(...roles.map(role => role.rank));
+  }
+
+  public async verifyUser(uuid: string, verifyData: AdminVerifyDTO) {
+    const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
+    if (this._hasPermission(requestingUser.roles, PERMISSION.VERIFY)) {
+      throw new HttpException(
+        'Permission denied.',
+        HttpStatus.FORBIDDEN
+      );
+    }
+
+    const userToVerify = await this._userRepository.findOne(verifyData.userId, { relations: ['roles', 'badges'] });
+    if (!userToVerify) {
+      throw new HttpException(
+        'User not found.',
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    if (userToVerify.verified) {
+      throw new HttpException(
+        'User is already verified.',
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    userToVerify.verified = true;
+
+    await this._userRepository.save(userToVerify);
+
+    return createAdminUser(userToVerify);
+  }
+
+  public async unverifyUser(uuid: string, verifyData: AdminVerifyDTO) {
+    const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
+    if (this._hasPermission(requestingUser.roles, PERMISSION.VERIFY)) {
+      throw new HttpException(
+        'Permission denied.',
+        HttpStatus.FORBIDDEN
+      );
+    }
+
+    const userToUnverify = await this._userRepository.findOne(verifyData.userId, { relations: ['roles', 'badges'] });
+    if (!userToUnverify) {
+      throw new HttpException(
+        'User not found.',
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    if (!userToUnverify.verified) {
+      throw new HttpException(
+        'User is not verified.',
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    userToUnverify.verified = false;
+
+    await this._userRepository.save(userToUnverify);
+
+    return createAdminUser(userToUnverify);
+  }
+
+  private _hasPermission(roles: Role[], permission: PERMISSION): boolean {
+    for (const role of roles) {
+      const permissions = role.permissions;
+      if (permissions.toString(2)[permission] === '1') {
+        return true;
+      }
+    }
+
+    return false;
   }
 
 }
