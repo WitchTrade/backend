@@ -1,6 +1,7 @@
-import { Entity, Column, PrimaryGeneratedColumn, BeforeInsert, CreateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, BeforeInsert, CreateDateColumn, JoinTable, ManyToMany } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
+import { Role } from './role.entity';
 
 @Entity()
 export class User {
@@ -56,7 +57,9 @@ export class User {
 
     // market
 
-    // roles
+    @ManyToMany(() => Role)
+    @JoinTable()
+    roles: Role[];
 
     // badges
 
@@ -80,7 +83,8 @@ export class User {
             discordTag: this.discordTag,
             usingSteamGuard: this.usingSteamGuard,
             verified: this.verified,
-            hidden: this.hidden
+            hidden: this.hidden,
+            roles: this.roles
         };
     }
 
@@ -114,4 +118,27 @@ export class PublicUser {
     usingSteamGuard: boolean;
     verified: boolean;
     hidden: boolean;
+    roles: Role[];
+}
+
+export class AdminUser {
+    id: string;
+    username: string;
+    displayName: string;
+    verified: boolean;
+    banned: boolean;
+    banMessage: string;
+    roles: Role[];
+}
+
+export function createAdminUser(user: Partial<User>): AdminUser {
+    return {
+        id: user.id ? user.id : null,
+        username: user.username ? user.username : null,
+        displayName: user.displayName ? user.displayName : null,
+        verified: user.verified ? user.verified : false,
+        banned: user.banned ? user.banned : false,
+        banMessage: user.banMessage ? user.banMessage : null,
+        roles: user.roles ? user.roles : []
+    };
 }

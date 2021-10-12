@@ -4,6 +4,8 @@ import { UsersModule } from './users/users.module';
 import 'dotenv/config';
 
 import { User } from './users/entities/user.entity';
+import { AdminModule } from './admin/admin.module';
+import { Role } from './users/entities/role.entity';
 
 @Module({
   imports: [
@@ -14,10 +16,11 @@ import { User } from './users/entities/user.entity';
       username: process.env.DATABASEUSER,
       password: process.env.DATABASEPW,
       database: 'witchtrade',
-      entities: [User],
+      entities: [User, Role],
       synchronize: true,
     }),
     UsersModule,
+    AdminModule,
   ],
   controllers: [],
   providers: [],
