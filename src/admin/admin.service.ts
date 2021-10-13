@@ -9,6 +9,7 @@ import { AdminBanDTO } from './dtos/ban.dto';
 import { AdminRoleDTO } from './dtos/role.dto';
 import { AdminUnbanDTO } from './dtos/unban.dto';
 import { AdminVerifyDTO } from './dtos/verify.dto';
+import { ACTIONGROUP, ACTIONTYPE, AdminLog } from './entities/adminlog.entity';
 
 @Injectable()
 export class AdminService {
@@ -19,6 +20,8 @@ export class AdminService {
     private _badgeRepository: Repository<Badge>,
     @InjectRepository(Role)
     private _roleRepository: Repository<Role>,
+    @InjectRepository(AdminLog)
+    private _adminLogRepository: Repository<AdminLog>,
   ) { }
 
   public async getUsers(uuid: string) {
@@ -86,6 +89,14 @@ export class AdminService {
 
     await this._userRepository.save(userToBan);
 
+    await this._adminLogRepository.insert({
+      user: requestingUser,
+      actionGroup: ACTIONGROUP.BAN,
+      actionType: ACTIONTYPE.POST,
+      targetUser: userToBan,
+      log: `Banned with reason ${banData.reason}`
+    });
+
     return createAdminUser(userToBan);
   }
 
@@ -98,8 +109,8 @@ export class AdminService {
       );
     }
 
-    const userToBan = await this._userRepository.findOne(unbanData.userId, { relations: ['roles', 'badges'] });
-    if (!userToBan) {
+    const userToUnban = await this._userRepository.findOne(unbanData.userId, { relations: ['roles', 'badges'] });
+    if (!userToUnban) {
       throw new HttpException(
         'User not found.',
         HttpStatus.BAD_REQUEST
@@ -115,19 +126,27 @@ export class AdminService {
       );
     }
 
-    if (!userToBan.banned) {
+    if (!userToUnban.banned) {
       throw new HttpException(
         'User is not banned.',
         HttpStatus.BAD_REQUEST
       );
     }
 
-    userToBan.banned = false;
-    userToBan.banMessage = null;
+    userToUnban.banned = false;
+    userToUnban.banMessage = null;
 
-    await this._userRepository.save(userToBan);
+    await this._userRepository.save(userToUnban);
 
-    return createAdminUser(userToBan);
+    await this._adminLogRepository.insert({
+      user: requestingUser,
+      actionGroup: ACTIONGROUP.BAN,
+      actionType: ACTIONTYPE.DELETE,
+      targetUser: userToUnban,
+      log: `Unbanned`
+    });
+
+    return createAdminUser(userToUnban);
   }
 
   public async getBadges(uuid: string) {
@@ -181,12 +200,20 @@ export class AdminService {
 
     await this._userRepository.save(userToModify);
 
+    await this._adminLogRepository.insert({
+      user: requestingUser,
+      actionGroup: ACTIONGROUP.BADGES,
+      actionType: ACTIONTYPE.POST,
+      targetUser: userToModify,
+      log: `Added badge ${badgeToAdd.id}.`
+    });
+
     return createAdminUser(userToModify);
   }
 
   public async removeBadge(uuid: string, badgeData: AdminBadgeDTO) {
     const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
-    if (this._hasPermission(requestingUser.roles, PERMISSION.BADGES)) {
+    if (!this._hasPermission(requestingUser.roles, PERMISSION.BADGES)) {
       throw new HttpException(
         'Permission denied.',
         HttpStatus.FORBIDDEN
@@ -220,6 +247,14 @@ export class AdminService {
 
     await this._userRepository.save(userToModify);
 
+    await this._adminLogRepository.insert({
+      user: requestingUser,
+      actionGroup: ACTIONGROUP.BADGES,
+      actionType: ACTIONTYPE.DELETE,
+      targetUser: userToModify,
+      log: `Removed badge ${badgeToRemove.id}.`
+    });
+
     return createAdminUser(userToModify);
   }
 
@@ -239,7 +274,7 @@ export class AdminService {
 
   public async addRole(uuid: string, roleData: AdminRoleDTO) {
     const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
-    if (this._hasPermission(requestingUser.roles, PERMISSION.ROLES)) {
+    if (!this._hasPermission(requestingUser.roles, PERMISSION.ROLES)) {
       throw new HttpException(
         'Permission denied.',
         HttpStatus.FORBIDDEN
@@ -281,12 +316,20 @@ export class AdminService {
 
     await this._userRepository.save(userToModify);
 
+    await this._adminLogRepository.insert({
+      user: requestingUser,
+      actionGroup: ACTIONGROUP.ROLES,
+      actionType: ACTIONTYPE.POST,
+      targetUser: userToModify,
+      log: `Added role ${roleToAdd.id}.`
+    });
+
     return createAdminUser(userToModify);
   }
 
   public async removeRole(uuid: string, roleData: AdminRoleDTO) {
     const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
-    if (this._hasPermission(requestingUser.roles, PERMISSION.ROLES)) {
+    if (!this._hasPermission(requestingUser.roles, PERMISSION.ROLES)) {
       throw new HttpException(
         'Permission denied.',
         HttpStatus.FORBIDDEN
@@ -328,6 +371,14 @@ export class AdminService {
 
     await this._userRepository.save(userToModify);
 
+    await this._adminLogRepository.insert({
+      user: requestingUser,
+      actionGroup: ACTIONGROUP.ROLES,
+      actionType: ACTIONTYPE.DELETE,
+      targetUser: userToModify,
+      log: `Removed role ${roleToRemove.id}.`
+    });
+
     return createAdminUser(userToModify);
   }
 
@@ -337,7 +388,7 @@ export class AdminService {
 
   public async verifyUser(uuid: string, verifyData: AdminVerifyDTO) {
     const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
-    if (this._hasPermission(requestingUser.roles, PERMISSION.VERIFY)) {
+    if (!this._hasPermission(requestingUser.roles, PERMISSION.VERIFY)) {
       throw new HttpException(
         'Permission denied.',
         HttpStatus.FORBIDDEN
@@ -363,12 +414,20 @@ export class AdminService {
 
     await this._userRepository.save(userToVerify);
 
+    await this._adminLogRepository.insert({
+      user: requestingUser,
+      actionGroup: ACTIONGROUP.VERIFY,
+      actionType: ACTIONTYPE.POST,
+      targetUser: userToVerify,
+      log: `Verified`
+    });
+
     return createAdminUser(userToVerify);
   }
 
   public async unverifyUser(uuid: string, verifyData: AdminVerifyDTO) {
     const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
-    if (this._hasPermission(requestingUser.roles, PERMISSION.VERIFY)) {
+    if (!this._hasPermission(requestingUser.roles, PERMISSION.VERIFY)) {
       throw new HttpException(
         'Permission denied.',
         HttpStatus.FORBIDDEN
@@ -394,6 +453,14 @@ export class AdminService {
 
     await this._userRepository.save(userToUnverify);
 
+    await this._adminLogRepository.insert({
+      user: requestingUser,
+      actionGroup: ACTIONGROUP.VERIFY,
+      actionType: ACTIONTYPE.DELETE,
+      targetUser: userToUnverify,
+      log: `Unverified`
+    });
+
     return createAdminUser(userToUnverify);
   }
 
@@ -406,6 +473,30 @@ export class AdminService {
     }
 
     return false;
+  }
+
+  public async getAdminLog(uuid: string) {
+    const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
+    if (!this._hasPermission(requestingUser.roles, PERMISSION.VERIFY)) {
+      throw new HttpException(
+        'Permission denied.',
+        HttpStatus.FORBIDDEN
+      );
+    }
+
+    const log = await this._adminLogRepository.find({ relations: ['user', 'targetUser'] });
+
+    const modifiedLog = log.map((log: any) => {
+      log.username = log.user.username;
+      log.targetUsername = log.targetUser.username;
+
+      delete log.user;
+      delete log.targetUser;
+
+      return log;
+    });
+
+    return modifiedLog;
   }
 
 }

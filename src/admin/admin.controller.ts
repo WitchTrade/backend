@@ -10,6 +10,7 @@ import { AdminBanDTO } from './dtos/ban.dto';
 import { AdminRoleDTO } from './dtos/role.dto';
 import { AdminUnbanDTO } from './dtos/unban.dto';
 import { AdminVerifyDTO } from './dtos/verify.dto';
+import { AdminLog } from './entities/adminlog.entity';
 
 @Controller('admin')
 export class AdminController {
@@ -90,5 +91,12 @@ export class AdminController {
   @Delete('verify')
   public unverifyUser(@UserDecorator('id') uuid: string, @Body() verifyData: AdminVerifyDTO): Promise<AdminUser> {
     return this.adminService.unverifyUser(uuid, verifyData);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @Get('log')
+  public getAdminLog(@UserDecorator('id') uuid: string): Promise<AdminLog[]> {
+    return this.adminService.getAdminLog(uuid);
   }
 }

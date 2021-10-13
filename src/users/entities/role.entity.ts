@@ -18,9 +18,10 @@ export class Role {
 }
 
 export enum PERMISSION {
-  ADMIN = 0,
-  BAN = 1,
-  ROLES = 2,
-  BADGES = 3,
-  VERIFY = 4
+  ADMIN,
+  BAN,
+  ROLES,
+  BADGES,
+  VERIFY,
+  LOG
 }

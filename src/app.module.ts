@@ -7,6 +7,7 @@ import { User } from './users/entities/user.entity';
 import { AdminModule } from './admin/admin.module';
 import { Role } from './users/entities/role.entity';
 import { Badge } from './users/entities/badge.entity';
+import { AdminLog } from './admin/entities/adminlog.entity';
 
 @Module({
   imports: [
@@ -17,7 +18,12 @@ import { Badge } from './users/entities/badge.entity';
       username: process.env.DATABASEUSER,
       password: process.env.DATABASEPW,
       database: 'witchtrade',
-      entities: [User, Role, Badge],
+      entities: [
+        User,
+        Role,
+        Badge,
+        AdminLog
+      ],
       synchronize: true,
     }),
     UsersModule,
