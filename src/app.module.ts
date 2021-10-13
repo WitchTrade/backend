@@ -8,6 +8,8 @@ import { AdminModule } from './admin/admin.module';
 import { Role } from './users/entities/role.entity';
 import { Badge } from './users/entities/badge.entity';
 import { AdminLog } from './admin/entities/adminlog.entity';
+import { ItemsModule } from './items/items.module';
+import { Item } from './items/entities/item.entity';
 
 @Module({
   imports: [
@@ -22,12 +24,14 @@ import { AdminLog } from './admin/entities/adminlog.entity';
         User,
         Role,
         Badge,
-        AdminLog
+        AdminLog,
+        Item
       ],
       synchronize: true,
     }),
     UsersModule,
     AdminModule,
+    ItemsModule,
   ],
   controllers: [],
   providers: [],
