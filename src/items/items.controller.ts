@@ -10,4 +10,9 @@ export class ItemsController {
     return this.itemService.getAll();
   }
 
+  @Get('sets')
+  getSets() {
+    return this.itemService.getSets();
+  }
+
 }

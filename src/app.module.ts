@@ -10,6 +10,7 @@ import { Badge } from './users/entities/badge.entity';
 import { AdminLog } from './admin/entities/adminlog.entity';
 import { ItemsModule } from './items/items.module';
 import { Item } from './items/entities/item.entity';
+import { ItemSet } from './items/entities/itemSet.entity';
 
 @Module({
   imports: [
@@ -25,7 +26,8 @@ import { Item } from './items/entities/item.entity';
         Role,
         Badge,
         AdminLog,
-        Item
+        Item,
+        ItemSet
       ],
       synchronize: true,
     }),

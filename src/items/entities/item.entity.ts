@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryColumn } from 'typeorm';
+import { Entity, Column, PrimaryColumn, ManyToMany, JoinTable } from 'typeorm';
+import { ItemSet } from './itemSet.entity';
 
 @Entity()
 export class Item {
@@ -37,4 +38,8 @@ export class Item {
 
   @Column()
   new: boolean;
+
+  @ManyToMany(() => ItemSet)
+  @JoinTable()
+  itemSets: ItemSet[];
 }
