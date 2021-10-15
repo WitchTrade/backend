@@ -1,14 +1,14 @@
 // Utility object:  Encode/Decode C-style binary primitives to/from octet arrays
 function BufferPack() {
-    // Module-level (private) variables
-    var el, bBE = false, m = this;
+    // Module-level (private) letiables
+    let el, bBE = false, m = this;
 
     // Raw byte arrays
     m._DeArray = function (a, p, l) {
         return [a.slice(p, p + l)];
     };
     m._EnArray = function (a, p, l, v) {
-        for (var i = 0; i < l; a[p + i] = v[i] ? v[i] : 0, i++);
+        for (let i = 0; i < l; a[p + i] = v[i] ? v[i] : 0, i++);
     };
 
     // ASCII characters
@@ -21,7 +21,7 @@ function BufferPack() {
 
     // Little-endian (un)signed N-byte integers
     m._DeInt = function (a, p) {
-        var lsb = bBE ? (el.len - 1) : 0, nsb = bBE ? -1 : 1, stop = lsb + nsb * el.len, rv, i, f;
+        let lsb = bBE ? (el.len - 1) : 0, nsb = bBE ? -1 : 1, stop = lsb + nsb * el.len, rv, i, f;
         for (rv = 0, i = lsb, f = 1; i != stop; rv += (a[p + i] * f), i += nsb, f *= 256);
         if (el.bSigned && (rv & Math.pow(2, el.len * 8 - 1))) {
             rv -= Math.pow(2, el.len * 8);
@@ -29,29 +29,32 @@ function BufferPack() {
         return rv;
     };
     m._EnInt = function (a, p, v) {
-        var lsb = bBE ? (el.len - 1) : 0, nsb = bBE ? -1 : 1, stop = lsb + nsb * el.len, i;
+        let lsb = bBE ? (el.len - 1) : 0, nsb = bBE ? -1 : 1, stop = lsb + nsb * el.len, i;
         v = (v < el.min) ? el.min : (v > el.max) ? el.max : v;
         for (i = lsb; i != stop; a[p + i] = v & 0xff, i += nsb, v >>= 8);
     };
 
     // ASCII character strings
     m._DeString = function (a, p, l) {
-        for (var rv = new Array(l), i = 0; i < l; rv[i] = String.fromCharCode(a[p + i]), i++);
+        let rv = new Array(l);
+        for (let i = 0; i < l; rv[i] = String.fromCharCode(a[p + i]), i++);
         return rv.join('');
     };
     m._EnString = function (a, p, l, v) {
-        for (var t, i = 0; i < l; a[p + i] = (t = v.charCodeAt(i)) ? t : 0, i++);
+        for (let t, i = 0; i < l; a[p + i] = t ? t : 0, i++) {
+            t = v.charCodeAt(i);
+        };
     };
 
     // ASCII character strings null terminated
     m._DeNullString = function (a, p, l, v) {
-        var str = m._DeString(a, p, l, v);
+        let str = m._DeString(a, p, l, v);
         return str.substring(0, str.length - 1);
     };
 
     // Little-endian N-bit IEEE 754 floating point
     m._De754 = function (a, p) {
-        var s, e, m, i, d, nBits, mLen, eLen, eBias, eMax;
+        let s, e, m, i, d, nBits, mLen, eLen, eBias, eMax;
         mLen = el.mLen, eLen = el.len * 8 - el.mLen - 1, eMax = (1 << eLen) - 1, eBias = eMax >> 1;
 
         i = bBE ? 0 : (el.len - 1); d = bBE ? 1 : -1; s = a[p + i]; i += d; nBits = -7;
@@ -75,7 +78,7 @@ function BufferPack() {
         return (s ? -1 : 1) * m * Math.pow(2, e - mLen);
     };
     m._En754 = function (a, p, v) {
-        var s, e, m, i, d, c, mLen, eLen, eBias, eMax;
+        let s, e, m, i, d, c, mLen, eLen, eBias, eMax;
         mLen = el.mLen, eLen = el.len * 8 - el.mLen - 1, eMax = (1 << eLen) - 1, eBias = eMax >> 1;
 
         s = v < 0 ? 1 : 0;
@@ -86,8 +89,9 @@ function BufferPack() {
         } else {
             e = Math.floor(Math.log(v) / Math.LN2);			// Calculate log2 of the value
 
-            if (v * (c = Math.pow(2, -e)) < 1) {
-                e--; c *= 2;						// Math.log() isn't 100% reliable
+            c = Math.pow(2, -e);
+            if (v * c < 1) {
+                e--; c *= 2;
             }
 
             // Round by adding 1/2 the significand's LSD
@@ -146,19 +150,20 @@ function BufferPack() {
 
     // Unpack a series of n elements of size s from array a at offset p with fxn
     m._UnpackSeries = function (n, s, a, p) {
-        for (var fxn = el.de, rv = [], i = 0; i < n; rv.push(fxn(a, p + i * s)), i++);
+        let rv = [];
+        for (let fxn = el.de, i = 0; i < n; rv.push(fxn(a, p + i * s)), i++);
         return rv;
     };
 
     // Pack a series of n elements of size s from array v at offset i to array a at offset p with fxn
     m._PackSeries = function (n, s, a, p, v, i) {
-        for (var fxn = el.en, o = 0; o < n; fxn(a, p + o * s, v[i + o]), o++);
+        for (let fxn = el.en, o = 0; o < n; fxn(a, p + o * s, v[i + o]), o++);
     };
 
     m._zip = function (keys, values) {
-        var result = {};
+        let result = {};
 
-        for (var i = 0; i < keys.length; i++) {
+        for (let i = 0; i < keys.length; i++) {
             result[keys[i]] = values[i];
         }
 
@@ -171,15 +176,16 @@ function BufferPack() {
         bBE = (fmt.charAt(0) != '<');
 
         p = p ? p : 0;
-        var re = new RegExp(this._sPattern, 'g');
-        var m;
-        var n;
-        var s;
-        var rk = [];
-        var rv = [];
+        let re = new RegExp(this._sPattern, 'g');
+        let m;
+        let n;
+        let s;
+        let rk = [];
+        let rv = [];
 
-        while (m = re.exec(fmt)) {
-            n = ((m[1] == undefined) || (m[1] == '')) ? 1 : parseInt(m[1]);
+        m = re.exec(fmt);
+        while (m) {
+            n = ((m[1] == undefined) || (m[1] == '')) ? 1 : parseInt(m[1], 10);
 
             if (m[2] === 'S') { // Null term string support
                 n = 0; // Need to deal with empty  null term strings
@@ -209,6 +215,7 @@ function BufferPack() {
             rk.push(m[4]); // Push key on to array
 
             p += n * s;
+            m = re.exec(fmt);
         }
 
         rv = Array.prototype.concat.apply([], rv);
@@ -225,15 +232,16 @@ function BufferPack() {
         // Set the private bBE flag based on the format string - assume big-endianness
         bBE = (fmt.charAt(0) != '<');
 
-        var re = new RegExp(this._sPattern, 'g');
-        var m;
-        var n;
-        var s;
-        var i = 0;
-        var j;
+        let re = new RegExp(this._sPattern, 'g');
+        let m;
+        let n;
+        let s;
+        let i = 0;
+        let j;
 
-        while (m = re.exec(fmt)) {
-            n = ((m[1] == undefined) || (m[1] == '')) ? 1 : parseInt(m[1]);
+        m = re.exec(fmt);
+        while (m) {
+            n = ((m[1] == undefined) || (m[1] == '')) ? 1 : parseInt(m[1], 10);
 
             // Null term string support
             if (m[2] === 'S') {
@@ -264,6 +272,7 @@ function BufferPack() {
                     break;
             }
             p += n * s;
+            m = re.exec(fmt);
         }
 
         return a;
@@ -276,9 +285,11 @@ function BufferPack() {
 
     // Determine the number of bytes represented by the format string
     m.calcLength = function (format, values) {
-        var re = new RegExp(this._sPattern, 'g'), m, sum = 0, i = 0;
-        while (m = re.exec(format)) {
-            var n = (((m[1] == undefined) || (m[1] == '')) ? 1 : parseInt(m[1])) * this._lenLut[m[2]];
+        let re = new RegExp(this._sPattern, 'g'), m, sum = 0, i = 0;
+
+        m = re.exec(format);
+        while (m) {
+            let n = (((m[1] == undefined) || (m[1] == '')) ? 1 : parseInt(m[1], 10)) * this._lenLut[m[2]];
 
             if (m[2] === 'S') {
                 n = values[i].length + 1; // Add one for null byte
@@ -286,6 +297,7 @@ function BufferPack() {
 
             sum += n;
             i++;
+            m = re.exec(format);
         }
         return sum;
     };

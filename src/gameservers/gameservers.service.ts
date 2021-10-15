@@ -21,7 +21,7 @@ export class GameserversService {
     if (this._serverCache && this._cacheIsValid()) {
       return this._serverCache.cache;
     }
-    return await this._fetchServerInfos();
+    return this._fetchServerInfos();
   }
 
   public async _fetchServerInfos() {
@@ -78,9 +78,9 @@ export class GameserversService {
       const keyVal = e.split(':');
       infos[keyVal[0]] = keyVal[1];
     });
-    if (parseInt(infos.PlayerCount_i) > 0) {
+    if (parseInt(infos.PlayerCount_i, 10) > 0) {
       fetchStatus.serversWithPlayers++;
-      serverInfos.push({ name: serverRes.name as string, playerCount: parseInt(infos.PlayerCount_i), maxPlayers: serverRes.maxplayers as number, gameMode: infos.GameMode_s, players: null });
+      serverInfos.push({ name: serverRes.name as string, playerCount: parseInt(infos.PlayerCount_i, 10), maxPlayers: serverRes.maxplayers as number, gameMode: infos.GameMode_s, players: null });
       this._fetchPlayers(ip, port, serverRes.name as string, fetchStatus, serverInfos);
     }
     fetchStatus.fetchedServers++;
@@ -116,6 +116,6 @@ export class GameserversService {
   }
 
   private _cacheIsValid() {
-    return (new Date().getTime() - this._serverCache.created.getTime()) < parseInt(process.env.GAMESERVERCACHETIME);
+    return (new Date().getTime() - this._serverCache.created.getTime()) < parseInt(process.env.GAMESERVERCACHETIME, 10);
   }
 }
