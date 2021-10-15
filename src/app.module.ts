@@ -11,6 +11,7 @@ import { AdminLog } from './admin/entities/adminlog.entity';
 import { ItemsModule } from './items/items.module';
 import { Item } from './items/entities/item.entity';
 import { ItemSet } from './items/entities/itemSet.entity';
+import { GameserversModule } from './gameservers/gameservers.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { ItemSet } from './items/entities/itemSet.entity';
     UsersModule,
     AdminModule,
     ItemsModule,
+    GameserversModule,
   ],
   controllers: [],
   providers: [],

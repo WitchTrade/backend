@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../guards/auth.guard';
 import { UserDecorator } from '../users/decorators/user.decorator';
 import { Badge } from '../users/entities/badge.entity';
@@ -12,6 +12,7 @@ import { AdminUnbanDTO } from './dtos/unban.dto';
 import { AdminVerifyDTO } from './dtos/verify.dto';
 import { AdminLog } from './entities/adminlog.entity';
 
+@ApiTags('admin')
 @Controller('admin')
 export class AdminController {
   constructor(private adminService: AdminService) { }
