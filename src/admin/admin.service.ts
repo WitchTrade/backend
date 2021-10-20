@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PERMISSION, Role } from 'src/users/entities/role.entity';
+import { PERMISSION, Role } from '../users/entities/role.entity';
 import { Repository } from 'typeorm';
 import { Badge } from '../users/entities/badge.entity';
 import { createAdminUser, User } from '../users/entities/user.entity';
@@ -10,6 +10,7 @@ import { AdminRoleDTO } from './dtos/role.dto';
 import { AdminUnbanDTO } from './dtos/unban.dto';
 import { AdminVerifyDTO } from './dtos/verify.dto';
 import { ACTIONGROUP, ACTIONTYPE, AdminLog } from './entities/adminlog.entity';
+import { Notification } from '../notifications/entities/notification.entity';
 
 @Injectable()
 export class AdminService {
@@ -22,6 +23,8 @@ export class AdminService {
     private _roleRepository: Repository<Role>,
     @InjectRepository(AdminLog)
     private _adminLogRepository: Repository<AdminLog>,
+    @InjectRepository(Notification)
+    private _notificationRepository: Repository<Notification>,
   ) { }
 
   public async getUsers(uuid: string) {
@@ -465,9 +468,15 @@ export class AdminService {
   }
 
   private _hasPermission(roles: Role[], permission: PERMISSION): boolean {
+    const permissionLength = Object.keys(PERMISSION).length / 2;
+    const filler = new Array(permissionLength + 1).join('0');
+    const negativePermissionLength = -Math.abs(permissionLength);
+
     for (const role of roles) {
       const permissions = role.permissions;
-      if (permissions.toString(2)[permission] === '1') {
+      const binaryPermissionString = (filler + permissions.toString(2)).slice(negativePermissionLength);
+
+      if (binaryPermissionString[permission] === '1') {
         return true;
       }
     }
@@ -497,6 +506,30 @@ export class AdminService {
     });
 
     return modifiedLog;
+  }
+
+  public async broadcastNotification(uuid: string, data: Partial<Notification>) {
+    const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
+
+    if (!this._hasPermission(requestingUser.roles, PERMISSION.ADMIN)) {
+      throw new HttpException(
+        'Permission denied.',
+        HttpStatus.FORBIDDEN
+      );
+    }
+
+    const users = await this._userRepository.find();
+
+    for (const user of users) {
+      const notification = new Notification();
+      notification.text = data.text;
+      notification.link = data.link;
+      notification.iconLink = data.iconLink;
+      notification.user = user;
+      await this._notificationRepository.save(notification);
+    }
+
+    return;
   }
 
 }

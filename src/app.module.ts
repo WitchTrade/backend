@@ -12,6 +12,8 @@ import { ItemsModule } from './items/items.module';
 import { Item } from './items/entities/item.entity';
 import { ItemSet } from './items/entities/itemSet.entity';
 import { GameserversModule } from './gameservers/gameservers.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { Notification } from './notifications/entities/notification.entity';
 
 @Module({
   imports: [
@@ -28,7 +30,8 @@ import { GameserversModule } from './gameservers/gameservers.module';
         Badge,
         AdminLog,
         Item,
-        ItemSet
+        ItemSet,
+        Notification
       ],
       synchronize: true,
     }),
@@ -36,6 +39,7 @@ import { GameserversModule } from './gameservers/gameservers.module';
     AdminModule,
     ItemsModule,
     GameserversModule,
+    NotificationsModule,
   ],
   controllers: [],
   providers: [],
