@@ -5,6 +5,7 @@ import * as jwt from 'jsonwebtoken';
 import { Role } from './role.entity';
 import { Badge } from './badge.entity';
 import { SyncSettings } from './syncSettings.entity';
+import { Inventory } from '../../inventory/entities/inventory.entity';
 
 @Entity()
 export class User {
@@ -56,7 +57,9 @@ export class User {
     @Column({ nullable: true })
     banMessage: string;
 
-    // inventory
+    @OneToOne(() => Inventory)
+    @JoinColumn()
+    inventory: Inventory;
 
     // market
 

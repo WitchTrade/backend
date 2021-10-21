@@ -15,6 +15,9 @@ import { GameserversModule } from './gameservers/gameservers.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { Notification } from './notifications/entities/notification.entity';
 import { SyncSettings } from './users/entities/syncSettings.entity';
+import { InventoryModule } from './inventory/inventory.module';
+import { InventoryItem } from './inventory/entities/inventoryItem.entity';
+import { Inventory } from './inventory/entities/inventory.entity';
 
 @Module({
   imports: [
@@ -33,7 +36,9 @@ import { SyncSettings } from './users/entities/syncSettings.entity';
         Item,
         ItemSet,
         Notification,
-        SyncSettings
+        SyncSettings,
+        Inventory,
+        InventoryItem,
       ],
       synchronize: true,
     }),
@@ -42,6 +47,7 @@ import { SyncSettings } from './users/entities/syncSettings.entity';
     ItemsModule,
     GameserversModule,
     NotificationsModule,
+    InventoryModule,
   ],
   controllers: [],
   providers: [],
