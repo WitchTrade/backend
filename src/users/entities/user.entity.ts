@@ -1,9 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, BeforeInsert, CreateDateColumn, JoinTable, ManyToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, BeforeInsert, CreateDateColumn, JoinTable, ManyToMany, OneToOne, JoinColumn } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 
 import { Role } from './role.entity';
 import { Badge } from './badge.entity';
+import { SyncSettings } from './syncSettings.entity';
 
 @Entity()
 export class User {
@@ -58,6 +59,10 @@ export class User {
     // inventory
 
     // market
+
+    @OneToOne(() => SyncSettings, { nullable: false })
+    @JoinColumn()
+    syncSettings: SyncSettings;
 
     @ManyToMany(() => Role)
     @JoinTable()

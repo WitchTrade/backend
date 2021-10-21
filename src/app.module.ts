@@ -14,6 +14,7 @@ import { ItemSet } from './items/entities/itemSet.entity';
 import { GameserversModule } from './gameservers/gameservers.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { Notification } from './notifications/entities/notification.entity';
+import { SyncSettings } from './users/entities/syncSettings.entity';
 
 @Module({
   imports: [
@@ -31,7 +32,8 @@ import { Notification } from './notifications/entities/notification.entity';
         AdminLog,
         Item,
         ItemSet,
-        Notification
+        Notification,
+        SyncSettings
       ],
       synchronize: true,
     }),

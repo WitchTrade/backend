@@ -11,7 +11,7 @@ export class NotificationsService {
   }
 
   public async getNotificationsOfUser(uuid: string) {
-    return await this._notificationRepository.find({ where: { user: { id: uuid } } });
+    return this._notificationRepository.find({ where: { user: { id: uuid } } });
   }
 
   public async deleteNotification(id: number, uuid: string) {

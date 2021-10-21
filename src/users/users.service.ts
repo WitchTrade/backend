@@ -7,12 +7,16 @@ import { UserLoginDTO } from './dtos/login.dto';
 import { PublicUser, User, UserWithToken } from './entities/user.entity';
 import { UserUpdateDTO } from './dtos/update.dto';
 import { UserChangePasswordDTO } from './dtos/changePassword.dto';
+import { SyncSettings } from './entities/syncSettings.entity';
+import { SyncSettingsUpdateDTO } from './dtos/UpdateSyncSettings.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private _userRepository: Repository<User>,
+    @InjectRepository(SyncSettings)
+    private _syncSettingsRepository: Repository<SyncSettings>,
   ) { }
 
   public async register(user: UserRegisterDTO): Promise<UserWithToken> {
@@ -41,11 +45,18 @@ export class UsersService {
       );
     }
 
+
     const createdUser = this._userRepository.create(user);
+
+    const syncSettings = await this._syncSettingsRepository.save({});
+    createdUser.syncSettings = syncSettings;
+
     await this._userRepository.save(createdUser);
 
     createdUser.roles = [];
     createdUser.badges = [];
+
+    delete createdUser.syncSettings;
 
     return createdUser.tokenResponse();
   }
@@ -86,6 +97,45 @@ export class UsersService {
 
     delete user.password;
     return user;
+  }
+
+  public async getSyncSettings(uuid: string): Promise<SyncSettings> {
+    const user = await this._userRepository.findOne(uuid, { relations: ['syncSettings'] });
+    if (!user) {
+      throw new HttpException(
+        'User not found.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    return user.syncSettings;
+  }
+
+  public async updateSyncSettings(data: SyncSettingsUpdateDTO, uuid: string): Promise<SyncSettings> {
+    const user = await this._userRepository.findOne(uuid, { relations: ['syncSettings'] });
+    if (!user) {
+      throw new HttpException(
+        'User not found.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const syncSettings = user.syncSettings;
+
+    syncSettings.syncInventory = data.syncInventory;
+    syncSettings.syncMarket = data.syncMarket;
+    syncSettings.ms_mode = data.ms_mode;
+    syncSettings.ms_rarity = data.ms_rarity;
+    syncSettings.ms_defaultPriceItem = data.ms_defaultPriceItem;
+    syncSettings.ms_defaultPriceRecipe = data.ms_defaultPriceRecipe;
+    syncSettings.ms_keepItem = data.ms_keepItem;
+    syncSettings.ms_keepRecipe = data.ms_keepRecipe;
+    syncSettings.ms_ignoreWishlistItems = data.ms_ignoreWishlistItems;
+    syncSettings.ms_removeNoneOnStock = data.ms_removeNoneOnStock;
+
+    const updatedSyncSettings = await this._syncSettingsRepository.save(syncSettings);
+
+    return updatedSyncSettings;
   }
 
   public async updateUser(data: UserUpdateDTO, uuid: string): Promise<UserWithToken> {
