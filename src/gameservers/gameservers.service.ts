@@ -68,7 +68,6 @@ export class GameserversService {
   private async _fetchServer(ip: string, port: number, fetchStatus: FetchStatus, serverInfos: ServerInfo[], serverName: string) {
     const serverRes = await this._sourceServerQuery.info(ip, port, 2000);
     if (!serverRes) {
-      console.error(`Error for ${ip}:${port} (${serverName})`);
       fetchStatus.fetchedServers++;
       this._checkIfFinished(fetchStatus);
       return;

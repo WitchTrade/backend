@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
+import { ScheduleModule } from '@nestjs/schedule';
 import 'dotenv/config';
 
 import { User } from './users/entities/user.entity';
@@ -18,6 +19,7 @@ import { SyncSettings } from './users/entities/syncSettings.entity';
 import { InventoryModule } from './inventory/inventory.module';
 import { InventoryItem } from './inventory/entities/inventoryItem.entity';
 import { Inventory } from './inventory/entities/inventory.entity';
+import { SteamModule } from './steam/steam.module';
 
 @Module({
   imports: [
@@ -42,12 +44,14 @@ import { Inventory } from './inventory/entities/inventory.entity';
       ],
       synchronize: true,
     }),
+    ScheduleModule.forRoot(),
     UsersModule,
     AdminModule,
     ItemsModule,
     GameserversModule,
     NotificationsModule,
     InventoryModule,
+    SteamModule,
   ],
   controllers: [],
   providers: [],
