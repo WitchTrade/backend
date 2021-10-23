@@ -52,7 +52,7 @@ export class SteamFetcherService {
   }
 
   public async fetchInventoryPage(steamProfileId: string, lastAssedId?: string, autoSync?: boolean, failed?: any) {
-    return await firstValueFrom(this._httpService.get<SteamInventoryResponse>(`https://steamcommunity.com/inventory/${steamProfileId}/559650/2?l=english&count=5000${lastAssedId ? `&start_assetid=${lastAssedId}` : ''}`)
+    return firstValueFrom(this._httpService.get<SteamInventoryResponse>(`https://steamcommunity.com/inventory/${steamProfileId}/559650/2?l=english&count=5000${lastAssedId ? `&start_assetid=${lastAssedId}` : ''}`)
       .pipe(
         catchError(e => {
           if (autoSync) {
@@ -74,7 +74,7 @@ export class SteamFetcherService {
   }
 
   public async getSteamFriendIds(steamId: string) {
-    return await firstValueFrom(this._httpService.get<any>(
+    return firstValueFrom(this._httpService.get<any>(
       `https://api.steampowered.com/ISteamUser/GetFriendList/v1/?key=${process.env.STEAMAPIKEY}&steamid=${steamId}&relationship=friend`
     ).pipe(
       catchError(e => {
@@ -90,7 +90,7 @@ export class SteamFetcherService {
   }
 
   public async getSteamNamesfromIds(steamIds: string[]) {
-    return await firstValueFrom(this._httpService.get<any>(
+    return firstValueFrom(this._httpService.get<any>(
       `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=${process.env.STEAMAPIKEY}&steamids=${steamIds.join(',')}`
     )
       .pipe(

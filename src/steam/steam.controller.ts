@@ -1,8 +1,10 @@
 import { Controller, Get, Patch, UseGuards } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../guards/auth.guard';
 import { UserDecorator } from '../users/decorators/user.decorator';
 import { SteamService } from './steam.service';
 
+@ApiTags('steam')
 @Controller('steam')
 export class SteamController {
   constructor(private _steamService: SteamService) { }
