@@ -5,7 +5,7 @@ import { SourceServerQuery } from './module/sourceServerQuery';
 import { FetchStatus } from './dtos/FetchStatus.dto';
 import { ServerCache } from './dtos/ServerCache.dto';
 import { ServerInfo } from './dtos/ServerInfo.dto';
-import servers from './static/servers';
+import servers from '../static/servers';
 
 @Injectable()
 export class GameserversService {

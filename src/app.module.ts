@@ -25,6 +25,7 @@ import { Market } from './markets/entities/market.entity';
 import { Offer } from './markets/entities/offer.entity';
 import { Wish } from './markets/entities/wish.entity';
 import { Price } from './markets/entities/price.entity';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { Price } from './markets/entities/price.entity';
     InventoryModule,
     SteamModule,
     MarketsModule,
+    SearchModule,
   ],
   controllers: [],
   providers: [],
