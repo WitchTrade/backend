@@ -5,7 +5,7 @@ import { Inventory } from './inventory.entity';
 
 @Entity()
 export class InventoryItem {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ type: 'bigint' })
   id: number;
 
   @ManyToOne(() => Inventory)

@@ -20,6 +20,11 @@ import { InventoryModule } from './inventory/inventory.module';
 import { InventoryItem } from './inventory/entities/inventoryItem.entity';
 import { Inventory } from './inventory/entities/inventory.entity';
 import { SteamModule } from './steam/steam.module';
+import { MarketsModule } from './markets/markets.module';
+import { Market } from './markets/entities/market.entity';
+import { Offer } from './markets/entities/offer.entity';
+import { Wish } from './markets/entities/wish.entity';
+import { Price } from './markets/entities/price.entity';
 
 @Module({
   imports: [
@@ -41,6 +46,10 @@ import { SteamModule } from './steam/steam.module';
         SyncSettings,
         Inventory,
         InventoryItem,
+        Market,
+        Offer,
+        Wish,
+        Price,
       ],
       synchronize: true,
     }),
@@ -52,6 +61,7 @@ import { SteamModule } from './steam/steam.module';
     NotificationsModule,
     InventoryModule,
     SteamModule,
+    MarketsModule,
   ],
   controllers: [],
   providers: [],

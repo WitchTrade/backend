@@ -37,9 +37,9 @@ export class SyncSettings {
 }
 
 export enum RARITY {
-  WHIMSICAL,
-  VERYRARE,
-  RARE,
-  UNCOMMON,
-  COMMON
+  WHIMSICAL = 'whimsical',
+  VERYRARE = 'veryrare',
+  RARE = 'rare',
+  UNCOMMON = 'uncommon',
+  COMMON = 'common'
 }

@@ -9,6 +9,7 @@ import { UserUpdateDTO } from './dtos/update.dto';
 import { UserChangePasswordDTO } from './dtos/changePassword.dto';
 import { SyncSettings } from './entities/syncSettings.entity';
 import { SyncSettingsUpdateDTO } from './dtos/UpdateSyncSettings.dto';
+import { Market } from '../markets/entities/market.entity';
 
 @Injectable()
 export class UsersService {
@@ -17,6 +18,8 @@ export class UsersService {
     private _userRepository: Repository<User>,
     @InjectRepository(SyncSettings)
     private _syncSettingsRepository: Repository<SyncSettings>,
+    @InjectRepository(Market)
+    private _marketRepository: Repository<Market>,
   ) { }
 
   public async register(user: UserRegisterDTO): Promise<UserWithToken> {
@@ -51,12 +54,16 @@ export class UsersService {
     const syncSettings = await this._syncSettingsRepository.save({});
     createdUser.syncSettings = syncSettings;
 
+    const market = await this._marketRepository.save({ lastUpdated: new Date() });
+    createdUser.market = market;
+
     await this._userRepository.save(createdUser);
 
     createdUser.roles = [];
     createdUser.badges = [];
 
     delete createdUser.syncSettings;
+    delete createdUser.market;
 
     return createdUser.tokenResponse();
   }

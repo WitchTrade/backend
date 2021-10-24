@@ -1,12 +1,6 @@
 import { IsBoolean, IsIn, IsNumber, IsString, Max, Min } from 'class-validator';
 
-export class SyncSettingsUpdateDTO {
-  @IsBoolean()
-  syncInventory: boolean;
-
-  @IsBoolean()
-  syncMarket: boolean;
-
+export class OfferSyncDTO {
   @IsString()
   @IsIn([
     'both',
@@ -42,7 +36,7 @@ export class SyncSettingsUpdateDTO {
 
   @IsBoolean()
   ms_ignoreWishlistItems: boolean;
-  
+
   @IsBoolean()
   ms_removeNoneOnStock: boolean;
 }

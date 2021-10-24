@@ -6,6 +6,7 @@ import { Role } from './role.entity';
 import { Badge } from './badge.entity';
 import { SyncSettings } from './syncSettings.entity';
 import { Inventory } from '../../inventory/entities/inventory.entity';
+import { Market } from '../../markets/entities/market.entity';
 
 @Entity()
 export class User {
@@ -61,7 +62,9 @@ export class User {
   @JoinColumn()
   inventory: Inventory;
 
-  // market
+  @OneToOne(() => Market, market => market.user)
+  @JoinColumn()
+  market: Market;
 
   @OneToOne(() => SyncSettings, { nullable: false })
   @JoinColumn()
