@@ -268,7 +268,7 @@ export class OffersService {
       );
     }
 
-    const response = { newOffers: 0, updatedOffers: 0 };
+    const response = { newOffers: 0, updatedOffers: 0, deletedOffers: 0 };
     const changedOffers: Offer[] = [];
 
     let existingOffers = await this._offerRepository.find({ where: { market: user.market }, relations: ['market', 'item'] });
@@ -321,6 +321,7 @@ export class OffersService {
     }
     if (data.ms_mode === 'both' || data.ms_mode === 'existing') {
       const offersToUpdate: Offer[] = [];
+      const offersToDelete: Offer[] = [];
       for (const offer of existingOffers) {
         // don't change items that are in the user's wishlist
         if (data.ms_ignoreWishlistItems && wishes.find(w => w.item.id === offer.item.id)) {
@@ -329,19 +330,27 @@ export class OffersService {
         if (user.inventory.inventoryItems.find(ii => ii.item.id === offer.item.id)) {
           const toKeep = user.inventory.inventoryItems.find(ii => ii.item.id === offer.item.id).item.tagSlot === 'recipe' ? data.ms_keepRecipe : data.ms_keepItem;
           const inStock = user.inventory.inventoryItems.find(ii => ii.item.id === offer.item.id).amount - toKeep >= 0 ? user.inventory.inventoryItems.find(ii => ii.item.id === offer.item.id).amount - toKeep : 0;
-          if (offer.quantity !== inStock) {
+          if (offer.quantity !== inStock && (!data.ms_removeNoneOnStock || inStock !== 0)) {
             offer.quantity = inStock;
             offersToUpdate.push(offer);
           }
+          if (data.ms_removeNoneOnStock && inStock === 0) {
+            offersToDelete.push(offer);
+          }
         } else {
-          if (offer.quantity !== 0) {
+          if (offer.quantity !== 0 && !data.ms_removeNoneOnStock) {
             offer.quantity = 0;
             offersToUpdate.push(offer);
+          }
+          if (data.ms_removeNoneOnStock) {
+            offersToDelete.push(offer);
           }
         }
       }
       await this._offerRepository.save(offersToUpdate);
+      await this._offerRepository.remove(offersToDelete);
       response.updatedOffers = offersToUpdate.length;
+      response.deletedOffers = offersToDelete.length;
       changedOffers.push(...offersToUpdate);
     }
 

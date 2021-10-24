@@ -5,6 +5,7 @@ import { SyncSettings } from '../users/entities/syncSettings.entity';
 import { User } from '../users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { SteamService } from './steam.service';
+import { OffersService } from 'src/markets/offers.service';
 
 @Injectable()
 export class SteamAutoSyncService {
@@ -15,6 +16,7 @@ export class SteamAutoSyncService {
     @InjectRepository(SyncSettings)
     private _syncSettingsRepository: Repository<SyncSettings>,
     private _steamService: SteamService,
+    private _offersService: OffersService,
   ) { }
 
   @Cron('0 * * * *')
@@ -39,7 +41,9 @@ export class SteamAutoSyncService {
           await this._syncSettingsRepository.save(invToSync.syncSettings);
         }
       });
-      // TODO: Auto market sync
+      if (invToSync.syncSettings.syncMarket) {
+        await this._offersService.syncOffers(invToSync.syncSettings, invToSync.id);
+      }
       await minDelay;
     }
   }

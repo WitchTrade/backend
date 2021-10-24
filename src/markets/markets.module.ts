@@ -18,6 +18,7 @@ import { WishesService } from './wishes.service';
     NotificationsModule
   ],
   providers: [MarketsService, OffersService, WishesService],
-  controllers: [MarketsController]
+  controllers: [MarketsController],
+  exports: [OffersService]
 })
 export class MarketsModule { }
