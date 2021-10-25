@@ -1,4 +1,4 @@
-![WitchTrade](https://i.imgur.com/vRuqie5.png)
+![WitchTrade](https://i.imgur.com/Wg8PVxR.png)
 
 [![Stars](https://img.shields.io/github/stars/WitchTrade/backend.svg?color=C59DFF)](https://github.com/WitchTrade/backend/stargazers)
 [![Commits](https://img.shields.io/github/commit-activity/m/WitchTrade/backend?color=C59DFF)](https://github.com/WitchTrade/backend/commits)
