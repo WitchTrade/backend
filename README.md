@@ -1,9 +1,9 @@
-![WitchTrade](https://i.imgur.com/Rjxtp6X.png)
+![WitchTrade](https://i.imgur.com/vRuqie5.png)
 
-[![Stars](https://img.shields.io/github/stars/WitchTrade/backend.svg?color=ff67e4)](https://github.com/WitchTrade/backend/stargazers)
-[![Commits](https://img.shields.io/github/commit-activity/m/WitchTrade/backend?color=ff67e4)](https://github.com/WitchTrade/backend/commits)
-[![Gitmoji](https://img.shields.io/badge/gitmoji-%20😜%20😍-FFDD67.svg?color=ff67e4)](https://gitmoji.dev)
-[![License](https://img.shields.io/github/license/WitchTrade/backend.svg?color=ff67e4)](https://github.com/WitchTrade/backend/blob/main/COPYING)
+[![Stars](https://img.shields.io/github/stars/WitchTrade/backend.svg?color=C59DFF)](https://github.com/WitchTrade/backend/stargazers)
+[![Commits](https://img.shields.io/github/commit-activity/m/WitchTrade/backend?color=C59DFF)](https://github.com/WitchTrade/backend/commits)
+[![Gitmoji](https://img.shields.io/badge/gitmoji-%20😜%20😍-FFDD67.svg?color=C59DFF)](https://gitmoji.dev)
+[![License](https://img.shields.io/github/license/WitchTrade/backend.svg?color=C59DFF)](https://github.com/WitchTrade/backend/blob/main/COPYING)
 [![CodeFactor](https://www.codefactor.io/repository/github/WitchTrade/backend/badge)](https://www.codefactor.io/repository/github/WitchTrade/backend)
 
 WitchTrade (https://witchtrade.org) is a trading website for the hide and seek game [Witch It](https://store.steampowered.com/app/559650/Witch_It/). It provides many features to facilitate trading Witch It cosmetic items.
