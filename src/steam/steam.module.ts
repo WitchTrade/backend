@@ -1,7 +1,7 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { MarketsModule } from 'src/markets/markets.module';
+import { MarketsModule } from '../markets/markets.module';
 import { Inventory } from '../inventory/entities/inventory.entity';
 import { InventoryItem } from '../inventory/entities/inventoryItem.entity';
 import { Item } from '../items/entities/item.entity';

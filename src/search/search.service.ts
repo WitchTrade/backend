@@ -1,9 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Offer } from 'src/markets/entities/offer.entity';
-import { Wish } from 'src/markets/entities/wish.entity';
-import { getRecipeOfItemId } from 'src/static/itemIdToRecipeId';
-import { User } from 'src/users/entities/user.entity';
+import { Offer } from '../markets/entities/offer.entity';
+import { Wish } from '../markets/entities/wish.entity';
+import { getRecipeOfItemId } from '../static/itemIdToRecipeId';
+import { User } from '../users/entities/user.entity';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { SearchDTO } from './dtos/search.dto';
 

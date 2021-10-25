@@ -1,7 +1,7 @@
 import { Body, Controller, HttpCode, Post, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { OptionalAuthGuard } from 'src/guards/optionalAuth.guard';
-import { UserDecorator } from 'src/users/decorators/user.decorator';
+import { OptionalAuthGuard } from '../guards/optionalAuth.guard';
+import { UserDecorator } from '../users/decorators/user.decorator';
 import { SearchDTO } from './dtos/search.dto';
 import { SearchService } from './search.service';
 

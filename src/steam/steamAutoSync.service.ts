@@ -5,7 +5,7 @@ import { SyncSettings } from '../users/entities/syncSettings.entity';
 import { User } from '../users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { SteamService } from './steam.service';
-import { OffersService } from 'src/markets/offers.service';
+import { OffersService } from '../markets/offers.service';
 
 @Injectable()
 export class SteamAutoSyncService {

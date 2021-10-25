@@ -26,11 +26,13 @@ import { Offer } from './markets/entities/offer.entity';
 import { Wish } from './markets/entities/wish.entity';
 import { Price } from './markets/entities/price.entity';
 import { SearchModule } from './search/search.module';
+import { StatsModule } from './stats/stats.module';
+import { Stats } from './stats/entities/stats.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      type: 'mysql',
+      type: 'mariadb',
       host: process.env.DATABASEHOST,
       port: parseInt(process.env.DATABASEPORT, 10),
       username: process.env.DATABASEUSER,
@@ -54,6 +56,17 @@ import { SearchModule } from './search/search.module';
       ],
       synchronize: true,
     }),
+    TypeOrmModule.forRoot({
+      name: 'wistats',
+      type: 'mariadb',
+      host: process.env.DATABASEHOST,
+      port: parseInt(process.env.DATABASEPORT),
+      username: process.env.DATABASEUSER,
+      password: process.env.DATABASEPW,
+      database: 'wistats',
+      entities: [Stats],
+      synchronize: false,
+    }),
     ScheduleModule.forRoot(),
     UsersModule,
     AdminModule,
@@ -64,6 +77,7 @@ import { SearchModule } from './search/search.module';
     SteamModule,
     MarketsModule,
     SearchModule,
+    StatsModule,
   ],
   controllers: [],
   providers: [],

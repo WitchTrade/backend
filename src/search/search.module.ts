@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Offer } from 'src/markets/entities/offer.entity';
-import { Wish } from 'src/markets/entities/wish.entity';
-import { User } from 'src/users/entities/user.entity';
+import { Offer } from '../markets/entities/offer.entity';
+import { Wish } from '../markets/entities/wish.entity';
+import { User } from '../users/entities/user.entity';
 import { SearchController } from './search.controller';
 import { SearchService } from './search.service';
 
