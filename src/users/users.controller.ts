@@ -7,7 +7,7 @@ import { UserChangePasswordDTO } from './dtos/changePassword.dto';
 import { UserLoginDTO } from './dtos/login.dto';
 import { UserRegisterDTO } from './dtos/register.dto';
 import { UserUpdateDTO } from './dtos/update.dto';
-import { SyncSettingsUpdateDTO } from './dtos/UpdateSyncSettings.dto';
+import { SyncSettingsUpdateDTO } from './dtos/updateSyncSettings.dto';
 import { SyncSettings } from './entities/syncSettings.entity';
 import { PublicUser, User, UserWithToken } from './entities/user.entity';
 import { UsersService } from './users.service';

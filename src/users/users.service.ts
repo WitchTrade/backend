@@ -8,7 +8,7 @@ import { PublicUser, User, UserWithToken } from './entities/user.entity';
 import { UserUpdateDTO } from './dtos/update.dto';
 import { UserChangePasswordDTO } from './dtos/changePassword.dto';
 import { SyncSettings } from './entities/syncSettings.entity';
-import { SyncSettingsUpdateDTO } from './dtos/UpdateSyncSettings.dto';
+import { SyncSettingsUpdateDTO } from './dtos/updateSyncSettings.dto';
 import { Market } from '../markets/entities/market.entity';
 
 @Injectable()
