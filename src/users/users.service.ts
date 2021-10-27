@@ -161,6 +161,12 @@ export class UsersService {
       );
     }
 
+    if (!data.steamProfileLink) {
+      data.steamProfileLink = null;
+    }
+    if (!data.steamTradeLink) {
+      data.steamTradeLink = null;
+    }
     if (
       user.verified &&
       (user.steamProfileLink !== data.steamProfileLink ||
