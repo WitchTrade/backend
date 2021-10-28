@@ -46,7 +46,8 @@ export class SearchDTO {
     'winterdream2018',
     'winterdream2019',
     'winterdream2020',
-    'witchforest'
+    'witchforest',
+    'mystic sands'
   ])
   event: string;
 
