@@ -35,11 +35,15 @@ export class UsersController {
     return this._usersService.getCurrentUser(uuid);
   }
 
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @Get('syncsettings')
   public getSyncSettings(@UserDecorator('id') uuid: string): Promise<SyncSettings> {
     return this._usersService.getSyncSettings(uuid);
   }
 
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @Put('syncsettings')
   public updateSyncSettings(@UserDecorator('id') uuid: string, @Body() data: SyncSettingsUpdateDTO): Promise<SyncSettings> {
     return this._usersService.updateSyncSettings(data, uuid);
