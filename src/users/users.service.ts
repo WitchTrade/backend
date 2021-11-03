@@ -140,9 +140,9 @@ export class UsersService {
     syncSettings.ms_ignoreWishlistItems = data.ms_ignoreWishlistItems;
     syncSettings.ms_removeNoneOnStock = data.ms_removeNoneOnStock;
 
-    const updatedSyncSettings = await this._syncSettingsRepository.save(syncSettings);
+    await this._syncSettingsRepository.update(syncSettings.id, syncSettings);
 
-    return updatedSyncSettings;
+    return await this._syncSettingsRepository.findOne(syncSettings.id);
   }
 
   public async updateUser(data: UserUpdateDTO, uuid: string): Promise<UserWithToken> {
