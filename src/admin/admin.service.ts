@@ -72,7 +72,7 @@ export class AdminService {
     }
 
     if (
-      this._hasPermission(requestingUser.roles, PERMISSION.ADMIN)
+      this._hasPermission(userToBan.roles, PERMISSION.ADMIN)
     ) {
       throw new HttpException(
         'User cannot be banned.',
@@ -121,7 +121,7 @@ export class AdminService {
     }
 
     if (
-      this._hasPermission(requestingUser.roles, PERMISSION.ADMIN)
+      this._hasPermission(userToUnban.roles, PERMISSION.ADMIN)
     ) {
       throw new HttpException(
         'User cannot be unbanned.',
