@@ -54,6 +54,7 @@ import { Stats } from './stats/entities/stats.entity';
         Wish,
         Price,
       ],
+      charset: 'utf8mb4_general_ci',
       synchronize: true,
     }),
     TypeOrmModule.forRoot({
@@ -65,6 +66,7 @@ import { Stats } from './stats/entities/stats.entity';
       password: process.env.DATABASEPW,
       database: 'wistats',
       entities: [Stats],
+      charset: 'utf8mb4_general_ci',
       synchronize: false,
     }),
     ScheduleModule.forRoot(),

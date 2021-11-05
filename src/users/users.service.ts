@@ -183,6 +183,21 @@ export class UsersService {
     user.usingSteamGuard = data.usingSteamGuard;
     user.hidden = data.hidden;
 
+    const existingUser = await this._userRepository.findOne({
+      where: [
+        { username: user.username },
+        { email: user.email },
+        { displayName: user.displayName }
+      ]
+    });
+    if (existingUser) {
+      const duplicate = existingUser.username === user.username ? 'username' : existingUser.email === user.email ? 'email' : 'displayName';
+      throw new HttpException(
+        `User with this ${duplicate} already exists`,
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
     const updatedUser = await this._userRepository.save(user);
 
     updatedUser.roles = user.roles;
