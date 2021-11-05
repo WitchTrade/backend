@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 
 import { UserRegisterDTO } from './dtos/register.dto';
 import { UserLoginDTO } from './dtos/login.dto';
@@ -185,13 +185,12 @@ export class UsersService {
 
     const existingUser = await this._userRepository.findOne({
       where: [
-        { username: user.username },
-        { email: user.email },
-        { displayName: user.displayName }
+        { username: Not(user.username), email: user.email },
+        { username: Not(user.username), displayName: user.displayName }
       ]
     });
     if (existingUser) {
-      const duplicate = existingUser.username === user.username ? 'username' : existingUser.email === user.email ? 'email' : 'displayName';
+      const duplicate = existingUser.email === user.email ? 'email' : 'displayName';
       throw new HttpException(
         `User with this ${duplicate} already exists`,
         HttpStatus.BAD_REQUEST
