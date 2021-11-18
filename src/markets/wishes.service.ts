@@ -206,6 +206,31 @@ export class WishesService {
     return;
   }
 
+  public async deleteAllWishes(uuid: string) {
+    const user = await this._userRepository.findOne(uuid, { relations: ['market'] });
+    if (!user) {
+      throw new HttpException(
+        'User not found.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    if (!user.market) {
+      throw new HttpException(
+        'User has no market.',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const wishes = await this._wishRepository.find({ where: { market: { user: { id: uuid } } }, relations: ['market', 'market.user'] });
+
+    await this._wishRepository.remove(wishes);
+
+    this._setLastUpdated(user.market);
+
+    return;
+  }
+
   private async _setLastUpdated(market: Market) {
     if (market.user) {
       delete market.user;

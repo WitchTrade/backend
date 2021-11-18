@@ -97,4 +97,10 @@ export class MarketsController {
   deleteWish(@Param('id') id: number, @UserDecorator('id') uuid: string) {
     return this._wishesService.deleteWish(id, uuid);
   }
+
+  @UseGuards(AuthGuard)
+  @Delete('wishes')
+  deleteAllWishes(@UserDecorator('id') uuid: string) {
+    return this._wishesService.deleteAllWishes(uuid);
+  }
 }
