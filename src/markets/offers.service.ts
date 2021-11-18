@@ -89,7 +89,7 @@ export class OffersService {
     offer.item = item;
     offer.mainPrice = mainPrice;
     if (mainPrice.withAmount) {
-      if (!data.mainPriceAmount) {
+      if (!data.mainPriceAmount && data.mainPriceAmount !== 0) {
         throw new HttpException(
           `Main price "${mainPrice.priceKey}" needs price amount.`,
           HttpStatus.NOT_FOUND,
@@ -106,7 +106,7 @@ export class OffersService {
       }
       offer.secondaryPrice = secondaryPrice;
       if (secondaryPrice.withAmount) {
-        if (!data.secondaryPriceAmount) {
+        if (!data.secondaryPriceAmount && data.secondaryPriceAmount !== 0) {
           throw new HttpException(
             `Secondary price "${secondaryPrice.priceKey}" needs price amount.`,
             HttpStatus.NOT_FOUND,

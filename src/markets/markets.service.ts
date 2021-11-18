@@ -30,7 +30,7 @@ export class MarketsService {
 
     const users = await this._userRepository
       .createQueryBuilder('user')
-      .select(['user.username', 'displayName'])
+      .select(['user.username', 'user.displayName'])
       .leftJoinAndSelect('user.market', 'market')
       .where('user.hidden = 0 AND market.lastUpdated > :oneMonthAgo', { oneMonthAgo })
       .getMany();
