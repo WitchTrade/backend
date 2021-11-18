@@ -142,7 +142,7 @@ export class WishesService {
       wish.mainPrice = mainPrice;
     }
     if (wish.mainPrice.withAmount) {
-      if (!data.mainPriceAmount) {
+      if (!data.mainPriceAmount && data.mainPriceAmount !== 0) {
         throw new HttpException(
           `Main price "${wish.mainPrice.priceKey}" needs price amount.`,
           HttpStatus.NOT_FOUND,
@@ -166,7 +166,7 @@ export class WishesService {
       wish.secondaryPrice = null;
     }
     if (wish.secondaryPrice && wish.secondaryPrice.withAmount) {
-      if (!data.secondaryPriceAmount) {
+      if (!data.secondaryPriceAmount && data.secondaryPriceAmount !== 0) {
         throw new HttpException(
           `Secondary price "${wish.secondaryPrice.priceKey}" needs price amount.`,
           HttpStatus.NOT_FOUND,
