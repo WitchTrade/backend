@@ -90,6 +90,12 @@ export class WishesService {
       }
       wish.mainPriceAmount = data.mainPriceAmount;
     }
+    if (!mainPrice.forWishes) {
+      throw new HttpException(
+        `Main price "${mainPrice.priceKey}" is not for wishes.`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
     if (secondaryPrice) {
       if (mainPrice.id === secondaryPrice.id) {
         throw new HttpException(
@@ -106,6 +112,12 @@ export class WishesService {
           );
         }
         wish.secondaryPriceAmount = data.secondaryPriceAmount;
+      }
+      if (!secondaryPrice.forWishes) {
+        throw new HttpException(
+          `Secondary price "${mainPrice.priceKey}" is not for wishes.`,
+          HttpStatus.NOT_FOUND,
+        );
       }
     }
 
@@ -140,6 +152,12 @@ export class WishesService {
         );
       }
       wish.mainPrice = mainPrice;
+      if (!mainPrice.forWishes) {
+        throw new HttpException(
+          `Main price "${mainPrice.priceKey}" is not for wishes.`,
+          HttpStatus.NOT_FOUND,
+        );
+      }
     }
     if (wish.mainPrice.withAmount) {
       if (!data.mainPriceAmount && data.mainPriceAmount !== 0) {
@@ -162,6 +180,12 @@ export class WishesService {
         );
       }
       wish.secondaryPrice = secondaryPrice;
+      if (!secondaryPrice.forWishes) {
+        throw new HttpException(
+          `Secondary price "${secondaryPrice.priceKey}" is not for wishes.`,
+          HttpStatus.NOT_FOUND,
+        );
+      }
     } else if (!data.secondaryPriceId) {
       wish.secondaryPrice = null;
     }

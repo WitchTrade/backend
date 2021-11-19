@@ -97,6 +97,12 @@ export class OffersService {
       }
       offer.mainPriceAmount = data.mainPriceAmount;
     }
+    if (!mainPrice.forOffers) {
+      throw new HttpException(
+        `Main price "${mainPrice.priceKey}" is not for offers.`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
     if (secondaryPrice) {
       if (mainPrice.id === secondaryPrice.id) {
         throw new HttpException(
@@ -113,6 +119,12 @@ export class OffersService {
           );
         }
         offer.secondaryPriceAmount = data.secondaryPriceAmount;
+      }
+      if (!secondaryPrice.forOffers) {
+        throw new HttpException(
+          `Secondary price "${mainPrice.priceKey}" is not for offers.`,
+          HttpStatus.NOT_FOUND,
+        );
       }
     }
     offer.quantity = data.quantity;
@@ -150,6 +162,12 @@ export class OffersService {
         );
       }
       offer.mainPrice = mainPrice;
+      if (!mainPrice.forOffers) {
+        throw new HttpException(
+          `Main price "${mainPrice.priceKey}" is not for offers.`,
+          HttpStatus.NOT_FOUND,
+        );
+      }
     }
     if (offer.mainPrice.withAmount) {
       if (!data.mainPriceAmount && data.mainPriceAmount !== 0) {
@@ -172,6 +190,12 @@ export class OffersService {
         );
       }
       offer.secondaryPrice = secondaryPrice;
+      if (!secondaryPrice.forOffers) {
+        throw new HttpException(
+          `Secondary price "${secondaryPrice.priceKey}" is not for offers.`,
+          HttpStatus.NOT_FOUND,
+        );
+      }
     } else if (!data.secondaryPriceId) {
       offer.secondaryPrice = null;
     }
