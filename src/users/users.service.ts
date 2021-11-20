@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
+import * as jwt from 'jsonwebtoken';
 
 import { UserRegisterDTO } from './dtos/register.dto';
 import { UserLoginDTO } from './dtos/login.dto';
@@ -10,6 +11,7 @@ import { UserChangePasswordDTO } from './dtos/changePassword.dto';
 import { SyncSettings } from './entities/syncSettings.entity';
 import { SyncSettingsUpdateDTO } from './dtos/updateSyncSettings.dto';
 import { Market } from '../markets/entities/market.entity';
+import { UserRefreshDTO } from './dtos/refresh.dto';
 
 @Injectable()
 export class UsersService {
@@ -88,6 +90,39 @@ export class UsersService {
     }
 
     return dbUser.tokenResponse();
+  }
+
+  public async refresh(tokens: UserRefreshDTO): Promise<UserRefreshDTO> {
+    let decodedToken: { id: string, username: string, type: string, iat: number, exp: number; };
+    try {
+      decodedToken = jwt.decode(tokens.token) as { id: string, username: string, type: string, iat: number, exp: number; };
+    } catch {
+      throw new HttpException(
+        'Invalid token provided',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    const user = await this._userRepository.findOne(decodedToken.id);
+    if (user.banned) {
+      throw new HttpException(
+        `This account has been banned! Reason: ${user.banMessage}`,
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    const refreshSecret = process.env.REFRESHSECRET + user.password;
+    try {
+      jwt.verify(tokens.refreshToken, refreshSecret);
+    } catch {
+      throw new HttpException(
+        'Refresh token is invalid! Please log in again.',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    const newTokenUser = user.tokenResponse();
+    return { token: newTokenUser.token, refreshToken: newTokenUser.refreshToken };
   }
 
   public async getCurrentUser(uuid: string): Promise<User> {

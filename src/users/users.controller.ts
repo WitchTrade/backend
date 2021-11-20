@@ -5,6 +5,7 @@ import { UserDecorator } from './decorators/user.decorator';
 import { UserChangePasswordDTO } from './dtos/changePassword.dto';
 
 import { UserLoginDTO } from './dtos/login.dto';
+import { UserRefreshDTO } from './dtos/refresh.dto';
 import { UserRegisterDTO } from './dtos/register.dto';
 import { UserUpdateDTO } from './dtos/update.dto';
 import { SyncSettingsUpdateDTO } from './dtos/updateSyncSettings.dto';
@@ -26,6 +27,12 @@ export class UsersController {
   @Post('login')
   public login(@Body() user: UserLoginDTO): Promise<UserWithToken> {
     return this._usersService.login(user);
+  }
+
+  @HttpCode(200)
+  @Post('refresh')
+  public refresh(@Body() tokens: UserRefreshDTO): Promise<UserRefreshDTO> {
+    return this._usersService.refresh(tokens);
   }
 
   @ApiBearerAuth()

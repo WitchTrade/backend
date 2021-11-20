@@ -105,22 +105,23 @@ export class User {
   }
 
   public tokenResponse(): UserWithToken {
-    const user = { ...this, token: this._generateToken() };
+    const user = { ...this, token: this._generateToken(false), refreshToken: this._generateToken(true) };
     delete user.password;
     return user;
   }
 
-  private _generateToken() {
+  private _generateToken(refresh: boolean) {
     const { id, username } = this;
     return jwt.sign({
       id, username
-    }, process.env.SECRET,
-      { expiresIn: '1y' });
+    }, refresh ? process.env.REFRESHSECRET + this.password : process.env.SECRET,
+      { expiresIn: refresh ? '7d' : '5m' });
   }
 }
 
 export class UserWithToken extends User {
   token: string;
+  refreshToken: string;
 }
 
 export class PublicUser {
