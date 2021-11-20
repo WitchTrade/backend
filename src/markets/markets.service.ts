@@ -32,7 +32,7 @@ export class MarketsService {
       .createQueryBuilder('user')
       .select(['user.username', 'user.displayName', 'user.verified'])
       .leftJoinAndSelect('user.market', 'market')
-      .where('user.hidden = 0 AND market.lastUpdated > :oneMonthAgo', { oneMonthAgo })
+      .where('user.hidden = 0 AND user.banned = 0 AND market.lastUpdated > :oneMonthAgo', { oneMonthAgo })
       .getMany();
 
     const markets: any[] = [];

@@ -103,7 +103,7 @@ export class SearchService {
         .addSelect(['user.username', 'user.displayName'])
         .leftJoin('offer.item', 'item')
         .addSelect('item.id')
-        .where('offer.quantity > 0 AND user.hidden = 0 AND market.lastUpdated > :oneMonthAgo', { oneMonthAgo });
+        .where('offer.quantity > 0 AND user.hidden = 0 AND user.banned = 0 AND market.lastUpdated > :oneMonthAgo', { oneMonthAgo });
     } else {
       query = this._wishRepository.createQueryBuilder('wish')
         .select(['wish.id', 'wish.mainPriceAmount', 'wish.secondaryPriceAmount'])
@@ -117,7 +117,7 @@ export class SearchService {
         .addSelect(['user.username', 'user.displayName'])
         .leftJoin('wish.item', 'item')
         .addSelect('item.id')
-        .where('user.hidden = 0 AND market.lastUpdated > :oneMonthAgo', { oneMonthAgo });
+        .where('user.hidden = 0 AND user.banned = 0 AND market.lastUpdated > :oneMonthAgo', { oneMonthAgo });
     }
 
     if (data.itemId) {

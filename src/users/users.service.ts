@@ -104,6 +104,12 @@ export class UsersService {
     }
 
     const user = await this._userRepository.findOne(decodedToken.id);
+    if (!user) {
+      throw new HttpException(
+        `User not found`,
+        HttpStatus.FORBIDDEN,
+      );
+    }
     if (user.banned) {
       throw new HttpException(
         `This account has been banned! Reason: ${user.banMessage}`,

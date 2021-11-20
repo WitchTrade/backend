@@ -28,7 +28,7 @@ export class StatsService {
       .select('count(*)', 'count')
       .leftJoin('offer.market', 'market')
       .leftJoin('market.user', 'user')
-      .where('offer.quantity > 0 AND user.hidden = 0 AND market.lastUpdated > :oneMonthAgo', { oneMonthAgo })
+      .where('offer.quantity > 0 AND user.hidden = 0 AND user.banned = 0 AND market.lastUpdated > :oneMonthAgo', { oneMonthAgo })
       .getRawOne();
 
     const userCount = await this._userRepository.count({ banned: false });
