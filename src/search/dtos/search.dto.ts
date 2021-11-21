@@ -5,7 +5,7 @@ export class SearchDTO {
   itemId: number;
 
   @IsIn([
-    'all',
+    'any',
     'none',
     'hunter',
     'witch'
@@ -13,7 +13,7 @@ export class SearchDTO {
   character: string;
 
   @IsIn([
-    'all',
+    'any',
     'ingredient',
     'body',
     'hat',
@@ -30,7 +30,7 @@ export class SearchDTO {
   slot: string;
 
   @IsIn([
-    'all',
+    'any',
     'none',
     'theater',
     'chinese newyear',
@@ -52,7 +52,7 @@ export class SearchDTO {
   event: string;
 
   @IsIn([
-    'all',
+    'any',
     'common',
     'uncommon',
     'rare',
@@ -62,7 +62,7 @@ export class SearchDTO {
   rarity: string;
 
   @IsIn([
-    'all',
+    'any',
     'owned',
     'duplicateown',
     'notowned'

@@ -35,7 +35,11 @@ export class SearchService {
           mainPriceAmount: tempOffer.mainPriceAmount,
           secondaryPrice: tempOffer.secondaryPrice,
           secondaryPriceAmount: tempOffer.secondaryPriceAmount,
-          user: { username: tempOffer.market.user.username, displayName: tempOffer.market.user.displayName }
+          user: {
+            username: tempOffer.market.user.username,
+            displayName: tempOffer.market.user.displayName,
+            verified: tempOffer.market.user.verified
+          }
         });
       } else {
         offers.push({
@@ -47,7 +51,11 @@ export class SearchService {
               mainPriceAmount: tempOffer.mainPriceAmount,
               secondaryPrice: tempOffer.secondaryPrice,
               secondaryPriceAmount: tempOffer.secondaryPriceAmount,
-              user: { username: tempOffer.market.user.username, displayName: tempOffer.market.user.displayName }
+              user: {
+                username: tempOffer.market.user.username,
+                displayName: tempOffer.market.user.displayName,
+                verified: tempOffer.market.user.verified
+              }
             }
           ]
         });
@@ -64,7 +72,11 @@ export class SearchService {
           mainPriceAmount: tempWish.mainPriceAmount,
           secondaryPrice: tempWish.secondaryPrice,
           secondaryPriceAmount: tempWish.secondaryPriceAmount,
-          user: { username: tempWish.market.user.username, displayName: tempWish.market.user.displayName }
+          user: {
+            username: tempWish.market.user.username,
+            displayName: tempWish.market.user.displayName,
+            verified: tempWish.market.user.verified
+          }
         });
       } else {
         wishes.push({
@@ -75,7 +87,11 @@ export class SearchService {
               mainPriceAmount: tempWish.mainPriceAmount,
               secondaryPrice: tempWish.secondaryPrice,
               secondaryPriceAmount: tempWish.secondaryPriceAmount,
-              user: { username: tempWish.market.user.username, displayName: tempWish.market.user.displayName }
+              user: {
+                username: tempWish.market.user.username,
+                displayName: tempWish.market.user.displayName,
+                verified: tempWish.market.user.verified
+              }
             }
           ]
         });
@@ -100,7 +116,7 @@ export class SearchService {
         .leftJoin('offer.market', 'market')
         .addSelect('market.id')
         .leftJoin('market.user', 'user')
-        .addSelect(['user.username', 'user.displayName'])
+        .addSelect(['user.username', 'user.displayName', 'user.verified'])
         .leftJoin('offer.item', 'item')
         .addSelect('item.id')
         .where('offer.quantity > 0 AND user.hidden = 0 AND user.banned = 0 AND market.lastUpdated > :oneMonthAgo', { oneMonthAgo });
@@ -114,7 +130,7 @@ export class SearchService {
         .leftJoin('wish.market', 'market')
         .addSelect('market.id')
         .leftJoin('market.user', 'user')
-        .addSelect(['user.username', 'user.displayName'])
+        .addSelect(['user.username', 'user.displayName', 'user.verified'])
         .leftJoin('wish.item', 'item')
         .addSelect('item.id')
         .where('user.hidden = 0 AND user.banned = 0 AND market.lastUpdated > :oneMonthAgo', { oneMonthAgo });
@@ -129,7 +145,7 @@ export class SearchService {
       query.andWhere(this._whereString('id', '=', properties), { itemId: data.itemId, recipeId });
     }
 
-    if (data.character !== 'all') {
+    if (data.character !== 'any') {
       const noneCharacter = data.character === 'none';
       query.andWhere(this._whereString(
         'tagCharacter',
@@ -138,7 +154,7 @@ export class SearchService {
       ), { character: data.character });
     }
 
-    if (data.slot !== 'all') {
+    if (data.slot !== 'any') {
       query.andWhere(this._whereString(
         'id',
         '=',
@@ -146,7 +162,7 @@ export class SearchService {
       ), { slot: data.slot });
     }
 
-    if (data.event !== 'all') {
+    if (data.event !== 'any') {
       query.andWhere(this._whereString(
         'tagEvent',
         '=',
@@ -154,7 +170,7 @@ export class SearchService {
       ), { event: data.event });
     }
 
-    if (data.event !== 'all') {
+    if (data.event !== 'any') {
       query.andWhere(this._whereString(
         'tagEvent',
         '=',
@@ -162,7 +178,7 @@ export class SearchService {
       ), { event: data.event });
     }
 
-    if (data.rarity !== 'all') {
+    if (data.rarity !== 'any') {
       query.andWhere(this._whereString(
         'tagRarity',
         '=',
