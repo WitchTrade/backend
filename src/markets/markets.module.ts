@@ -11,10 +11,11 @@ import { Price } from './entities/price.entity';
 import { Wish } from './entities/wish.entity';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { WishesService } from './wishes.service';
+import { Notification } from 'src/notifications/entities/notification.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Market, Offer, Wish, Item, Price]),
+    TypeOrmModule.forFeature([User, Market, Offer, Wish, Item, Price, Notification]),
     NotificationsModule
   ],
   providers: [MarketsService, OffersService, WishesService],

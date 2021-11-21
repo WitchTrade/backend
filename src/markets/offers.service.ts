@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Item } from '../items/entities/item.entity';
 import { NotificationsService } from '../notifications/notifications.service';
 import { User } from '../users/entities/user.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { OfferCreateDTO } from './dtos/offerCreate.dto';
 import { Market } from './entities/market.entity';
 import { Offer } from './entities/offer.entity';
@@ -12,6 +12,7 @@ import { Wish } from './entities/wish.entity';
 import { OfferUpdateDTO } from './dtos/offerUpdate.dto';
 import { OfferSyncDTO } from './dtos/offerSync.dto';
 import { RARITY } from '../users/entities/syncSettings.entity';
+import { Notification } from 'src/notifications/entities/notification.entity';
 
 @Injectable()
 export class OffersService {
@@ -29,6 +30,8 @@ export class OffersService {
     private _itemRepository: Repository<Item>,
     @InjectRepository(Price)
     private _priceRepository: Repository<Price>,
+    @InjectRepository(Notification)
+    private _notificationReposity: Repository<Notification>,
     private _notificationService: NotificationsService
   ) { }
 
@@ -131,7 +134,9 @@ export class OffersService {
 
     const createdOffer = await this._offerRepository.save(offer);
 
-    this._checkNotificationFor([offer], user);
+    if (offer.quantity !== 0) {
+      this._checkNotificationFor([offer], user);
+    }
 
     await this._setLastUpdated(user.market);
 
@@ -215,7 +220,11 @@ export class OffersService {
 
     const updatedOffer = await this._offerRepository.save(offer);
 
-    this._checkNotificationFor([offer], offer.market.user);
+    if (offer.quantity === 0) {
+      this._checkDeleteNotificationFor([offer], offer.market.user);
+    } else {
+      this._checkNotificationFor([offer], offer.market.user);
+    }
 
     await this._setLastUpdated(offer.market);
 
@@ -223,7 +232,7 @@ export class OffersService {
   }
 
   public async deleteOffer(id: number, uuid: string) {
-    const offer = await this._offerRepository.findOne(id, { relations: ['market', 'market.user'] });
+    const offer = await this._offerRepository.findOne(id, { relations: ['item', 'market', 'market.user'] });
     if (!offer) {
       throw new HttpException(
         'Offer not found.',
@@ -238,6 +247,8 @@ export class OffersService {
     }
 
     await this._offerRepository.remove(offer);
+
+    this._checkDeleteNotificationFor([offer], offer.market.user);
 
     this._setLastUpdated(offer.market);
 
@@ -260,9 +271,11 @@ export class OffersService {
       );
     }
 
-    const offers = await this._offerRepository.find({ where: { market: { user: { id: uuid } } }, relations: ['market', 'market.user'] });
+    const offers = await this._offerRepository.find({ where: { market: { user: { id: uuid } } }, relations: ['item', 'market', 'market.user'] });
 
     await this._offerRepository.remove(offers);
+
+    this._checkDeleteNotificationFor(offers, user);
 
     this._setLastUpdated(user.market);
 
@@ -294,6 +307,7 @@ export class OffersService {
 
     const response = { newOffers: 0, updatedOffers: 0, deletedOffers: 0 };
     const changedOffers: Offer[] = [];
+    const deletedOffers: Offer[] = [];
 
     let existingOffers = await this._offerRepository.find({ where: { market: user.market }, relations: ['market', 'item'] });
     let rarities: string[] = [];
@@ -376,9 +390,12 @@ export class OffersService {
       response.updatedOffers = offersToUpdate.length;
       response.deletedOffers = offersToDelete.length;
       changedOffers.push(...offersToUpdate);
+      deletedOffers.push(...offersToDelete);
     }
 
-    this._checkNotificationFor(changedOffers, user);
+    this._checkNotificationFor(changedOffers.filter(co => co.quantity !== 0), user);
+
+    this._checkDeleteNotificationFor([...deletedOffers, ...changedOffers.filter(co => co.quantity === 0)], user);
 
     this._setLastUpdated(user.market);
 
@@ -401,6 +418,17 @@ export class OffersService {
         }
       }
     }
+  }
+
+  private async _checkDeleteNotificationFor(offers: Offer[], user: User) {
+    if (offers.length === 0) {
+      return;
+    }
+    let notifications = await this._notificationReposity.find({ where: { targetUser: { id: user.id }, targetItem: { id: In(offers.map(o => o.item.id)) } }, relations: ['targetUser', 'targetItem'] });
+    if (notifications.length === 0) {
+      return;
+    }
+    this._notificationReposity.remove(notifications);
   }
 
   private async _setLastUpdated(market: Market) {

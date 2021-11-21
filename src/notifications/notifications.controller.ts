@@ -18,4 +18,10 @@ export class NotificationsController {
   deleteNotification(@Param('id') id: number, @UserDecorator('id') uuid: string) {
     return this._notificationsService.deleteNotification(id, uuid);
   }
+
+  @UseGuards(AuthGuard)
+  @Delete('')
+  deleteAllNotifications(@UserDecorator('id') uuid: string) {
+    return this._notificationsService.deleteAllNotifications(uuid);
+  }
 }

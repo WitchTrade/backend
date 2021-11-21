@@ -38,12 +38,22 @@ export class NotificationsService {
     return;
   }
 
+  public async deleteAllNotifications(uuid: string) {
+    const notifications = await this._notificationRepository.find({ where: { user: { id: uuid } }, relations: ['user'] });
+
+    await this._notificationRepository.remove(notifications);
+
+    return;
+  }
+
   public async sendNotification(wantUserId: string, haveUser: User, item: Item) {
     const notification = new Notification();
     notification.text = `in ${haveUser.displayName}'s market`;
     notification.link = `https://witchtrade.org/@/${haveUser.username}?searchString=${item.name.split(' ').join('+')}&itemSlot=${item.tagSlot}`;
     notification.iconLink = item.iconUrl;
     notification.user = await this._userRepository.findOne(wantUserId);
+    notification.targetUser = haveUser;
+    notification.targetItem = item;
 
     const alreadyExisting = await this._notificationRepository.findOne(notification);
     if (alreadyExisting) {
