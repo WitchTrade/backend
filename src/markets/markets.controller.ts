@@ -1,5 +1,4 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put, UseGuards } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../guards/auth.guard';
 import { UserDecorator } from '../users/decorators/user.decorator';
 import { OfferCreateDTO } from './dtos/offerCreate.dto';
@@ -12,7 +11,6 @@ import { MarketsService } from './markets.service';
 import { OffersService } from './offers.service';
 import { WishesService } from './wishes.service';
 
-@ApiTags('markets')
 @Controller('markets')
 export class MarketsController {
   constructor(

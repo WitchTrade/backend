@@ -1,5 +1,4 @@
 import { Body, Controller, Delete, Get, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Notification } from '../notifications/entities/notification.entity';
 import { AuthGuard } from '../guards/auth.guard';
 import { UserDecorator } from '../users/decorators/user.decorator';
@@ -13,96 +12,82 @@ import { AdminUnbanDTO } from './dtos/unban.dto';
 import { AdminVerifyDTO } from './dtos/verify.dto';
 import { AdminLog } from './entities/adminlog.entity';
 
-@ApiTags('admin')
 @Controller('admin')
 export class AdminController {
   constructor(private _adminService: AdminService) { }
 
-  @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @Get('users')
   public getUsers(@UserDecorator('id') uuid: string): Promise<AdminUser[]> {
     return this._adminService.getUsers(uuid);
   }
 
-  @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @Post('ban')
   public banUser(@UserDecorator('id') uuid: string, @Body() banData: AdminBanDTO): Promise<AdminUser> {
     return this._adminService.banUser(uuid, banData);
   }
 
-  @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @Delete('ban')
   public unbanUser(@UserDecorator('id') uuid: string, @Body() unbanData: AdminUnbanDTO): Promise<AdminUser> {
     return this._adminService.unbanUser(uuid, unbanData);
   }
 
-  @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @Get('badges')
   public getBadges(@UserDecorator('id') uuid: string): Promise<Badge[]> {
     return this._adminService.getBadges(uuid);
   }
 
-  @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @Post('badge')
   public addBadge(@UserDecorator('id') uuid: string, @Body() badgeData: AdminBadgeDTO): Promise<AdminUser> {
     return this._adminService.addBadge(uuid, badgeData);
   }
 
-  @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @Delete('badge')
   public removeBadge(@UserDecorator('id') uuid: string, @Body() badgeData: AdminBadgeDTO): Promise<AdminUser> {
     return this._adminService.removeBadge(uuid, badgeData);
   }
 
-  @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @Get('roles')
   public getRoles(@UserDecorator('id') uuid: string): Promise<Badge[]> {
     return this._adminService.getRoles(uuid);
   }
 
-  @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @Post('role')
   public addRole(@UserDecorator('id') uuid: string, @Body() roleData: AdminRoleDTO): Promise<AdminUser> {
     return this._adminService.addRole(uuid, roleData);
   }
 
-  @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @Delete('role')
   public removeRole(@UserDecorator('id') uuid: string, @Body() roleData: AdminRoleDTO): Promise<AdminUser> {
     return this._adminService.removeRole(uuid, roleData);
   }
 
-  @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @Post('verify')
   public verifyUser(@UserDecorator('id') uuid: string, @Body() verifyData: AdminVerifyDTO): Promise<AdminUser> {
     return this._adminService.verifyUser(uuid, verifyData);
   }
 
-  @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @Delete('verify')
   public unverifyUser(@UserDecorator('id') uuid: string, @Body() verifyData: AdminVerifyDTO): Promise<AdminUser> {
     return this._adminService.unverifyUser(uuid, verifyData);
   }
 
-  @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @Get('log')
   public getAdminLog(@UserDecorator('id') uuid: string): Promise<AdminLog[]> {
     return this._adminService.getAdminLog(uuid);
   }
 
-  @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @Post('broadcast')
   public broadcastNotification(@UserDecorator('id') uuid: string, @Body() notification: Partial<Notification>): Promise<void> {

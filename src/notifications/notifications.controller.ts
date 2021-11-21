@@ -1,10 +1,8 @@
 import { Controller, Delete, Get, Param, UseGuards } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../guards/auth.guard';
 import { UserDecorator } from '../users/decorators/user.decorator';
 import { NotificationsService } from './notifications.service';
 
-@ApiTags('notifications')
 @Controller('notifications')
 export class NotificationsController {
   constructor(private _notificationsService: NotificationsService) { }

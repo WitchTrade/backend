@@ -1,11 +1,9 @@
 import { Body, Controller, Get, Put, UseGuards } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../guards/auth.guard';
 import { UserDecorator } from '../users/decorators/user.decorator';
 import { InventoryUpdateDTO } from './dtos/update.dto';
 import { InventoryService } from './inventory.service';
 
-@ApiTags('inventory')
 @Controller('inventory')
 export class InventoryController {
   constructor(private _inventoryService: InventoryService) { }
