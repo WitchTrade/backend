@@ -156,18 +156,10 @@ export class SearchService {
 
     if (data.slot !== 'any') {
       query.andWhere(this._whereString(
-        'id',
+        'tagSlot',
         '=',
-        [':tagSlot']
+        [':slot']
       ), { slot: data.slot });
-    }
-
-    if (data.event !== 'any') {
-      query.andWhere(this._whereString(
-        'tagEvent',
-        '=',
-        [':event']
-      ), { event: data.event });
     }
 
     if (data.event !== 'any') {
