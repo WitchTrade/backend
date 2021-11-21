@@ -41,7 +41,7 @@ export class NotificationsService {
   public async sendNotification(wantUserId: string, haveUser: User, item: Item) {
     const notification = new Notification();
     notification.text = `in ${haveUser.displayName}'s market`;
-    notification.link = `https://witchtrade.org/profile/${haveUser.username}/offers/?highlight=${item.id}`;
+    notification.link = `https://witchtrade.org/@/${haveUser.username}?searchString=${item.name.split(' ').join('+')}&itemSlot=${item.tagSlot}`;
     notification.iconLink = item.iconUrl;
     notification.user = await this._userRepository.findOne(wantUserId);
 
