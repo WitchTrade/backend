@@ -1,8 +1,9 @@
-import { IsNumber, IsOptional, Min } from 'class-validator';
+import { IsNumber, IsOptional, Max, Min } from 'class-validator';
 
 export class OfferUpdateDTO {
   @IsNumber()
   @Min(0)
+  @Max(10000)
   quantity: number;
 
   @IsNumber()
