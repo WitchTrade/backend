@@ -21,12 +21,12 @@ export class SyncSettingsUpdateDTO {
   ms_rarity: number;
 
   @IsNumber()
-  @Min(0)
+  @Min(1)
   @Max(99)
   ms_defaultPriceItem: number;
 
   @IsNumber()
-  @Min(0)
+  @Min(1)
   @Max(99)
   ms_defaultPriceRecipe: number;
 

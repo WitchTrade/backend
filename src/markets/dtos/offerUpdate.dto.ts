@@ -11,6 +11,8 @@ export class OfferUpdateDTO {
 
   @IsOptional()
   @IsNumber()
+  @Min(1)
+  @Max(99)
   mainPriceAmount: number;
 
   @IsOptional()
@@ -19,5 +21,7 @@ export class OfferUpdateDTO {
 
   @IsOptional()
   @IsNumber()
+  @Min(1)
+  @Max(99)
   secondaryPriceAmount: number;
 }

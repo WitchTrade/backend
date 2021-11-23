@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional } from 'class-validator';
+import { IsNumber, IsOptional, Max, Min } from 'class-validator';
 
 export class WishCreateDTO {
   @IsNumber()
@@ -9,6 +9,8 @@ export class WishCreateDTO {
 
   @IsOptional()
   @IsNumber()
+  @Min(1)
+  @Max(99)
   mainPriceAmount: number;
 
   @IsOptional()
@@ -17,5 +19,7 @@ export class WishCreateDTO {
 
   @IsOptional()
   @IsNumber()
+  @Min(1)
+  @Max(99)
   secondaryPriceAmount: number;
 }
