@@ -2,7 +2,7 @@ import { IsEmail, IsOptional, IsString, Matches, MaxLength } from 'class-validat
 
 export class UserRegisterDTO {
   @IsString()
-  @Matches(/^(?=.{5,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/, {
+  @Matches(/^(?=.{4,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/, {
     message: 'Invalid username',
   })
   username: string;
