@@ -180,23 +180,25 @@ export class SearchService {
 
     if (uuid) {
       const user = await this._userRepository.findOne(uuid, { relations: ['inventory', 'inventory.inventoryItems', 'inventory.inventoryItems.item', 'market', 'market.wishes', 'market.wishes.item'] });
-      if (!user.inventory) {
-        throw new HttpException(
-          `User has no inventory`,
-          HttpStatus.NOT_FOUND,
-        );
-      }
-      let inventoryItems = user.inventory.inventoryItems;
-      if (data.inventoryType === 'duplicateown') {
-        inventoryItems = inventoryItems.filter(ii => ii.amount > 1);
-      }
-      if (data.inventoryType === 'owned' || data.inventoryType === 'duplicateown') {
-        query.andWhere(this._whereString('id', 'IN', ['(:...ids)']), { ids: inventoryItems.map(ii => ii.item.id) });
-      }
-      if (data.inventoryType === 'notowned') {
-        const ids = user.inventory.inventoryItems.map(ii => ii.item.id);
-        query.andWhere(this._whereString('id', 'NOT IN', ['(:...ids)']), { ids });
-        query.andWhere(this._whereString('tagSlot', '!=', ['\'recipe\'']));
+      if (data.inventoryType !== 'any') {
+        if (!user.inventory) {
+          throw new HttpException(
+            `User has no inventory`,
+            HttpStatus.NOT_FOUND,
+          );
+        }
+        let inventoryItems = user.inventory.inventoryItems;
+        if (data.inventoryType === 'duplicateown') {
+          inventoryItems = inventoryItems.filter(ii => ii.amount > 1);
+        }
+        if (data.inventoryType === 'owned' || data.inventoryType === 'duplicateown') {
+          query.andWhere(this._whereString('id', 'IN', ['(:...ids)']), { ids: inventoryItems.map(ii => ii.item.id) });
+        }
+        if (data.inventoryType === 'notowned') {
+          const ids = user.inventory.inventoryItems.map(ii => ii.item.id);
+          query.andWhere(this._whereString('id', 'NOT IN', ['(:...ids)']), { ids });
+          query.andWhere(this._whereString('tagSlot', '!=', ['\'recipe\'']));
+        }
       }
       if (data.onlyWishlistItems) {
         query.andWhere(this._whereString('id', 'IN', ['(:...wishIds)']), { wishIds: user.market.wishes.map(wish => wish.item.id) });
