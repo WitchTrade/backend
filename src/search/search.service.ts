@@ -200,8 +200,10 @@ export class SearchService {
           query.andWhere(this._whereString('tagSlot', '!=', ['\'recipe\'']));
         }
       }
-      if (data.onlyWishlistItems) {
+      if (data.onlyWishlistItems && user.market.wishes.length > 0) {
         query.andWhere(this._whereString('id', 'IN', ['(:...wishIds)']), { wishIds: user.market.wishes.map(wish => wish.item.id) });
+      } else if (data.onlyWishlistItems) {
+        return [];
       }
     }
 
