@@ -11,6 +11,7 @@ import { AdminUnbanDTO } from './dtos/unban.dto';
 import { AdminVerifyDTO } from './dtos/verify.dto';
 import { ACTIONGROUP, ACTIONTYPE, AdminLog } from './entities/adminlog.entity';
 import { Notification } from '../notifications/entities/notification.entity';
+import { AdminNotificationDTO } from './dtos/notification.dto';
 
 @Injectable()
 export class AdminService {
@@ -506,6 +507,33 @@ export class AdminService {
     });
 
     return modifiedLog;
+  }
+
+  public async sendNotification(uuid: string, data: AdminNotificationDTO) {
+    const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
+
+    if (!this._hasPermission(requestingUser.roles, PERMISSION.ADMIN)) {
+      throw new HttpException(
+        'Permission denied.',
+        HttpStatus.FORBIDDEN
+      );
+    }
+
+    const user = await this._userRepository.findOne(data.userId);
+
+    if (!user) {
+      throw new HttpException(
+        'User not found.',
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    const notification = new Notification();
+    notification.text = data.text;
+    notification.link = data.link;
+    notification.iconLink = data.iconLink;
+    notification.user = user;
+    await this._notificationRepository.save(notification);
   }
 
   public async broadcastNotification(uuid: string, data: Partial<Notification>) {
