@@ -19,11 +19,11 @@ export class SteamFetcherService {
       const response = await firstValueFrom(this._httpService.get<any>(
         `http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=${process.env.STEAMAPIKEY}&vanityurl=${steamUsername}`
       ));
-      if (response.data.response.success === 1) {
+      if (response.status === 200 && response.data.response.success === 1) {
         steamProfileId = response.data.response.steamid;
       } else {
         if (autoSync) {
-          failed(true);
+          failed(response.status === 200);
           return;
         }
         throw new HttpException(
