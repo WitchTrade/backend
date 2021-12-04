@@ -148,6 +148,8 @@ export class AdminUser {
   banMessage: string;
   roles: Role[];
   badges: Badge[];
+  created: Date;
+  lastOnline: Date;
 }
 
 export function createAdminUser(user: Partial<User>): AdminUser {
@@ -159,6 +161,8 @@ export function createAdminUser(user: Partial<User>): AdminUser {
     banned: user.banned ? user.banned : false,
     banMessage: user.banMessage ? user.banMessage : null,
     roles: user.roles ? user.roles : [],
-    badges: user.badges ? user.badges : []
+    badges: user.badges ? user.badges : [],
+    created: user.created ? user.created : null,
+    lastOnline: user.lastOnline ? user.lastOnline : null
   };
 }

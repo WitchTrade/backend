@@ -44,7 +44,9 @@ export class AdminService {
         'displayName',
         'verified',
         'banned',
-        'banMessage'
+        'banMessage',
+        'created',
+        'lastOnline'
       ],
       relations: [
         'roles',
