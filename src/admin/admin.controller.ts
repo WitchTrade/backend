@@ -11,6 +11,7 @@ import { AdminRoleDTO } from './dtos/role.dto';
 import { AdminUnbanDTO } from './dtos/unban.dto';
 import { AdminVerifyDTO } from './dtos/verify.dto';
 import { AdminLog } from './entities/adminlog.entity';
+import { AdminNotificationDTO } from './dtos/notification.dto';
 
 @Controller('admin')
 export class AdminController {
@@ -86,6 +87,12 @@ export class AdminController {
   @Get('log')
   public getAdminLog(@UserDecorator('id') uuid: string): Promise<AdminLog[]> {
     return this._adminService.getAdminLog(uuid);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('notification')
+  public sendNotification(@UserDecorator('id') uuid: string, @Body() notificationInfo: AdminNotificationDTO): Promise<void> {
+    return this._adminService.sendNotification(uuid, notificationInfo);
   }
 
   @UseGuards(AuthGuard)
