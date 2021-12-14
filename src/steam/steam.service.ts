@@ -115,11 +115,14 @@ export class SteamService {
       }
     }
 
-    const abstractItems = descriptions.map(description => {
+    let abstractItems = descriptions.map(description => {
       const amount = assets.filter(a => a.classid === description.classid).map(a => parseInt(a.amount, 10)).reduce((a, c) => a + c);
 
       return { name: description.name, amount, tagSlot: description.tags.find(t => t.category === 'slot').internal_name };
     });
+
+    // remove possible duplicates
+    abstractItems = [...new Map(abstractItems.map(ai => [JSON.stringify([ai.name, ai.tagSlot]), ai])).values()];
 
     return abstractItems;
   }
@@ -127,12 +130,10 @@ export class SteamService {
   private async _updateInventory(userInventory: Inventory, newInventoryItems: { item: Item, amount: number; }[]) {
     let updatedInventoryItems = await this._inventoryItemRepository.find({ where: { inventory: userInventory }, relations: ['item'] });
     for (const newInventoryItem of newInventoryItems) {
-      if (updatedInventoryItems.some(ii => {
-        return ii.item.id === newInventoryItem.item.id;
-      })) {
+      if (updatedInventoryItems.some(ii => ii.item.id === newInventoryItem.item.id)) {
         const ii = updatedInventoryItems.find(ii => ii.item.id === newInventoryItem.item.id);
         if (ii.amount === newInventoryItem.amount) {
-          // remove item because it didn't chance (Don't update it in the database)
+          // remove item because the amount didn't change (Don't update it in the database)
           this._removeFromArray(updatedInventoryItems, ii);
         } else {
           ii.amount = newInventoryItem.amount;
