@@ -186,7 +186,7 @@ export class SteamService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    let steamId = await this._steamFetcherService.getSteamProfileId(user.steamProfileLink);
+    const steamId = await this._steamFetcherService.getSteamProfileId(user.steamProfileLink);
 
     const friendIds = (await this._steamFetcherService.getSteamFriendIds(steamId)).data.friendslist.friends.map(friend => friend.steamid);
     let friendNames: string[] = [];

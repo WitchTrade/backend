@@ -11,6 +11,7 @@ import { SteamController } from './steam.controller';
 import { SteamService } from './steam.service';
 import { SteamAutoSyncService } from './steamAutoSync.service';
 import { SteamFetcherService } from './steamFetcher.service';
+import { SteamAuthService } from './steamAuth.service';
 
 @Module({
   imports: [
@@ -19,6 +20,6 @@ import { SteamFetcherService } from './steamFetcher.service';
     MarketsModule
   ],
   controllers: [SteamController],
-  providers: [SteamService, SteamFetcherService, SteamAutoSyncService]
+  providers: [SteamService, SteamAuthService, SteamFetcherService, SteamAutoSyncService]
 })
 export class SteamModule { }

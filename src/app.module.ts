@@ -61,7 +61,7 @@ import { Stats } from './stats/entities/stats.entity';
       name: 'wistats',
       type: 'mariadb',
       host: process.env.DATABASEHOST,
-      port: parseInt(process.env.DATABASEPORT),
+      port: parseInt(process.env.DATABASEPORT, 10),
       username: process.env.DATABASEUSER,
       password: process.env.DATABASEPW,
       database: 'wistats',
