@@ -215,6 +215,12 @@ export class UsersService {
     ) {
       user.verified = false;
     }
+    if (
+      user.verifiedSteamProfileLink &&
+      user.steamProfileLink !== data.steamProfileLink
+    ) {
+      user.verifiedSteamProfileLink = false;
+    }
 
     user.email = data.email;
     user.displayName = data.displayName;
