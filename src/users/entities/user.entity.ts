@@ -37,7 +37,7 @@ export class User {
   @Column({ nullable: true })
   steamProfileLink: string;
 
-  @Column({ nullable: true })
+  @Column({ default: false })
   verifiedSteamProfileLink: boolean;
 
   @Column({ nullable: true })
