@@ -104,6 +104,15 @@ export class WishesService {
         );
       }
       wish.secondaryPrice = secondaryPrice;
+
+      if (data.wantsBoth === undefined) {
+        throw new HttpException(
+          `wantsBoth property is required if second price is defined`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      wish.wantsBoth = data.wantsBoth;
+
       if (secondaryPrice.withAmount) {
         if (!data.secondaryPriceAmount && data.secondaryPriceAmount !== 0) {
           throw new HttpException(
@@ -199,6 +208,18 @@ export class WishesService {
       wish.secondaryPriceAmount = data.secondaryPriceAmount;
     } else {
       wish.secondaryPriceAmount = null;
+    }
+
+    if (wish.secondaryPrice) {
+      if (data.wantsBoth === undefined) {
+        throw new HttpException(
+          `wantsBoth property is required if second price is defined`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      wish.wantsBoth = data.wantsBoth;
+    } else {
+      wish.wantsBoth = null;
     }
 
     const updatedWish = await this._wishRepository.save(wish);

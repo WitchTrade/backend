@@ -20,6 +20,9 @@ export class Wish {
   @Column({ nullable: true })
   mainPriceAmount: number;
 
+  @Column({ nullable: true })
+  wantsBoth: boolean;
+
   @ManyToOne(() => Price)
   secondaryPrice: Price;
 

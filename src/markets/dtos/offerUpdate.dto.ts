@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, Max, Min } from 'class-validator';
+import { IsBoolean, IsNumber, IsOptional, Max, Min } from 'class-validator';
 
 export class OfferUpdateDTO {
   @IsNumber()
@@ -14,6 +14,10 @@ export class OfferUpdateDTO {
   @Min(1)
   @Max(99)
   mainPriceAmount: number;
+
+  @IsOptional()
+  @IsBoolean()
+  wantsBoth: boolean;
 
   @IsOptional()
   @IsNumber()

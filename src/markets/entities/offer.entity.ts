@@ -23,6 +23,9 @@ export class Offer {
   @Column({ nullable: true })
   mainPriceAmount: number;
 
+  @Column({ nullable: true })
+  wantsBoth: boolean;
+
   @ManyToOne(() => Price)
   secondaryPrice: Price;
 
