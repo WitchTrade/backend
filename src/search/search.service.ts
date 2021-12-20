@@ -33,6 +33,7 @@ export class SearchService {
           quantity: tempOffer.quantity,
           mainPrice: tempOffer.mainPrice,
           mainPriceAmount: tempOffer.mainPriceAmount,
+          wantsBoth: tempOffer.wantsBoth,
           secondaryPrice: tempOffer.secondaryPrice,
           secondaryPriceAmount: tempOffer.secondaryPriceAmount,
           user: {
@@ -49,6 +50,7 @@ export class SearchService {
               quantity: tempOffer.quantity,
               mainPrice: tempOffer.mainPrice,
               mainPriceAmount: tempOffer.mainPriceAmount,
+              wantsBoth: tempOffer.wantsBoth,
               secondaryPrice: tempOffer.secondaryPrice,
               secondaryPriceAmount: tempOffer.secondaryPriceAmount,
               user: {
@@ -70,6 +72,7 @@ export class SearchService {
         existingWish.markets.push({
           mainPrice: tempWish.mainPrice,
           mainPriceAmount: tempWish.mainPriceAmount,
+          wantsBoth: tempWish.wantsBoth,
           secondaryPrice: tempWish.secondaryPrice,
           secondaryPriceAmount: tempWish.secondaryPriceAmount,
           user: {
@@ -85,6 +88,7 @@ export class SearchService {
             {
               mainPrice: tempWish.mainPrice,
               mainPriceAmount: tempWish.mainPriceAmount,
+              wantsBoth: tempWish.wantsBoth,
               secondaryPrice: tempWish.secondaryPrice,
               secondaryPriceAmount: tempWish.secondaryPriceAmount,
               user: {
@@ -108,7 +112,7 @@ export class SearchService {
     let query: SelectQueryBuilder<Offer> | SelectQueryBuilder<Wish>;
     if (type === QUERYTYPE.OFFERS) {
       query = this._offerRepository.createQueryBuilder('offer')
-        .select(['offer.id', 'offer.quantity', 'offer.mainPriceAmount', 'offer.secondaryPriceAmount'])
+        .select(['offer.id', 'offer.quantity', 'offer.mainPriceAmount', 'offer.wantsBoth', 'offer.secondaryPriceAmount'])
         .leftJoin('offer.mainPrice', 'mainPrice')
         .addSelect('mainPrice.priceKey')
         .leftJoin('offer.secondaryPrice', 'secondaryPrice')
@@ -122,7 +126,7 @@ export class SearchService {
         .where('offer.quantity > 0 AND user.hidden = 0 AND user.banned = 0 AND market.lastUpdated > :oneMonthAgo', { oneMonthAgo });
     } else {
       query = this._wishRepository.createQueryBuilder('wish')
-        .select(['wish.id', 'wish.mainPriceAmount', 'wish.secondaryPriceAmount'])
+        .select(['wish.id', 'wish.mainPriceAmount', 'wish.wantsBoth', 'wish.secondaryPriceAmount'])
         .leftJoin('wish.mainPrice', 'mainPrice')
         .addSelect('mainPrice.priceKey')
         .leftJoin('wish.secondaryPrice', 'secondaryPrice')
@@ -198,6 +202,7 @@ export class SearchService {
           const ids = user.inventory.inventoryItems.map(ii => ii.item.id);
           query.andWhere(this._whereString('id', 'NOT IN', ['(:...ids)']), { ids });
           query.andWhere(this._whereString('tagSlot', '!=', ['\'recipe\'']));
+          query.andWhere(this._whereString('tagSlot', '!=', ['\'ingredient\'']));
         }
       }
       if (data.onlyWishlistItems && user.market.wishes.length > 0) {

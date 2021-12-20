@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, Max, Min } from 'class-validator';
+import { IsBoolean, IsNumber, IsOptional, Max, Min } from 'class-validator';
 
 export class WishCreateDTO {
   @IsNumber()
@@ -12,6 +12,10 @@ export class WishCreateDTO {
   @Min(1)
   @Max(99)
   mainPriceAmount: number;
+
+  @IsOptional()
+  @IsBoolean()
+  wantsBoth: boolean;
 
   @IsOptional()
   @IsNumber()

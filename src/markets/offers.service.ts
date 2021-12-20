@@ -114,6 +114,15 @@ export class OffersService {
         );
       }
       offer.secondaryPrice = secondaryPrice;
+
+      if (data.wantsBoth === undefined) {
+        throw new HttpException(
+          `wantsBoth property is required if second price is defined`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      offer.wantsBoth = data.wantsBoth;
+
       if (secondaryPrice.withAmount) {
         if (!data.secondaryPriceAmount && data.secondaryPriceAmount !== 0) {
           throw new HttpException(
@@ -214,6 +223,18 @@ export class OffersService {
       offer.secondaryPriceAmount = data.secondaryPriceAmount;
     } else {
       offer.secondaryPriceAmount = null;
+    }
+
+    if (offer.secondaryPrice) {
+      if (data.wantsBoth === undefined) {
+        throw new HttpException(
+          `wantsBoth property is required if second price is defined`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      offer.wantsBoth = data.wantsBoth;
+    } else {
+      offer.wantsBoth = null;
     }
 
     offer.quantity = data.quantity;
