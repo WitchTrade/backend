@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { getIdOfItemSlot } from 'src/static/tagSlotToId';
 import { Repository } from 'typeorm';
 import { Item } from '../items/entities/item.entity';
 import { User } from '../users/entities/user.entity';
@@ -49,7 +50,7 @@ export class NotificationsService {
   public async sendNotification(wantUserId: string, haveUser: User, item: Item) {
     const notification = new Notification();
     notification.text = `in ${haveUser.displayName}'s market`;
-    notification.link = `https://witchtrade.org/@/${haveUser.username}?searchString=${item.name.split(' ').join('+')}&itemSlot=${item.tagSlot}`;
+    notification.link = `https://witchtrade.org/@/${haveUser.username}?searchString=${item.name.split(' ').join('+')}&itemSlot=${getIdOfItemSlot(item.tagSlot)}`;
     notification.iconLink = item.iconUrl;
     notification.user = await this._userRepository.findOne(wantUserId);
     notification.targetUser = haveUser;
