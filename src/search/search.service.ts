@@ -202,6 +202,7 @@ export class SearchService {
           const ids = user.inventory.inventoryItems.map(ii => ii.item.id);
           query.andWhere(this._whereString('id', 'NOT IN', ['(:...ids)']), { ids });
           query.andWhere(this._whereString('tagSlot', '!=', ['\'recipe\'']));
+          query.andWhere(this._whereString('tagSlot', '!=', ['\'ingredient\'']));
         }
       }
       if (data.onlyWishlistItems && user.market.wishes.length > 0) {
