@@ -30,7 +30,7 @@ export class UserRegisterDTO {
 
   @IsOptional()
   @IsString()
-  @Matches(/^(?:https?:\/\/)?steamcommunity\.com\/tradeoffer\/new\/[a-zA-Z0-9?=&-]+$/, {
+  @Matches(/^(?:https?:\/\/)?steamcommunity\.com\/tradeoffer\/new\/?\?partner=[0-9]+&token=[a-zA-Z0-9_-]+$/, {
     message: 'Not a valid steam trade link'
   })
   steamTradeLink: string;
