@@ -12,6 +12,7 @@ import { SyncSettings } from './entities/syncSettings.entity';
 import { SyncSettingsUpdateDTO } from './dtos/updateSyncSettings.dto';
 import { Market } from '../markets/entities/market.entity';
 import { UserRefreshDTO } from './dtos/refresh.dto';
+import { Price } from 'src/markets/entities/price.entity';
 
 @Injectable()
 export class UsersService {
@@ -22,6 +23,8 @@ export class UsersService {
     private _syncSettingsRepository: Repository<SyncSettings>,
     @InjectRepository(Market)
     private _marketRepository: Repository<Market>,
+    @InjectRepository(Price)
+    private _priceRepository: Repository<Price>,
   ) { }
 
   public async register(user: UserRegisterDTO): Promise<UserWithToken> {
@@ -53,7 +56,20 @@ export class UsersService {
 
     const createdUser = this._userRepository.create(user);
 
-    const syncSettings = await this._syncSettingsRepository.save({});
+    const dynamicRarityPrice = await this._priceRepository.findOne({ where: { priceKey: 'dynamicRarity' } });
+
+    if (!dynamicRarityPrice) {
+      console.error('Dynamic rarity price not found while registering a new account.');
+      throw new HttpException(
+        'There was an error while creating your account.',
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    const syncSettings = await this._syncSettingsRepository.save({
+      mainPriceItem: dynamicRarityPrice,
+      mainPriceRecipe: dynamicRarityPrice
+    });
     createdUser.syncSettings = syncSettings;
 
     const market = await this._marketRepository.save({ lastUpdated: new Date() });
@@ -168,18 +184,98 @@ export class UsersService {
       );
     }
 
+    const prices = await this._priceRepository.find();
+
+    if (
+      !prices.some(p => p.id === data.mainPriceItem.id) ||
+      (data.secondaryPriceItem && !prices.some(p => p.id === data.secondaryPriceItem.id)) ||
+      !prices.some(p => p.id === data.mainPriceRecipe.id) ||
+      (data.secondaryPriceRecipe && !prices.some(p => p.id === data.secondaryPriceRecipe.id))
+    ) {
+      throw new HttpException(
+        'Some prices were not found in the database',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    if (
+      !prices.find(p => p.id === data.mainPriceItem.id).canBeMain ||
+      !prices.find(p => p.id === data.mainPriceRecipe.id).canBeMain
+    ) {
+      throw new HttpException(
+        'Some prices which cannot be the main price are configured as the main price.',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
     const syncSettings = user.syncSettings;
 
     syncSettings.syncInventory = data.syncInventory;
     syncSettings.syncMarket = data.syncMarket;
-    syncSettings.ms_mode = data.ms_mode;
-    syncSettings.ms_rarity = data.ms_rarity;
-    syncSettings.ms_defaultPriceItem = data.ms_defaultPriceItem;
-    syncSettings.ms_defaultPriceRecipe = data.ms_defaultPriceRecipe;
-    syncSettings.ms_keepItem = data.ms_keepItem;
-    syncSettings.ms_keepRecipe = data.ms_keepRecipe;
-    syncSettings.ms_ignoreWishlistItems = data.ms_ignoreWishlistItems;
-    syncSettings.ms_removeNoneOnStock = data.ms_removeNoneOnStock;
+    syncSettings.mode = data.mode;
+    syncSettings.rarity = data.rarity;
+
+    syncSettings.mainPriceItem = prices.find(p => p.id === data.mainPriceItem.id);
+    if (syncSettings.mainPriceItem.withAmount) {
+      if (!data.mainPriceAmountItem) {
+        throw new HttpException(
+          'Main item price requires amount.',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      syncSettings.mainPriceAmountItem = data.mainPriceAmountItem;
+    } else {
+      syncSettings.mainPriceAmountItem = null;
+    }
+
+
+    if (data.secondaryPriceItem) {
+      syncSettings.secondaryPriceItem = prices.find(p => p.id === data.secondaryPriceItem.id);
+      if (syncSettings.secondaryPriceItem.withAmount) {
+        if (!data.secondaryPriceAmountItem) {
+          throw new HttpException(
+            'Secondary item price requires amount.',
+            HttpStatus.NOT_FOUND,
+          );
+        }
+        syncSettings.secondaryPriceAmountItem = data.secondaryPriceAmountItem;
+      } else {
+        syncSettings.secondaryPriceAmountItem = null;
+      }
+    }
+
+    syncSettings.mainPriceRecipe = prices.find(p => p.id === data.mainPriceRecipe.id);
+    if (syncSettings.mainPriceRecipe.withAmount) {
+      if (!data.mainPriceAmountRecipe) {
+        throw new HttpException(
+          'Main recipe price requires amount.',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      syncSettings.mainPriceAmountRecipe = data.mainPriceAmountRecipe;
+    } else {
+      syncSettings.mainPriceAmountRecipe = null;
+    }
+
+    if (data.secondaryPriceRecipe) {
+      syncSettings.secondaryPriceRecipe = prices.find(p => p.id === data.secondaryPriceRecipe.id);
+      if (syncSettings.secondaryPriceRecipe.withAmount) {
+        if (!data.secondaryPriceAmountRecipe) {
+          throw new HttpException(
+            'Secondary recipe price requires amount.',
+            HttpStatus.NOT_FOUND,
+          );
+        }
+        syncSettings.secondaryPriceAmountRecipe = data.secondaryPriceAmountRecipe;
+      } else {
+        syncSettings.secondaryPriceAmountRecipe = null;
+      }
+    }
+
+    syncSettings.keepItem = data.keepItem;
+    syncSettings.keepRecipe = data.keepRecipe;
+    syncSettings.ignoreWishlistItems = data.ignoreWishlistItems;
+    syncSettings.removeNoneOnStock = data.removeNoneOnStock;
 
     const updatedSyncSettings = await this._syncSettingsRepository.save(syncSettings);
 

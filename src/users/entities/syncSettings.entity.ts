@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Price } from 'src/markets/entities/price.entity';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class SyncSettings {
@@ -12,28 +13,46 @@ export class SyncSettings {
   syncMarket: boolean;
 
   @Column({ default: 'both' })
-  ms_mode: string;
+  mode: string;
 
   @Column({ default: 31 })
-  ms_rarity: number;
+  rarity: number;
 
-  @Column({ default: 4 })
-  ms_defaultPriceItem: number;
+  @ManyToOne(() => Price)
+  mainPriceItem: Price;
+  
+  @Column({ default: 4, nullable: true })
+  mainPriceAmountItem: number;
 
-  @Column({ default: 2 })
-  ms_defaultPriceRecipe: number;
+  @ManyToOne(() => Price)
+  secondaryPriceItem: Price;
+
+  @Column({ nullable: true })
+  secondaryPriceAmountItem: number;
+
+  @ManyToOne(() => Price)
+  mainPriceRecipe: Price;
+  
+  @Column({ default: 2, nullable: true })
+  mainPriceAmountRecipe: number;
+
+  @ManyToOne(() => Price)
+  secondaryPriceRecipe: Price;
+
+  @Column({ nullable: true })
+  secondaryPriceAmountRecipe: number;
 
   @Column({ default: 1 })
-  ms_keepItem: number;
+  keepItem: number;
 
   @Column({ default: 0 })
-  ms_keepRecipe: number;
+  keepRecipe: number;
 
   @Column({ default: true })
-  ms_ignoreWishlistItems: boolean;
+  ignoreWishlistItems: boolean;
 
-  @Column({ default: true })
-  ms_removeNoneOnStock: boolean;
+  @Column({ default: false })
+  removeNoneOnStock: boolean;
 }
 
 export enum RARITY {

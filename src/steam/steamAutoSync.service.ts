@@ -30,6 +30,14 @@ export class SteamAutoSyncService {
       .addSelect(['inv.id'])
       .leftJoin('user.syncSettings', 'syncSettings')
       .addSelect('syncSettings')
+      .leftJoin('syncSettings.mainPriceItem', 'mainPriceItem')
+      .addSelect('mainPriceItem')
+      .leftJoin('syncSettings.secondaryPriceItem', 'secondaryPriceItem')
+      .addSelect('secondaryPriceItem')
+      .leftJoin('syncSettings.mainPriceRecipe', 'mainPriceRecipe')
+      .addSelect('mainPriceRecipe')
+      .leftJoin('syncSettings.secondaryPriceRecipe', 'secondaryPriceRecipe')
+      .addSelect('secondaryPriceRecipe')
       .where('syncSettings.syncInventory AND user.lastOnline > :oneWeekAgo', { oneWeekAgo })
       .getMany();
 
