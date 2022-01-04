@@ -326,7 +326,7 @@ export class OffersService {
       );
     }
 
-    const response = { newOffers: 0, updatedOffers: 0, deletedOffers: 0 };
+    const response = { newOffers: [], newOffersCount: 0, updatedOffersCount: 0, deletedOffersCount: 0 };
     const changedOffers: Offer[] = [];
     const deletedOffers: Offer[] = [];
 
@@ -421,8 +421,9 @@ export class OffersService {
         offer.item = itemToInsert.item;
         offers.push(offer);
       }
-      await this._offerRepository.save(offers);
-      response.newOffers = offers.length;
+      const insertedNewOffers = await this._offerRepository.save(offers);
+      response.newOffersCount = offers.length;
+      response.newOffers = insertedNewOffers.map(ino => ino.id);
       changedOffers.push(...offers);
     }
     if (data.mode === 'both' || data.mode === 'existing') {
@@ -455,8 +456,8 @@ export class OffersService {
       }
       await this._offerRepository.save(offersToUpdate);
       await this._offerRepository.remove(offersToDelete);
-      response.updatedOffers = offersToUpdate.length;
-      response.deletedOffers = offersToDelete.length;
+      response.updatedOffersCount = offersToUpdate.length;
+      response.deletedOffersCount = offersToDelete.length;
       changedOffers.push(...offersToUpdate);
       deletedOffers.push(...offersToDelete);
     }
