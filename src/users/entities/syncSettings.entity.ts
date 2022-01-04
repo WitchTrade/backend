@@ -1,5 +1,6 @@
+import { Item } from 'src/items/entities/item.entity';
 import { Price } from 'src/markets/entities/price.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class SyncSettings {
@@ -20,7 +21,7 @@ export class SyncSettings {
 
   @ManyToOne(() => Price)
   mainPriceItem: Price;
-  
+
   @Column({ default: 4, nullable: true })
   mainPriceAmountItem: number;
 
@@ -32,7 +33,7 @@ export class SyncSettings {
 
   @ManyToOne(() => Price)
   mainPriceRecipe: Price;
-  
+
   @Column({ default: 2, nullable: true })
   mainPriceAmountRecipe: number;
 
@@ -53,6 +54,10 @@ export class SyncSettings {
 
   @Column({ default: false })
   removeNoneOnStock: boolean;
+
+  @ManyToMany(() => Item)
+  @JoinTable()
+  ignoreList: Item[];
 }
 
 export enum RARITY {

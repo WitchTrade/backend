@@ -13,6 +13,7 @@ import { SyncSettingsUpdateDTO } from './dtos/updateSyncSettings.dto';
 import { Market } from '../markets/entities/market.entity';
 import { UserRefreshDTO } from './dtos/refresh.dto';
 import { Price } from 'src/markets/entities/price.entity';
+import { Item } from 'src/items/entities/item.entity';
 
 @Injectable()
 export class UsersService {
@@ -25,6 +26,8 @@ export class UsersService {
     private _marketRepository: Repository<Market>,
     @InjectRepository(Price)
     private _priceRepository: Repository<Price>,
+    @InjectRepository(Item)
+    private _itemRepository: Repository<Item>,
   ) { }
 
   public async register(user: UserRegisterDTO): Promise<UserWithToken> {
@@ -164,7 +167,16 @@ export class UsersService {
   }
 
   public async getSyncSettings(uuid: string): Promise<SyncSettings> {
-    const user = await this._userRepository.findOne(uuid, { relations: ['syncSettings'] });
+    const user = await this._userRepository.findOne(uuid, {
+      relations: [
+        'syncSettings',
+        'syncSettings.mainPriceItem',
+        'syncSettings.secondaryPriceItem',
+        'syncSettings.mainPriceRecipe',
+        'syncSettings.secondaryPriceRecipe',
+        'syncSettings.ignoreList'
+      ]
+    });
     if (!user) {
       throw new HttpException(
         'User not found.',
@@ -276,6 +288,8 @@ export class UsersService {
     syncSettings.keepRecipe = data.keepRecipe;
     syncSettings.ignoreWishlistItems = data.ignoreWishlistItems;
     syncSettings.removeNoneOnStock = data.removeNoneOnStock;
+
+    syncSettings.ignoreList = (await this._itemRepository.findByIds(data.ignoreList.map(i => i.id))).filter(i => i.tradeable);
 
     const updatedSyncSettings = await this._syncSettingsRepository.save(syncSettings);
 

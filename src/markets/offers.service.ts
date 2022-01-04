@@ -366,6 +366,8 @@ export class OffersService {
       );
     }
 
+    let ignoreListItems = (await this._itemRepository.findByIds(data.ignoreList.map(i => i.id))).filter(i => i.tradeable);
+
     if (data.mode === 'both' || data.mode === 'new') {
       const itemsToInsert = user.inventory.inventoryItems.filter(
         ii => {
@@ -373,7 +375,8 @@ export class OffersService {
           return (data.rarity === 31 || rarities.includes(ii.item.tagRarity)) &&
             ii.amount > toKeep &&
             !existingOffers.find(o => o.item.id === ii.item.id) &&
-            (!data.ignoreWishlistItems || !wishes.find(w => w.item.id === ii.item.id)) &&
+            (!data.ignoreWishlistItems || !wishes.some(w => w.item.id === ii.item.id)) &&
+            !ignoreListItems.some(ili => ili.id === ii.item.id) &&
             ii.item.tradeable &&
             ii.item.tagSlot !== 'ingredient';
         });
@@ -430,8 +433,11 @@ export class OffersService {
       const offersToUpdate: Offer[] = [];
       const offersToDelete: Offer[] = [];
       for (const offer of existingOffers) {
-        // don't change items that are in the user's wishlist
-        if (data.ignoreWishlistItems && wishes.find(w => w.item.id === offer.item.id)) {
+        // don't change items that are in the user's wishlist or in the ignoreList
+        if (
+          data.ignoreWishlistItems && wishes.some(w => w.item.id === offer.item.id) ||
+          ignoreListItems.some(ili => ili.id === offer.item.id)
+          ) {
           continue;
         }
         if (user.inventory.inventoryItems.find(ii => ii.item.id === offer.item.id)) {

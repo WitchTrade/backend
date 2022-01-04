@@ -1,4 +1,5 @@
-import { IsBoolean, IsIn, IsNumber, IsObject, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsArray, IsBoolean, IsIn, IsNumber, IsObject, IsOptional, IsString, Max, Min } from 'class-validator';
+import { Item } from 'src/items/entities/item.entity';
 import { Price } from '../entities/price.entity';
 
 export class OfferSyncDTO {
@@ -69,4 +70,7 @@ export class OfferSyncDTO {
 
   @IsBoolean()
   removeNoneOnStock: boolean;
+
+  @IsArray()
+  ignoreList: Item[];
 }

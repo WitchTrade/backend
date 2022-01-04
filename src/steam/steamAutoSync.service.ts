@@ -19,7 +19,7 @@ export class SteamAutoSyncService {
     private _offersService: OffersService,
   ) { }
 
-  @Cron('0 * * * *')
+  @Cron('12 * * * *')
   async automaticInvSync() {
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
@@ -38,6 +38,8 @@ export class SteamAutoSyncService {
       .addSelect('mainPriceRecipe')
       .leftJoin('syncSettings.secondaryPriceRecipe', 'secondaryPriceRecipe')
       .addSelect('secondaryPriceRecipe')
+      .leftJoin('syncSettings.ignoreList', 'ignoreList')
+      .addSelect('ignoreList')
       .where('syncSettings.syncInventory AND user.lastOnline > :oneWeekAgo', { oneWeekAgo })
       .getMany();
 
