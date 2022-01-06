@@ -25,17 +25,18 @@ export class SyncSettingsUpdateDTO {
   @IsObject()
   mainPriceItem: Price;
 
-  @IsOptional()
   @IsNumber()
   @Min(1)
   @Max(99)
   mainPriceAmountItem: number;
 
+  @IsBoolean()
+  wantsBothItem: boolean;
+
   @IsOptional()
   @IsObject()
   secondaryPriceItem: Price;
 
-  @IsOptional()
   @IsNumber()
   @Min(1)
   @Max(99)
@@ -45,17 +46,18 @@ export class SyncSettingsUpdateDTO {
   @IsObject()
   mainPriceRecipe: Price;
 
-  @IsOptional()
   @IsNumber()
   @Min(1)
   @Max(99)
   mainPriceAmountRecipe: number;
 
+  @IsBoolean()
+  wantsBothRecipe: boolean;
+
   @IsOptional()
   @IsObject()
   secondaryPriceRecipe: Price;
 
-  @IsOptional()
   @IsNumber()
   @Min(1)
   @Max(99)

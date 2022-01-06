@@ -408,8 +408,11 @@ export class OffersService {
         }
 
         let secondaryPrice = itemToInsert.item.tagSlot === 'recipe' ?
-          prices.find(p => p.id === data.secondaryPriceRecipe.id) :
-          prices.find(p => p.id === data.secondaryPriceItem.id);
+          prices.find(p => p.id === data.secondaryPriceRecipe?.id) :
+          prices.find(p => p.id === data.secondaryPriceItem?.id);
+        let wantsBoth = itemToInsert.item.tagSlot === 'recipe' ?
+          data.wantsBothRecipe :
+          data.wantsBothItem;
         if (secondaryPrice) {
           if (secondaryPrice.priceKey.startsWith('dynamic')) {
             offer.secondaryPrice = this._resolveDynamicPrice(itemToInsert.item, secondaryPrice, prices);
@@ -419,6 +422,7 @@ export class OffersService {
           if (offer.secondaryPrice && offer.secondaryPrice.withAmount) {
             offer.secondaryPriceAmount = itemToInsert.item.tagSlot === 'recipe' ? data.secondaryPriceAmountRecipe : data.secondaryPriceAmountItem;
           }
+          offer.wantsBoth = wantsBoth;
         }
 
         offer.item = itemToInsert.item;

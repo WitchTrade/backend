@@ -19,7 +19,7 @@ export class SteamAutoSyncService {
     private _offersService: OffersService,
   ) { }
 
-  @Cron('12 * * * *')
+  @Cron('0 * * * *')
   async automaticInvSync() {
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);

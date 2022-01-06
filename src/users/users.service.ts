@@ -236,8 +236,6 @@ export class UsersService {
         );
       }
       syncSettings.mainPriceAmountItem = data.mainPriceAmountItem;
-    } else {
-      syncSettings.mainPriceAmountItem = null;
     }
 
 
@@ -251,9 +249,10 @@ export class UsersService {
           );
         }
         syncSettings.secondaryPriceAmountItem = data.secondaryPriceAmountItem;
-      } else {
-        syncSettings.secondaryPriceAmountItem = null;
       }
+      syncSettings.wantsBothItem = data.wantsBothItem;
+    } else {
+      syncSettings.secondaryPriceItem = null;
     }
 
     syncSettings.mainPriceRecipe = prices.find(p => p.id === data.mainPriceRecipe.id);
@@ -265,8 +264,6 @@ export class UsersService {
         );
       }
       syncSettings.mainPriceAmountRecipe = data.mainPriceAmountRecipe;
-    } else {
-      syncSettings.mainPriceAmountRecipe = null;
     }
 
     if (data.secondaryPriceRecipe) {
@@ -279,9 +276,10 @@ export class UsersService {
           );
         }
         syncSettings.secondaryPriceAmountRecipe = data.secondaryPriceAmountRecipe;
-      } else {
-        syncSettings.secondaryPriceAmountRecipe = null;
       }
+      syncSettings.wantsBothRecipe = data.wantsBothRecipe;
+    } else {
+      syncSettings.secondaryPriceRecipe = null;
     }
 
     syncSettings.keepItem = data.keepItem;

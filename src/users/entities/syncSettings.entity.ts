@@ -22,25 +22,31 @@ export class SyncSettings {
   @ManyToOne(() => Price)
   mainPriceItem: Price;
 
-  @Column({ default: 4, nullable: true })
+  @Column({ default: 4 })
   mainPriceAmountItem: number;
+
+  @Column({ default: true })
+  wantsBothItem: boolean;
 
   @ManyToOne(() => Price)
   secondaryPriceItem: Price;
 
-  @Column({ nullable: true })
+  @Column({ default: 1 })
   secondaryPriceAmountItem: number;
 
   @ManyToOne(() => Price)
   mainPriceRecipe: Price;
 
-  @Column({ default: 2, nullable: true })
+  @Column({ default: 2 })
   mainPriceAmountRecipe: number;
+
+  @Column({ default: true })
+  wantsBothRecipe: boolean;
 
   @ManyToOne(() => Price)
   secondaryPriceRecipe: Price;
 
-  @Column({ nullable: true })
+  @Column({ default: 1 })
   secondaryPriceAmountRecipe: number;
 
   @Column({ default: 1 })

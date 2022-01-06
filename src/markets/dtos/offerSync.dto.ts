@@ -26,6 +26,10 @@ export class OfferSyncDTO {
   mainPriceAmountItem: number;
 
   @IsOptional()
+  @IsBoolean()
+  wantsBothItem: boolean;
+
+  @IsOptional()
   @IsObject()
   secondaryPriceItem: Price;
 
@@ -48,6 +52,10 @@ export class OfferSyncDTO {
   @IsOptional()
   @IsObject()
   secondaryPriceRecipe: Price;
+
+  @IsOptional()
+  @IsBoolean()
+  wantsBothRecipe: boolean;
 
   @IsOptional()
   @IsNumber()
