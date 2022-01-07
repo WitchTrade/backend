@@ -19,4 +19,10 @@ export class Price {
 
   @Column()
   forWishes: boolean;
+
+  @Column()
+  forSync: boolean;
+
+  @Column()
+  canBeMain: boolean;
 }

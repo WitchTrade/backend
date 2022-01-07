@@ -1,4 +1,6 @@
-import { IsBoolean, IsIn, IsNumber, IsString, Max, Min } from 'class-validator';
+import { IsArray, IsBoolean, IsIn, IsNumber, IsObject, IsOptional, IsString, Max, Min } from 'class-validator';
+import { Item } from 'src/items/entities/item.entity';
+import { Price } from '../entities/price.entity';
 
 export class OfferSyncDTO {
   @IsString()
@@ -7,36 +9,76 @@ export class OfferSyncDTO {
     'new',
     'existing'
   ])
-  ms_mode: string;
+  mode: string;
 
   @IsNumber()
   @Min(1)
   @Max(31)
-  ms_rarity: number;
+  rarity: number;
 
+  @IsObject()
+  mainPriceItem: Price;
+
+  @IsOptional()
   @IsNumber()
   @Min(1)
   @Max(99)
-  ms_defaultPriceItem: number;
+  mainPriceAmountItem: number;
 
+  @IsOptional()
+  @IsBoolean()
+  wantsBothItem: boolean;
+
+  @IsOptional()
+  @IsObject()
+  secondaryPriceItem: Price;
+
+  @IsOptional()
   @IsNumber()
   @Min(1)
   @Max(99)
-  ms_defaultPriceRecipe: number;
+  secondaryPriceAmountItem: number;
+
+  @IsOptional()
+  @IsObject()
+  mainPriceRecipe: Price;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Max(99)
+  mainPriceAmountRecipe: number;
+
+  @IsOptional()
+  @IsObject()
+  secondaryPriceRecipe: Price;
+
+  @IsOptional()
+  @IsBoolean()
+  wantsBothRecipe: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Max(99)
+  secondaryPriceAmountRecipe: number;
 
   @IsNumber()
   @Min(0)
   @Max(99)
-  ms_keepItem: number;
+  keepItem: number;
 
   @IsNumber()
   @Min(0)
   @Max(99)
-  ms_keepRecipe: number;
+  keepRecipe: number;
 
   @IsBoolean()
-  ms_ignoreWishlistItems: boolean;
+  ignoreWishlistItems: boolean;
 
   @IsBoolean()
-  ms_removeNoneOnStock: boolean;
+  removeNoneOnStock: boolean;
+
+  @IsArray()
+  ignoreList: Item[];
 }

@@ -1,4 +1,6 @@
-import { IsBoolean, IsIn, IsNumber, IsString, Max, Min } from 'class-validator';
+import { IsArray, IsBoolean, IsIn, IsNumber, IsObject, IsOptional, IsString, Max, Min } from 'class-validator';
+import { Item } from 'src/items/entities/item.entity';
+import { Price } from 'src/markets/entities/price.entity';
 
 export class SyncSettingsUpdateDTO {
   @IsBoolean()
@@ -13,36 +15,70 @@ export class SyncSettingsUpdateDTO {
     'new',
     'existing'
   ])
-  ms_mode: string;
+  mode: string;
 
   @IsNumber()
   @Min(1)
   @Max(31)
-  ms_rarity: number;
+  rarity: number;
+
+  @IsObject()
+  mainPriceItem: Price;
 
   @IsNumber()
   @Min(1)
   @Max(99)
-  ms_defaultPriceItem: number;
+  mainPriceAmountItem: number;
+
+  @IsBoolean()
+  wantsBothItem: boolean;
+
+  @IsOptional()
+  @IsObject()
+  secondaryPriceItem: Price;
 
   @IsNumber()
   @Min(1)
   @Max(99)
-  ms_defaultPriceRecipe: number;
+  secondaryPriceAmountItem: number;
+
+  @IsOptional()
+  @IsObject()
+  mainPriceRecipe: Price;
+
+  @IsNumber()
+  @Min(1)
+  @Max(99)
+  mainPriceAmountRecipe: number;
+
+  @IsBoolean()
+  wantsBothRecipe: boolean;
+
+  @IsOptional()
+  @IsObject()
+  secondaryPriceRecipe: Price;
+
+  @IsNumber()
+  @Min(1)
+  @Max(99)
+  secondaryPriceAmountRecipe: number;
 
   @IsNumber()
   @Min(0)
   @Max(99)
-  ms_keepItem: number;
+  keepItem: number;
 
   @IsNumber()
   @Min(0)
   @Max(99)
-  ms_keepRecipe: number;
+  keepRecipe: number;
 
   @IsBoolean()
-  ms_ignoreWishlistItems: boolean;
-  
+  ignoreWishlistItems: boolean;
+
   @IsBoolean()
-  ms_removeNoneOnStock: boolean;
+  removeNoneOnStock: boolean;
+
+  @IsArray()
+  ignoreList: Item[];
 }

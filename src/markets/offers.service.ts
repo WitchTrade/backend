@@ -326,32 +326,57 @@ export class OffersService {
       );
     }
 
-    const response = { newOffers: 0, updatedOffers: 0, deletedOffers: 0 };
+    const response = { newOffers: [], newOffersCount: 0, updatedOffersCount: 0, deletedOffersCount: 0 };
     const changedOffers: Offer[] = [];
     const deletedOffers: Offer[] = [];
 
     let existingOffers = await this._offerRepository.find({ where: { market: user.market }, relations: ['market', 'item'] });
     let rarities: string[] = [];
-    if (data.ms_rarity !== 31) {
-      rarities = this._getRarityStrings(data.ms_rarity);
+    if (data.rarity !== 31) {
+      rarities = this._getRarityStrings(data.rarity);
       existingOffers = existingOffers.filter(eo => rarities.includes(eo.item.tagRarity));
     }
 
     let wishes: Wish[];
-    if (data.ms_ignoreWishlistItems) {
+    if (data.ignoreWishlistItems) {
       wishes = await this._wishRepository.find({ where: { market: user.market }, relations: ['market', 'item'] });
     }
 
     let prices = await this._priceRepository.find();
 
-    if (data.ms_mode === 'both' || data.ms_mode === 'new') {
+    if (
+      !prices.some(p => p.id === data.mainPriceItem.id) ||
+      (data.secondaryPriceItem && !prices.some(p => p.id === data.secondaryPriceItem.id)) ||
+      !prices.some(p => p.id === data.mainPriceRecipe.id) ||
+      (data.secondaryPriceRecipe && !prices.some(p => p.id === data.secondaryPriceRecipe.id))
+    ) {
+      throw new HttpException(
+        'Some prices were not found in the database',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    if (
+      !prices.find(p => p.id === data.mainPriceItem.id).canBeMain ||
+      !prices.find(p => p.id === data.mainPriceRecipe.id).canBeMain
+    ) {
+      throw new HttpException(
+        'Some prices which cannot be the main price are configured as the main price.',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    let ignoreListItems = (await this._itemRepository.findByIds(data.ignoreList.map(i => i.id))).filter(i => i.tradeable);
+
+    if (data.mode === 'both' || data.mode === 'new') {
       const itemsToInsert = user.inventory.inventoryItems.filter(
         ii => {
-          const toKeep = ii.item.tagSlot === 'recipe' ? data.ms_keepRecipe : data.ms_keepItem;
-          return (data.ms_rarity === 31 || rarities.includes(ii.item.tagRarity)) &&
+          const toKeep = ii.item.tagSlot === 'recipe' ? data.keepRecipe : data.keepItem;
+          return (data.rarity === 31 || rarities.includes(ii.item.tagRarity)) &&
             ii.amount > toKeep &&
             !existingOffers.find(o => o.item.id === ii.item.id) &&
-            (!data.ms_ignoreWishlistItems || !wishes.find(w => w.item.id === ii.item.id)) &&
+            (!data.ignoreWishlistItems || !wishes.some(w => w.item.id === ii.item.id)) &&
+            !ignoreListItems.some(ili => ili.id === ii.item.id) &&
             ii.item.tradeable &&
             ii.item.tagSlot !== 'ingredient';
         });
@@ -364,52 +389,85 @@ export class OffersService {
 
         let inStock: number;
         if (itemToInsert.item.tagSlot === 'recipe') {
-          inStock = itemToInsert.amount - data.ms_keepRecipe >= 0 ? itemToInsert.amount - data.ms_keepRecipe : 0;
+          inStock = itemToInsert.amount - data.keepRecipe >= 0 ? itemToInsert.amount - data.keepRecipe : 0;
         } else {
-          inStock = itemToInsert.amount - data.ms_keepItem >= 0 ? itemToInsert.amount - data.ms_keepItem : 0;
+          inStock = itemToInsert.amount - data.keepItem >= 0 ? itemToInsert.amount - data.keepItem : 0;
         }
         offer.quantity = inStock;
-        offer.mainPrice = prices.find(p => p.priceKey === itemToInsert.item.tagRarity);
-        offer.mainPriceAmount = itemToInsert.item.tagSlot === 'recipe' ? data.ms_defaultPriceRecipe : data.ms_defaultPriceItem;
+
+        let mainPrice = itemToInsert.item.tagSlot === 'recipe' ?
+          prices.find(p => p.id === data.mainPriceRecipe.id) :
+          prices.find(p => p.id === data.mainPriceItem.id);
+        if (mainPrice.priceKey.startsWith('dynamic')) {
+          offer.mainPrice = this._resolveDynamicPrice(itemToInsert.item, mainPrice, prices);
+        } else {
+          offer.mainPrice = mainPrice;
+        }
+        if (offer.mainPrice.withAmount) {
+          offer.mainPriceAmount = itemToInsert.item.tagSlot === 'recipe' ? data.mainPriceAmountRecipe : data.mainPriceAmountItem;
+        }
+
+        let secondaryPrice = itemToInsert.item.tagSlot === 'recipe' ?
+          prices.find(p => p.id === data.secondaryPriceRecipe?.id) :
+          prices.find(p => p.id === data.secondaryPriceItem?.id);
+        let wantsBoth = itemToInsert.item.tagSlot === 'recipe' ?
+          data.wantsBothRecipe :
+          data.wantsBothItem;
+        if (secondaryPrice) {
+          if (secondaryPrice.priceKey.startsWith('dynamic')) {
+            offer.secondaryPrice = this._resolveDynamicPrice(itemToInsert.item, secondaryPrice, prices);
+          } else {
+            offer.secondaryPrice = secondaryPrice;
+          }
+          if (offer.secondaryPrice && offer.secondaryPrice.withAmount) {
+            offer.secondaryPriceAmount = itemToInsert.item.tagSlot === 'recipe' ? data.secondaryPriceAmountRecipe : data.secondaryPriceAmountItem;
+          }
+          offer.wantsBoth = wantsBoth;
+        }
+
         offer.item = itemToInsert.item;
         offers.push(offer);
       }
-      await this._offerRepository.save(offers);
-      response.newOffers = offers.length;
+      const insertedNewOffers = await this._offerRepository.save(offers);
+      response.newOffersCount = offers.length;
+      response.newOffers = insertedNewOffers.map(ino => ino.id);
       changedOffers.push(...offers);
     }
-    if (data.ms_mode === 'both' || data.ms_mode === 'existing') {
+    if (data.mode === 'both' || data.mode === 'existing') {
       const offersToUpdate: Offer[] = [];
       const offersToDelete: Offer[] = [];
       for (const offer of existingOffers) {
-        // don't change items that are in the user's wishlist
-        if (data.ms_ignoreWishlistItems && wishes.find(w => w.item.id === offer.item.id)) {
+        // don't change items that are in the user's wishlist or in the ignoreList
+        if (
+          data.ignoreWishlistItems && wishes.some(w => w.item.id === offer.item.id) ||
+          ignoreListItems.some(ili => ili.id === offer.item.id)
+          ) {
           continue;
         }
         if (user.inventory.inventoryItems.find(ii => ii.item.id === offer.item.id)) {
-          const toKeep = user.inventory.inventoryItems.find(ii => ii.item.id === offer.item.id).item.tagSlot === 'recipe' ? data.ms_keepRecipe : data.ms_keepItem;
+          const toKeep = user.inventory.inventoryItems.find(ii => ii.item.id === offer.item.id).item.tagSlot === 'recipe' ? data.keepRecipe : data.keepItem;
           const inStock = user.inventory.inventoryItems.find(ii => ii.item.id === offer.item.id).amount - toKeep >= 0 ? user.inventory.inventoryItems.find(ii => ii.item.id === offer.item.id).amount - toKeep : 0;
-          if (offer.quantity !== inStock && (!data.ms_removeNoneOnStock || inStock !== 0)) {
+          if (offer.quantity !== inStock && (!data.removeNoneOnStock || inStock !== 0)) {
             offer.quantity = inStock;
             offersToUpdate.push(offer);
           }
-          if (data.ms_removeNoneOnStock && inStock === 0) {
+          if (data.removeNoneOnStock && inStock === 0) {
             offersToDelete.push(offer);
           }
         } else {
-          if (offer.quantity !== 0 && !data.ms_removeNoneOnStock) {
+          if (offer.quantity !== 0 && !data.removeNoneOnStock) {
             offer.quantity = 0;
             offersToUpdate.push(offer);
           }
-          if (data.ms_removeNoneOnStock) {
+          if (data.removeNoneOnStock) {
             offersToDelete.push(offer);
           }
         }
       }
       await this._offerRepository.save(offersToUpdate);
       await this._offerRepository.remove(offersToDelete);
-      response.updatedOffers = offersToUpdate.length;
-      response.deletedOffers = offersToDelete.length;
+      response.updatedOffersCount = offersToUpdate.length;
+      response.deletedOffersCount = offersToDelete.length;
       changedOffers.push(...offersToUpdate);
       deletedOffers.push(...offersToDelete);
     }
@@ -421,6 +479,51 @@ export class OffersService {
     this._setLastUpdated(user.market);
 
     return response;
+  }
+
+  private _resolveDynamicPrice(item: Item, dynamicPrice: Price, prices: Price[]): Price {
+    switch (dynamicPrice.priceKey) {
+      case 'dynamicRarity':
+        return prices.find(p => p.priceKey === item.tagRarity);
+      case 'dynamicCharacter':
+        switch (item.tagCharacter) {
+          case 'hunter':
+            return prices.find(p => p.priceKey === 'rusty_nails');
+          case 'witch':
+            return prices.find(p => p.priceKey === 'odd_mushroom');
+          default:
+            return null;
+        }
+      case 'dynamicEvent':
+        switch (item.tagEvent) {
+          case 'summerevent':
+            return prices.find(p => p.priceKey === 'shell');
+          case 'halloween':
+          case 'halloween2018':
+          case 'halloween2019':
+          case 'halloween2020':
+            return prices.find(p => p.priceKey === 'ectoplasm');
+          case 'theater':
+            return prices.find(p => p.priceKey === 'red_string');
+          case 'plunderparty':
+            return prices.find(p => p.priceKey === 'coin');
+          case 'winterdream':
+          case 'winterdream witch':
+          case 'winterdream2018':
+          case 'winterdream2019':
+          case 'winterdream2020':
+          case 'winterdream2021':
+            return prices.find(p => p.priceKey === 'candy_cane');
+          case 'witchforest':
+            return prices.find(p => p.priceKey === 'morgaryll_flower');
+          case 'mystic sands':
+            return prices.find(p => p.priceKey === 'scarab');
+          default:
+            return null;
+        }
+      default:
+        return null;
+    }
   }
 
   private async _checkNotificationFor(offers: Offer[], user: User) {
