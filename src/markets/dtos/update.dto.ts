@@ -4,13 +4,13 @@ import { CustomLineValidator } from './CustomLineValidator';
 export class MarketUpdateDTO {
   @IsOptional()
   @IsString()
-  @MaxLength(300)
+  @MaxLength(250)
   @Validate(CustomLineValidator)
   offerlistNote: string;
 
   @IsOptional()
   @IsString()
-  @MaxLength(300)
+  @MaxLength(250)
   @Validate(CustomLineValidator)
   wishlistNote: string;
 }
