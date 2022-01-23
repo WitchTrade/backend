@@ -8,10 +8,10 @@ export class Market {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, length: 300 })
   offerlistNote: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, length: 300 })
   wishlistNote: string;
 
   @Column()

@@ -498,14 +498,15 @@ export class AdminService {
 
     const log = await this._adminLogRepository.find({ relations: ['user', 'targetUser'] });
 
-    const modifiedLog = log.map((log: any) => {
-      log.username = log.user.username;
-      log.targetUsername = log.targetUser.username;
+    const modifiedLog = log.map((log) => {
+      const modifiedLog: any = log;
+      modifiedLog.username = log.user.username;
+      modifiedLog.targetUsername = log.targetUser.username;
 
-      delete log.user;
-      delete log.targetUser;
+      delete modifiedLog.user;
+      delete modifiedLog.targetUser;
 
-      return log;
+      return modifiedLog;
     });
 
     return modifiedLog;
@@ -514,7 +515,7 @@ export class AdminService {
   public async sendNotification(uuid: string, data: AdminNotificationDTO) {
     const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
 
-    if (!this._hasPermission(requestingUser.roles, PERMISSION.ADMIN)) {
+    if (!this._hasPermission(requestingUser.roles, PERMISSION.VERIFY)) {
       throw new HttpException(
         'Permission denied.',
         HttpStatus.FORBIDDEN
