@@ -167,10 +167,11 @@ export class SearchService {
     }
 
     if (data.event !== 'any') {
+      const noneEvent = data.event === 'none';
       query.andWhere(this._whereString(
         'tagEvent',
-        '=',
-        [':event']
+        noneEvent ? 'IS' : '=',
+        [noneEvent ? 'NULL' : ':event']
       ), { event: data.event });
     }
 
