@@ -9,6 +9,7 @@ import { AbstractItem } from './models/abstractItem.model';
 import { SteamItemAsset } from './models/steamItemAsset.model';
 import { SteamItemDescription } from './models/steamItemDescription.model';
 import { SteamFetcherService } from './steamFetcher.service';
+import { Badge } from 'src/users/entities/badge.entity';
 
 @Injectable()
 export class SteamService {
@@ -24,11 +25,13 @@ export class SteamService {
     private _inventoryRepository: Repository<Inventory>,
     @InjectRepository(InventoryItem)
     private _inventoryItemRepository: Repository<InventoryItem>,
+    @InjectRepository(Badge)
+    private _badgeRepository: Repository<Badge>,
     private _steamFetcherService: SteamFetcherService
   ) { }
 
   public async syncInventory(uuid: string, autoSync?: boolean, failed?: any) {
-    const user = await this._userRepository.findOne(uuid, { relations: ['inventory'] });
+    const user = await this._userRepository.findOne(uuid, { relations: ['inventory', 'badges'] });
     if (!user) {
       if (autoSync) {
         failed(true);
@@ -92,6 +95,10 @@ export class SteamService {
     }
 
     await this._updateInventory(user.inventory, newInventoryItems);
+
+    if (user.verifiedSteamProfileLink) {
+      this._checkForCompleteCollection(user);
+    }
 
     return this._inventoryRepository.findOne(user.inventory.id, { relations: ['inventoryItems', 'inventoryItems.item'] });
   }
@@ -169,6 +176,46 @@ export class SteamService {
     if (abstractItem.name === 'Legs of the  Minty Gingerbreadman') {
       abstractItem.name = 'Legs of the Minty Gingerbreadman';
     }
+  }
+
+  private async _checkForCompleteCollection(user: User) {
+    const missingItemCount = (await this._itemRepository.query(
+      `SELECT i.id FROM item as i ` +
+      `where NOT EXISTS (SELECT ii.itemId FROM inventory_item as ii where ii.inventoryId = ${user.inventory.id} ` +
+      `AND ii.itemId = i.id) ` +
+      `AND i.tagSlot != 'ingredient' ` +
+      `AND i.tagSlot != 'recipe' ` +
+      `AND i.tradeable = 1;`
+    )).length;
+    const totalItemCount = await this._itemRepository.createQueryBuilder('i')
+      .where('i.tagSlot != \'ingredient\'')
+      .andWhere('i.tagSlot != \'recipe\'')
+      .andWhere('i.tradeable = 1')
+      .getCount();
+
+    const steps = [100, 75, 50, 25];
+
+    const ownedPercent = (totalItemCount - missingItemCount) / totalItemCount * 100;
+
+    const step = steps.find(s => s <= ownedPercent);
+
+    const completionistBadgeId = `completionist${step}`;
+
+    // User already has the desired completionist badge
+    if (user.badges.some(b => b.id === completionistBadgeId)) {
+      return;
+    }
+
+    const completionistBadge = await this._badgeRepository.findOne(completionistBadgeId);
+    if (!completionistBadge) {
+      console.error(`Completionist badge "${completionistBadgeId}" not found.`);
+      return;
+    }
+
+    user.badges = user.badges.filter(b => !b.id.startsWith('completionist'));
+
+    user.badges.push(completionistBadge);
+    this._userRepository.save(user);
   }
 
   public async getFriends(uuid: string) {

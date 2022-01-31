@@ -12,10 +12,11 @@ import { SteamService } from './steam.service';
 import { SteamAutoSyncService } from './steamAutoSync.service';
 import { SteamFetcherService } from './steamFetcher.service';
 import { SteamAuthService } from './steamAuth.service';
+import { Badge } from 'src/users/entities/badge.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Item, Inventory, InventoryItem, SyncSettings]),
+    TypeOrmModule.forFeature([User, Item, Inventory, InventoryItem, SyncSettings, Badge]),
     HttpModule,
     MarketsModule
   ],
