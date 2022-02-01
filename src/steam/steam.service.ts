@@ -199,6 +199,10 @@ export class SteamService {
 
     const step = steps.find(s => s <= ownedPercent);
 
+    if (!step) {
+      return;
+    }
+
     const completionistBadgeId = `completionist${step}`;
 
     // User already has the desired completionist badge
