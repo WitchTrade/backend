@@ -28,6 +28,9 @@ import { Price } from './markets/entities/price.entity';
 import { SearchModule } from './search/search.module';
 import { StatsModule } from './stats/stats.module';
 import { Stats } from './stats/entities/stats.entity';
+import { QuestsModule } from './quests/quests.module';
+import { UserQuest } from './quests/entities/userQuest.entity';
+import { Quest } from './quests/entities/quest.entity';
 
 @Module({
   imports: [
@@ -53,6 +56,8 @@ import { Stats } from './stats/entities/stats.entity';
         Offer,
         Wish,
         Price,
+        UserQuest,
+        Quest,
       ],
       charset: 'utf8mb4_general_ci',
       synchronize: true,
@@ -80,6 +85,7 @@ import { Stats } from './stats/entities/stats.entity';
     MarketsModule,
     SearchModule,
     StatsModule,
+    QuestsModule,
   ],
   controllers: [],
   providers: [],
