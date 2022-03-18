@@ -95,6 +95,10 @@ export class QuestsService {
       quest.completed = resQuest.isCompleted;
       quest.type = resQuest.type.toLowerCase() as 'daily' | 'weekly';
       quest.rewardItem = await this._itemRepository.findOne(parseInt(resQuest.rewardVal.split('x')[0]));
+      if (!quest.rewardItem) {
+        console.error(`Item for quest not found. questId: ${resQuest.questId}, rewardVal: ${resQuest.rewardVal}`);
+        continue;
+      }
       quest.rewardAmount = parseInt(resQuest.rewardVal.split('x')[1]);
       quest.progress = parseInt(resQuest.objective1Val);
       quest.maxProgress = parseInt(resQuest.objective1Max);
