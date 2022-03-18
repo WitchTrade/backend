@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, BeforeInsert, CreateDateColumn, JoinTable, ManyToMany, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, BeforeInsert, CreateDateColumn, JoinTable, ManyToMany, OneToOne, JoinColumn, OneToMany } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 
@@ -7,6 +7,7 @@ import { Badge } from './badge.entity';
 import { SyncSettings } from './syncSettings.entity';
 import { Inventory } from '../../inventory/entities/inventory.entity';
 import { Market } from '../../markets/entities/market.entity';
+import { UserQuest } from 'src/quests/entities/userQuest.entity';
 
 @Entity()
 export class User {
@@ -80,6 +81,12 @@ export class User {
   @ManyToMany(() => Badge)
   @JoinTable()
   badges: Badge[];
+
+  @Column()
+  questsCachedAt: Date;
+
+  @OneToMany(() => UserQuest, userQuest => userQuest.user)
+  quests: UserQuest[];
 
   @BeforeInsert()
   public async hashPassword(): Promise<void> {
