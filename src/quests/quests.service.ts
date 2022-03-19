@@ -40,7 +40,7 @@ export class QuestsService {
 
     if (user.questsCachedAt && this._cacheIsValid(user.questsCachedAt)) {
       const cachedQuests = await this._userQuestRepository.find({ where: { user: { id: uuid } }, relations: ['quest', 'rewardItem'] });
-      return cachedQuests;
+      return { quests: cachedQuests, cachedAt: user.questsCachedAt };
     }
 
     const steamUrlIdRegex = user.steamProfileLink.match(/^https:\/\/steamcommunity\.com\/profiles\/([^/]+).*$/);
@@ -59,7 +59,8 @@ export class QuestsService {
 
     await this._saveQuests(questResponse.quests, user);
 
-    return await this._userQuestRepository.find({ where: { user: { id: uuid } }, relations: ['quest', 'rewardItem'] });
+    const quests = await this._userQuestRepository.find({ where: { user: { id: uuid } }, relations: ['quest', 'rewardItem'] })
+    return { quests, cachedAt: user.questsCachedAt };
   }
 
   private _cacheIsValid(cachedAt: Date) {
