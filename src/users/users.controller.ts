@@ -1,4 +1,13 @@
-import { Body, Controller, Get, HttpCode, Param, Post, Put, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { UserDecorator } from './decorators/user.decorator';
 import { UserChangePasswordDTO } from './dtos/changePassword.dto';
@@ -14,7 +23,7 @@ import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {
-  constructor(private _usersService: UsersService) { }
+  constructor(private _usersService: UsersService) {}
 
   @Post('register')
   public register(@Body() user: UserRegisterDTO): Promise<UserWithToken> {
@@ -41,30 +50,43 @@ export class UsersController {
 
   @UseGuards(AuthGuard)
   @Get('syncsettings')
-  public getSyncSettings(@UserDecorator('id') uuid: string): Promise<SyncSettings> {
+  public getSyncSettings(
+    @UserDecorator('id') uuid: string,
+  ): Promise<SyncSettings> {
     return this._usersService.getSyncSettings(uuid);
   }
 
   @UseGuards(AuthGuard)
   @Put('syncsettings')
-  public updateSyncSettings(@UserDecorator('id') uuid: string, @Body() data: SyncSettingsUpdateDTO): Promise<SyncSettings> {
+  public updateSyncSettings(
+    @UserDecorator('id') uuid: string,
+    @Body() data: SyncSettingsUpdateDTO,
+  ): Promise<SyncSettings> {
     return this._usersService.updateSyncSettings(data, uuid);
   }
 
   @UseGuards(AuthGuard)
   @Put('')
-  public updateUser(@UserDecorator('id') uuid: string, @Body() data: UserUpdateDTO): Promise<UserWithToken> {
+  public updateUser(
+    @UserDecorator('id') uuid: string,
+    @Body() data: UserUpdateDTO,
+  ): Promise<UserWithToken> {
     return this._usersService.updateUser(data, uuid);
   }
 
   @UseGuards(AuthGuard)
   @Put('password')
-  public changePassword(@Body() data: UserChangePasswordDTO, @UserDecorator('id') uuid: string): Promise<UserWithToken> {
+  public changePassword(
+    @Body() data: UserChangePasswordDTO,
+    @UserDecorator('id') uuid: string,
+  ): Promise<UserWithToken> {
     return this._usersService.changePassword(data, uuid);
   }
 
   @Get('get/:username')
-  public getPublicUser(@Param('username') username: string): Promise<PublicUser> {
+  public getPublicUser(
+    @Param('username') username: string,
+  ): Promise<PublicUser> {
     return this._usersService.getPublicUser(username);
   }
 }

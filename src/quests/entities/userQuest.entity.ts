@@ -5,30 +5,30 @@ import { Quest } from './quest.entity';
 
 @Entity()
 export class UserQuest {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @ManyToOne(() => User, user => user.quests)
-    user: User;
+  @ManyToOne(() => User, (user) => user.quests)
+  user: User;
 
-    @ManyToOne(() => Quest)
-    quest: Quest;
+  @ManyToOne(() => Quest)
+  quest: Quest;
 
-    @Column()
-    completed: boolean;
+  @Column()
+  completed: boolean;
 
-    @Column()
-    type: 'daily' | 'weekly';
+  @Column()
+  type: 'daily' | 'weekly';
 
-    @ManyToOne(() => Item)
-    rewardItem: Item;
+  @ManyToOne(() => Item)
+  rewardItem: Item;
 
-    @Column()
-    rewardAmount: number;
+  @Column()
+  rewardAmount: number;
 
-    @Column()
-    progress: number;
+  @Column()
+  progress: number;
 
-    @Column()
-    maxProgress: number;
+  @Column()
+  maxProgress: number;
 }

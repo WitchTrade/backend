@@ -10,13 +10,12 @@ import { SteamFetcherService } from './steamFetcher.service';
 
 @Injectable()
 export class SteamAuthService {
-
   private _steamAuth: SteamAuth;
 
   constructor(
     @InjectRepository(User)
     private _userRepository: Repository<User>,
-    private _steamFetcherService: SteamFetcherService
+    private _steamFetcherService: SteamFetcherService,
   ) {
     this._steamAuth = new SteamAuth();
   }
@@ -25,10 +24,7 @@ export class SteamAuthService {
     const user = await this._userRepository.findOne(uuid);
 
     if (!user) {
-      throw new HttpException(
-        'User not found.',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
 
     if (user.verifiedSteamProfileLink) {
@@ -60,16 +56,17 @@ export class SteamAuthService {
       );
     }
 
-    const user = await this._userRepository.findOne(uuid, { relations: ['roles', 'badges'] });
+    const user = await this._userRepository.findOne(uuid, {
+      relations: ['roles', 'badges'],
+    });
 
     if (!user) {
-      throw new HttpException(
-        'User not found.',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
 
-    const steamIdFromUser = await this._steamFetcherService.getSteamProfileId(user.steamProfileLink);
+    const steamIdFromUser = await this._steamFetcherService.getSteamProfileId(
+      user.steamProfileLink,
+    );
 
     if (steamId !== steamIdFromUser) {
       throw new HttpException(
@@ -88,5 +85,4 @@ export class SteamAuthService {
 
     return updatedUser.tokenResponse();
   }
-
 }

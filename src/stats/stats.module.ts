@@ -12,6 +12,6 @@ import { StatsService } from './stats.service';
     TypeOrmModule.forFeature([Stats], 'wistats'),
   ],
   controllers: [StatsController],
-  providers: [StatsService]
+  providers: [StatsService],
 })
-export class StatsModule { }
+export class StatsModule {}

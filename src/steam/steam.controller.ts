@@ -9,8 +9,8 @@ import { SteamAuthService } from './steamAuth.service';
 export class SteamController {
   constructor(
     private _steamService: SteamService,
-    private _steamAuthService: SteamAuthService
-  ) { }
+    private _steamAuthService: SteamAuthService,
+  ) {}
 
   @UseGuards(AuthGuard)
   @Patch('inventory')

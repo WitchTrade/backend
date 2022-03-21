@@ -9,8 +9,10 @@ import { AdminLog } from './entities/adminlog.entity';
 import { Notification } from '../notifications/entities/notification.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Badge, Role, AdminLog, Notification])],
+  imports: [
+    TypeOrmModule.forFeature([User, Badge, Role, AdminLog, Notification]),
+  ],
   controllers: [AdminController],
-  providers: [AdminService]
+  providers: [AdminService],
 })
-export class AdminModule { }
+export class AdminModule {}

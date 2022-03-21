@@ -1,4 +1,15 @@
-import { Entity, Column, PrimaryGeneratedColumn, BeforeInsert, CreateDateColumn, JoinTable, ManyToMany, OneToOne, JoinColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  BeforeInsert,
+  CreateDateColumn,
+  JoinTable,
+  ManyToMany,
+  OneToOne,
+  JoinColumn,
+  OneToMany,
+} from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 
@@ -66,7 +77,7 @@ export class User {
   @JoinColumn()
   inventory: Inventory;
 
-  @OneToOne(() => Market, market => market.user)
+  @OneToOne(() => Market, (market) => market.user)
   @JoinColumn()
   market: Market;
 
@@ -85,7 +96,7 @@ export class User {
   @Column()
   questsCachedAt: Date;
 
-  @OneToMany(() => UserQuest, userQuest => userQuest.user)
+  @OneToMany(() => UserQuest, (userQuest) => userQuest.user)
   quests: UserQuest[];
 
   @BeforeInsert()
@@ -111,22 +122,30 @@ export class User {
       verified: this.verified,
       hidden: this.hidden,
       roles: this.roles,
-      badges: this.badges
+      badges: this.badges,
     };
   }
 
   public tokenResponse(): UserWithToken {
-    const user = { ...this, token: this._generateToken(false), refreshToken: this._generateToken(true) };
+    const user = {
+      ...this,
+      token: this._generateToken(false),
+      refreshToken: this._generateToken(true),
+    };
     delete user.password;
     return user;
   }
 
   private _generateToken(refresh: boolean) {
     const { id, username } = this;
-    return jwt.sign({
-      id, username
-    }, refresh ? process.env.REFRESHSECRET + this.password : process.env.SECRET,
-      { expiresIn: refresh ? '7d' : '5m' });
+    return jwt.sign(
+      {
+        id,
+        username,
+      },
+      refresh ? process.env.REFRESHSECRET + this.password : process.env.SECRET,
+      { expiresIn: refresh ? '7d' : '5m' },
+    );
   }
 }
 
@@ -175,6 +194,6 @@ export function createAdminUser(user: Partial<User>): AdminUser {
     roles: user.roles ? user.roles : [],
     badges: user.badges ? user.badges : [],
     created: user.created ? user.created : null,
-    lastOnline: user.lastOnline ? user.lastOnline : null
+    lastOnline: user.lastOnline ? user.lastOnline : null,
   };
 }

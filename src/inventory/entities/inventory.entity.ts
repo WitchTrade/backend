@@ -13,6 +13,6 @@ export class Inventory {
   @Column({ default: false })
   showInTrading: boolean;
 
-  @OneToMany(() => InventoryItem, inventoryItem => inventoryItem.inventory)
+  @OneToMany(() => InventoryItem, (inventoryItem) => inventoryItem.inventory)
   inventoryItems: InventoryItem[];
 }

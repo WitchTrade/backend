@@ -16,11 +16,23 @@ import { Badge } from 'src/users/entities/badge.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Item, Inventory, InventoryItem, SyncSettings, Badge]),
+    TypeOrmModule.forFeature([
+      User,
+      Item,
+      Inventory,
+      InventoryItem,
+      SyncSettings,
+      Badge,
+    ]),
     HttpModule,
-    MarketsModule
+    MarketsModule,
   ],
   controllers: [SteamController],
-  providers: [SteamService, SteamAuthService, SteamFetcherService, SteamAutoSyncService]
+  providers: [
+    SteamService,
+    SteamAuthService,
+    SteamFetcherService,
+    SteamAutoSyncService,
+  ],
 })
-export class SteamModule { }
+export class SteamModule {}

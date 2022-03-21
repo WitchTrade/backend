@@ -9,7 +9,6 @@ import { OffersService } from '../markets/offers.service';
 
 @Injectable()
 export class SteamAutoSyncService {
-
   constructor(
     @InjectRepository(User)
     private _userRepository: Repository<User>,
@@ -17,14 +16,15 @@ export class SteamAutoSyncService {
     private _syncSettingsRepository: Repository<SyncSettings>,
     private _steamService: SteamService,
     private _offersService: OffersService,
-  ) { }
+  ) {}
 
   @Cron('0 * * * *')
   async automaticInvSync() {
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-    const inventoriesToSync = await this._userRepository.createQueryBuilder('user')
+    const inventoriesToSync = await this._userRepository
+      .createQueryBuilder('user')
       .select(['user.id', 'user.lastOnline'])
       .leftJoin('user.inventory', 'inv')
       .addSelect(['inv.id'])
@@ -40,19 +40,28 @@ export class SteamAutoSyncService {
       .addSelect('secondaryPriceRecipe')
       .leftJoin('syncSettings.ignoreList', 'ignoreList')
       .addSelect('ignoreList')
-      .where('syncSettings.syncInventory AND user.lastOnline > :oneWeekAgo', { oneWeekAgo })
+      .where('syncSettings.syncInventory AND user.lastOnline > :oneWeekAgo', {
+        oneWeekAgo,
+      })
       .getMany();
 
     for (const invToSync of inventoriesToSync) {
       const minDelay = this._delay(parseInt(process.env.AUTOSYNCDELAY, 10));
-      await this._steamService.syncInventory(invToSync.id, true, async (userBasedFail: boolean) => {
-        if (userBasedFail) {
-          invToSync.syncSettings.syncInventory = false;
-          await this._syncSettingsRepository.save(invToSync.syncSettings);
-        }
-      });
+      await this._steamService.syncInventory(
+        invToSync.id,
+        true,
+        async (userBasedFail: boolean) => {
+          if (userBasedFail) {
+            invToSync.syncSettings.syncInventory = false;
+            await this._syncSettingsRepository.save(invToSync.syncSettings);
+          }
+        },
+      );
       if (invToSync.syncSettings.syncMarket) {
-        await this._offersService.syncOffers(invToSync.syncSettings, invToSync.id);
+        await this._offersService.syncOffers(
+          invToSync.syncSettings,
+          invToSync.id,
+        );
       }
       await minDelay;
     }

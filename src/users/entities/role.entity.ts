@@ -23,5 +23,5 @@ export enum PERMISSION {
   ROLES,
   BADGES,
   VERIFY,
-  LOG
+  LOG,
 }

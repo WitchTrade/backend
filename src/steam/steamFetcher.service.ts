@@ -5,20 +5,25 @@ import { SteamInventoryResponse } from './models/steamInventoryResponse.model';
 
 @Injectable()
 export class SteamFetcherService {
+  constructor(private _httpService: HttpService) {}
 
-  constructor(
-    private _httpService: HttpService
-  ) { }
-
-  public async getSteamProfileId(steamUrl: string, autoSync?: boolean, failed?: any): Promise<string> {
+  public async getSteamProfileId(
+    steamUrl: string,
+    autoSync?: boolean,
+    failed?: any,
+  ): Promise<string> {
     let steamProfileId: string;
 
-    const steamUrlUsernameRegex = steamUrl.match(/^https:\/\/steamcommunity\.com\/id\/([^/]+).*$/);
+    const steamUrlUsernameRegex = steamUrl.match(
+      /^https:\/\/steamcommunity\.com\/id\/([^/]+).*$/,
+    );
     if (steamUrlUsernameRegex) {
       const steamUsername = steamUrlUsernameRegex[1];
-      const response = await firstValueFrom(this._httpService.get<any>(
-        `http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=${process.env.STEAMAPIKEY}&vanityurl=${steamUsername}`
-      ));
+      const response = await firstValueFrom(
+        this._httpService.get<any>(
+          `http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=${process.env.STEAMAPIKEY}&vanityurl=${steamUsername}`,
+        ),
+      );
       if (response.status === 200 && response.data.response.success === 1) {
         steamProfileId = response.data.response.steamid;
       } else {
@@ -33,7 +38,9 @@ export class SteamFetcherService {
       }
     }
 
-    const steamUrlIdRegex = steamUrl.match(/^https:\/\/steamcommunity\.com\/profiles\/([^/]+).*$/);
+    const steamUrlIdRegex = steamUrl.match(
+      /^https:\/\/steamcommunity\.com\/profiles\/([^/]+).*$/,
+    );
     if (steamUrlIdRegex) {
       steamProfileId = steamUrlIdRegex[1];
     }
@@ -51,53 +58,72 @@ export class SteamFetcherService {
     return steamProfileId;
   }
 
-  public async fetchInventoryPage(steamProfileId: string, lastAssedId?: string, autoSync?: boolean, failed?: any) {
-    return firstValueFrom(this._httpService.get<SteamInventoryResponse>(`https://steamcommunity.com/inventory/${steamProfileId}/559650/2?l=english&count=5000${lastAssedId ? `&start_assetid=${lastAssedId}` : ''}`)
-      .pipe(
-        catchError(e => {
-          if (autoSync) {
-            failed(e.response.status === 403);
-            return EMPTY;
-          } else {
-            if (e.response.status === 403) {
-              throw new HttpException(
-                `Your steam inventory is not public. witchtrade.org can't access it.`,
-                HttpStatus.BAD_REQUEST,
-              );
+  public async fetchInventoryPage(
+    steamProfileId: string,
+    lastAssedId?: string,
+    autoSync?: boolean,
+    failed?: any,
+  ) {
+    return firstValueFrom(
+      this._httpService
+        .get<SteamInventoryResponse>(
+          `https://steamcommunity.com/inventory/${steamProfileId}/559650/2?l=english&count=5000${
+            lastAssedId ? `&start_assetid=${lastAssedId}` : ''
+          }`,
+        )
+        .pipe(
+          catchError((e) => {
+            if (autoSync) {
+              failed(e.response.status === 403);
+              return EMPTY;
             } else {
-              throw new HttpException(e.response.data, e.response.status);
+              if (e.response.status === 403) {
+                throw new HttpException(
+                  `Your steam inventory is not public. witchtrade.org can't access it.`,
+                  HttpStatus.BAD_REQUEST,
+                );
+              } else {
+                throw new HttpException(e.response.data, e.response.status);
+              }
             }
-          }
-        })
-      )
+          }),
+        ),
     );
   }
 
   public async getSteamFriendIds(steamId: string) {
-    return firstValueFrom(this._httpService.get<any>(
-      `https://api.steampowered.com/ISteamUser/GetFriendList/v1/?key=${process.env.STEAMAPIKEY}&steamid=${steamId}&relationship=friend`
-    ).pipe(
-      catchError(e => {
-        if (e.response.status === 401) {
-          throw new HttpException(
-            `Your steam friend list is private. witchtrade.org can't access it.`,
-            HttpStatus.BAD_REQUEST,
-          );
-        }
-        throw new HttpException(e.response.data, e.response.status);
-      }),
-    ));
+    return firstValueFrom(
+      this._httpService
+        .get<any>(
+          `https://api.steampowered.com/ISteamUser/GetFriendList/v1/?key=${process.env.STEAMAPIKEY}&steamid=${steamId}&relationship=friend`,
+        )
+        .pipe(
+          catchError((e) => {
+            if (e.response.status === 401) {
+              throw new HttpException(
+                `Your steam friend list is private. witchtrade.org can't access it.`,
+                HttpStatus.BAD_REQUEST,
+              );
+            }
+            throw new HttpException(e.response.data, e.response.status);
+          }),
+        ),
+    );
   }
 
   public async getSteamNamesfromIds(steamIds: string[]) {
-    return firstValueFrom(this._httpService.get<any>(
-      `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=${process.env.STEAMAPIKEY}&steamids=${steamIds.join(',')}`
-    )
-      .pipe(
-        catchError(e => {
-          throw new HttpException(e.response.data, e.response.status);
-        }),
-      )
+    return firstValueFrom(
+      this._httpService
+        .get<any>(
+          `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=${
+            process.env.STEAMAPIKEY
+          }&steamids=${steamIds.join(',')}`,
+        )
+        .pipe(
+          catchError((e) => {
+            throw new HttpException(e.response.data, e.response.status);
+          }),
+        ),
     );
   }
 }

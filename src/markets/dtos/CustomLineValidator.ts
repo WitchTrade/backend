@@ -1,4 +1,7 @@
-import { ValidatorConstraint, ValidatorConstraintInterface } from 'class-validator';
+import {
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+} from 'class-validator';
 
 @ValidatorConstraint({ name: 'customText', async: false })
 export class CustomLineValidator implements ValidatorConstraintInterface {

@@ -26,15 +26,14 @@ export class AdminService {
     private _adminLogRepository: Repository<AdminLog>,
     @InjectRepository(Notification)
     private _notificationRepository: Repository<Notification>,
-  ) { }
+  ) {}
 
   public async getUsers(uuid: string) {
-    const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
+    const requestingUser = await this._userRepository.findOne(uuid, {
+      relations: ['roles'],
+    });
     if (requestingUser.roles.length === 0) {
-      throw new HttpException(
-        'Permission denied.',
-        HttpStatus.FORBIDDEN
-      );
+      throw new HttpException('Permission denied.', HttpStatus.FORBIDDEN);
     }
 
     const users = await this._userRepository.find({
@@ -46,47 +45,37 @@ export class AdminService {
         'banned',
         'banMessage',
         'created',
-        'lastOnline'
+        'lastOnline',
       ],
-      relations: [
-        'roles',
-        'badges'
-      ]
+      relations: ['roles', 'badges'],
     });
 
     return users;
   }
 
   public async banUser(uuid: string, banData: AdminBanDTO) {
-    const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
+    const requestingUser = await this._userRepository.findOne(uuid, {
+      relations: ['roles'],
+    });
     if (!this._hasPermission(requestingUser.roles, PERMISSION.BAN)) {
-      throw new HttpException(
-        'Permission denied.',
-        HttpStatus.FORBIDDEN
-      );
+      throw new HttpException('Permission denied.', HttpStatus.FORBIDDEN);
     }
 
-    const userToBan = await this._userRepository.findOne(banData.userId, { relations: ['roles', 'badges'] });
+    const userToBan = await this._userRepository.findOne(banData.userId, {
+      relations: ['roles', 'badges'],
+    });
     if (!userToBan) {
-      throw new HttpException(
-        'User not found.',
-        HttpStatus.BAD_REQUEST
-      );
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
 
-    if (
-      this._hasPermission(userToBan.roles, PERMISSION.ADMIN)
-    ) {
-      throw new HttpException(
-        'User cannot be banned.',
-        HttpStatus.FORBIDDEN
-      );
+    if (this._hasPermission(userToBan.roles, PERMISSION.ADMIN)) {
+      throw new HttpException('User cannot be banned.', HttpStatus.FORBIDDEN);
     }
 
     if (userToBan.banned) {
       throw new HttpException(
         'User is already banned.',
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
 
@@ -100,43 +89,33 @@ export class AdminService {
       actionGroup: ACTIONGROUP.BAN,
       actionType: ACTIONTYPE.POST,
       targetUser: userToBan,
-      log: `Banned with reason ${banData.reason}`
+      log: `Banned with reason ${banData.reason}`,
     });
 
     return createAdminUser(userToBan);
   }
 
   public async unbanUser(uuid: string, unbanData: AdminUnbanDTO) {
-    const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
+    const requestingUser = await this._userRepository.findOne(uuid, {
+      relations: ['roles'],
+    });
     if (!this._hasPermission(requestingUser.roles, PERMISSION.BAN)) {
-      throw new HttpException(
-        'Permission denied.',
-        HttpStatus.FORBIDDEN
-      );
+      throw new HttpException('Permission denied.', HttpStatus.FORBIDDEN);
     }
 
-    const userToUnban = await this._userRepository.findOne(unbanData.userId, { relations: ['roles', 'badges'] });
+    const userToUnban = await this._userRepository.findOne(unbanData.userId, {
+      relations: ['roles', 'badges'],
+    });
     if (!userToUnban) {
-      throw new HttpException(
-        'User not found.',
-        HttpStatus.BAD_REQUEST
-      );
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
 
-    if (
-      this._hasPermission(userToUnban.roles, PERMISSION.ADMIN)
-    ) {
-      throw new HttpException(
-        'User cannot be unbanned.',
-        HttpStatus.FORBIDDEN
-      );
+    if (this._hasPermission(userToUnban.roles, PERMISSION.ADMIN)) {
+      throw new HttpException('User cannot be unbanned.', HttpStatus.FORBIDDEN);
     }
 
     if (!userToUnban.banned) {
-      throw new HttpException(
-        'User is not banned.',
-        HttpStatus.BAD_REQUEST
-      );
+      throw new HttpException('User is not banned.', HttpStatus.BAD_REQUEST);
     }
 
     userToUnban.banned = false;
@@ -149,19 +128,18 @@ export class AdminService {
       actionGroup: ACTIONGROUP.BAN,
       actionType: ACTIONTYPE.DELETE,
       targetUser: userToUnban,
-      log: `Unbanned`
+      log: `Unbanned`,
     });
 
     return createAdminUser(userToUnban);
   }
 
   public async getBadges(uuid: string) {
-    const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
+    const requestingUser = await this._userRepository.findOne(uuid, {
+      relations: ['roles'],
+    });
     if (requestingUser.roles.length === 0) {
-      throw new HttpException(
-        'Permission denied.',
-        HttpStatus.FORBIDDEN
-      );
+      throw new HttpException('Permission denied.', HttpStatus.FORBIDDEN);
     }
 
     const badges = await this._badgeRepository.find();
@@ -170,36 +148,31 @@ export class AdminService {
   }
 
   public async addBadge(uuid: string, badgeData: AdminBadgeDTO) {
-    const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
+    const requestingUser = await this._userRepository.findOne(uuid, {
+      relations: ['roles'],
+    });
 
     if (!this._hasPermission(requestingUser.roles, PERMISSION.BADGES)) {
-      throw new HttpException(
-        'Permission denied.',
-        HttpStatus.FORBIDDEN
-      );
+      throw new HttpException('Permission denied.', HttpStatus.FORBIDDEN);
     }
 
-    const userToModify = await this._userRepository.findOne(badgeData.userId, { relations: ['roles', 'badges'] });
+    const userToModify = await this._userRepository.findOne(badgeData.userId, {
+      relations: ['roles', 'badges'],
+    });
     if (!userToModify) {
-      throw new HttpException(
-        'User not found.',
-        HttpStatus.BAD_REQUEST
-      );
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
 
-    if (userToModify.badges.some(badge => badge.id === badgeData.badgeId)) {
+    if (userToModify.badges.some((badge) => badge.id === badgeData.badgeId)) {
       throw new HttpException(
         'User already has this badge.',
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
 
     const badgeToAdd = await this._badgeRepository.findOne(badgeData.badgeId);
     if (!badgeToAdd) {
-      throw new HttpException(
-        'Badge not found.',
-        HttpStatus.BAD_REQUEST
-      );
+      throw new HttpException('Badge not found.', HttpStatus.BAD_REQUEST);
     }
 
     userToModify.badges.push(badgeToAdd);
@@ -211,45 +184,44 @@ export class AdminService {
       actionGroup: ACTIONGROUP.BADGES,
       actionType: ACTIONTYPE.POST,
       targetUser: userToModify,
-      log: `Added badge ${badgeToAdd.id}.`
+      log: `Added badge ${badgeToAdd.id}.`,
     });
 
     return createAdminUser(userToModify);
   }
 
   public async removeBadge(uuid: string, badgeData: AdminBadgeDTO) {
-    const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
+    const requestingUser = await this._userRepository.findOne(uuid, {
+      relations: ['roles'],
+    });
     if (!this._hasPermission(requestingUser.roles, PERMISSION.BADGES)) {
-      throw new HttpException(
-        'Permission denied.',
-        HttpStatus.FORBIDDEN
-      );
+      throw new HttpException('Permission denied.', HttpStatus.FORBIDDEN);
     }
 
-    const userToModify = await this._userRepository.findOne(badgeData.userId, { relations: ['roles', 'badges'] });
+    const userToModify = await this._userRepository.findOne(badgeData.userId, {
+      relations: ['roles', 'badges'],
+    });
     if (!userToModify) {
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
+    }
+
+    if (!userToModify.badges.some((badge) => badge.id === badgeData.badgeId)) {
       throw new HttpException(
-        'User not found.',
-        HttpStatus.BAD_REQUEST
+        "User doesn't own this badge.",
+        HttpStatus.BAD_REQUEST,
       );
     }
 
-    if (!userToModify.badges.some(badge => badge.id === badgeData.badgeId)) {
-      throw new HttpException(
-        'User doesn\'t own this badge.',
-        HttpStatus.BAD_REQUEST
-      );
-    }
-
-    const badgeToRemove = await this._badgeRepository.findOne(badgeData.badgeId);
+    const badgeToRemove = await this._badgeRepository.findOne(
+      badgeData.badgeId,
+    );
     if (!badgeToRemove) {
-      throw new HttpException(
-        'Badge not found.',
-        HttpStatus.BAD_REQUEST
-      );
+      throw new HttpException('Badge not found.', HttpStatus.BAD_REQUEST);
     }
 
-    userToModify.badges = userToModify.badges.filter(badge => badge.id !== badgeToRemove.id);
+    userToModify.badges = userToModify.badges.filter(
+      (badge) => badge.id !== badgeToRemove.id,
+    );
 
     await this._userRepository.save(userToModify);
 
@@ -258,19 +230,18 @@ export class AdminService {
       actionGroup: ACTIONGROUP.BADGES,
       actionType: ACTIONTYPE.DELETE,
       targetUser: userToModify,
-      log: `Removed badge ${badgeToRemove.id}.`
+      log: `Removed badge ${badgeToRemove.id}.`,
     });
 
     return createAdminUser(userToModify);
   }
 
   public async getRoles(uuid: string) {
-    const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
+    const requestingUser = await this._userRepository.findOne(uuid, {
+      relations: ['roles'],
+    });
     if (requestingUser.roles.length === 0) {
-      throw new HttpException(
-        'Permission denied.',
-        HttpStatus.FORBIDDEN
-      );
+      throw new HttpException('Permission denied.', HttpStatus.FORBIDDEN);
     }
 
     const roles = await this._roleRepository.find();
@@ -279,42 +250,37 @@ export class AdminService {
   }
 
   public async addRole(uuid: string, roleData: AdminRoleDTO) {
-    const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
+    const requestingUser = await this._userRepository.findOne(uuid, {
+      relations: ['roles'],
+    });
     if (!this._hasPermission(requestingUser.roles, PERMISSION.ROLES)) {
-      throw new HttpException(
-        'Permission denied.',
-        HttpStatus.FORBIDDEN
-      );
+      throw new HttpException('Permission denied.', HttpStatus.FORBIDDEN);
     }
 
-    const userToModify = await this._userRepository.findOne(roleData.userId, { relations: ['roles', 'badges'] });
+    const userToModify = await this._userRepository.findOne(roleData.userId, {
+      relations: ['roles', 'badges'],
+    });
     if (!userToModify) {
-      throw new HttpException(
-        'User not found.',
-        HttpStatus.BAD_REQUEST
-      );
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
 
-    if (userToModify.roles.some(role => role.id === roleData.roleId)) {
+    if (userToModify.roles.some((role) => role.id === roleData.roleId)) {
       throw new HttpException(
         'User already has this role.',
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
 
     const roleToAdd = await this._roleRepository.findOne(roleData.roleId);
     if (!roleToAdd) {
-      throw new HttpException(
-        'Role not found.',
-        HttpStatus.BAD_REQUEST
-      );
+      throw new HttpException('Role not found.', HttpStatus.BAD_REQUEST);
     }
 
     const ownRank = this._getHighestRoleRank(requestingUser.roles);
     if (roleToAdd.rank <= ownRank) {
       throw new HttpException(
-        'You aren\'t allowed to give or remove this role',
-        HttpStatus.BAD_REQUEST
+        "You aren't allowed to give or remove this role",
+        HttpStatus.BAD_REQUEST,
       );
     }
 
@@ -327,53 +293,50 @@ export class AdminService {
       actionGroup: ACTIONGROUP.ROLES,
       actionType: ACTIONTYPE.POST,
       targetUser: userToModify,
-      log: `Added role ${roleToAdd.id}.`
+      log: `Added role ${roleToAdd.id}.`,
     });
 
     return createAdminUser(userToModify);
   }
 
   public async removeRole(uuid: string, roleData: AdminRoleDTO) {
-    const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
+    const requestingUser = await this._userRepository.findOne(uuid, {
+      relations: ['roles'],
+    });
     if (!this._hasPermission(requestingUser.roles, PERMISSION.ROLES)) {
-      throw new HttpException(
-        'Permission denied.',
-        HttpStatus.FORBIDDEN
-      );
+      throw new HttpException('Permission denied.', HttpStatus.FORBIDDEN);
     }
 
-    const userToModify = await this._userRepository.findOne(roleData.userId, { relations: ['roles', 'badges'] });
+    const userToModify = await this._userRepository.findOne(roleData.userId, {
+      relations: ['roles', 'badges'],
+    });
     if (!userToModify) {
-      throw new HttpException(
-        'User not found.',
-        HttpStatus.BAD_REQUEST
-      );
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
 
-    if (!userToModify.roles.some(role => role.id === roleData.roleId)) {
+    if (!userToModify.roles.some((role) => role.id === roleData.roleId)) {
       throw new HttpException(
-        'User doesn\'t own this role.',
-        HttpStatus.BAD_REQUEST
+        "User doesn't own this role.",
+        HttpStatus.BAD_REQUEST,
       );
     }
 
     const roleToRemove = await this._roleRepository.findOne(roleData.roleId);
     if (!roleToRemove) {
-      throw new HttpException(
-        'Role not found.',
-        HttpStatus.BAD_REQUEST
-      );
+      throw new HttpException('Role not found.', HttpStatus.BAD_REQUEST);
     }
 
     const ownRank = this._getHighestRoleRank(requestingUser.roles);
     if (roleToRemove.rank <= ownRank) {
       throw new HttpException(
-        'You aren\'t allowed to give or remove this role',
-        HttpStatus.BAD_REQUEST
+        "You aren't allowed to give or remove this role",
+        HttpStatus.BAD_REQUEST,
       );
     }
 
-    userToModify.roles = userToModify.roles.filter(role => role.id !== roleToRemove.id);
+    userToModify.roles = userToModify.roles.filter(
+      (role) => role.id !== roleToRemove.id,
+    );
 
     await this._userRepository.save(userToModify);
 
@@ -382,37 +345,35 @@ export class AdminService {
       actionGroup: ACTIONGROUP.ROLES,
       actionType: ACTIONTYPE.DELETE,
       targetUser: userToModify,
-      log: `Removed role ${roleToRemove.id}.`
+      log: `Removed role ${roleToRemove.id}.`,
     });
 
     return createAdminUser(userToModify);
   }
 
   private _getHighestRoleRank(roles: Role[]) {
-    return Math.min(...roles.map(role => role.rank));
+    return Math.min(...roles.map((role) => role.rank));
   }
 
   public async verifyUser(uuid: string, verifyData: AdminVerifyDTO) {
-    const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
+    const requestingUser = await this._userRepository.findOne(uuid, {
+      relations: ['roles'],
+    });
     if (!this._hasPermission(requestingUser.roles, PERMISSION.VERIFY)) {
-      throw new HttpException(
-        'Permission denied.',
-        HttpStatus.FORBIDDEN
-      );
+      throw new HttpException('Permission denied.', HttpStatus.FORBIDDEN);
     }
 
-    const userToVerify = await this._userRepository.findOne(verifyData.userId, { relations: ['roles', 'badges'] });
+    const userToVerify = await this._userRepository.findOne(verifyData.userId, {
+      relations: ['roles', 'badges'],
+    });
     if (!userToVerify) {
-      throw new HttpException(
-        'User not found.',
-        HttpStatus.BAD_REQUEST
-      );
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
 
     if (userToVerify.verified) {
       throw new HttpException(
         'User is already verified.',
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
 
@@ -425,34 +386,30 @@ export class AdminService {
       actionGroup: ACTIONGROUP.VERIFY,
       actionType: ACTIONTYPE.POST,
       targetUser: userToVerify,
-      log: `Verified`
+      log: `Verified`,
     });
 
     return createAdminUser(userToVerify);
   }
 
   public async unverifyUser(uuid: string, verifyData: AdminVerifyDTO) {
-    const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
+    const requestingUser = await this._userRepository.findOne(uuid, {
+      relations: ['roles'],
+    });
     if (!this._hasPermission(requestingUser.roles, PERMISSION.VERIFY)) {
-      throw new HttpException(
-        'Permission denied.',
-        HttpStatus.FORBIDDEN
-      );
+      throw new HttpException('Permission denied.', HttpStatus.FORBIDDEN);
     }
 
-    const userToUnverify = await this._userRepository.findOne(verifyData.userId, { relations: ['roles', 'badges'] });
+    const userToUnverify = await this._userRepository.findOne(
+      verifyData.userId,
+      { relations: ['roles', 'badges'] },
+    );
     if (!userToUnverify) {
-      throw new HttpException(
-        'User not found.',
-        HttpStatus.BAD_REQUEST
-      );
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
 
     if (!userToUnverify.verified) {
-      throw new HttpException(
-        'User is not verified.',
-        HttpStatus.BAD_REQUEST
-      );
+      throw new HttpException('User is not verified.', HttpStatus.BAD_REQUEST);
     }
 
     userToUnverify.verified = false;
@@ -464,7 +421,7 @@ export class AdminService {
       actionGroup: ACTIONGROUP.VERIFY,
       actionType: ACTIONTYPE.DELETE,
       targetUser: userToUnverify,
-      log: `Unverified`
+      log: `Unverified`,
     });
 
     return createAdminUser(userToUnverify);
@@ -477,7 +434,9 @@ export class AdminService {
 
     for (const role of roles) {
       const permissions = role.permissions;
-      const binaryPermissionString = (filler + permissions.toString(2)).slice(negativePermissionLength);
+      const binaryPermissionString = (filler + permissions.toString(2)).slice(
+        negativePermissionLength,
+      );
 
       if (binaryPermissionString[permission] === '1') {
         return true;
@@ -488,15 +447,16 @@ export class AdminService {
   }
 
   public async getAdminLog(uuid: string) {
-    const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
+    const requestingUser = await this._userRepository.findOne(uuid, {
+      relations: ['roles'],
+    });
     if (!this._hasPermission(requestingUser.roles, PERMISSION.VERIFY)) {
-      throw new HttpException(
-        'Permission denied.',
-        HttpStatus.FORBIDDEN
-      );
+      throw new HttpException('Permission denied.', HttpStatus.FORBIDDEN);
     }
 
-    const log = await this._adminLogRepository.find({ relations: ['user', 'targetUser'] });
+    const log = await this._adminLogRepository.find({
+      relations: ['user', 'targetUser'],
+    });
 
     const modifiedLog = log.map((log) => {
       const modifiedLog: any = log;
@@ -513,22 +473,18 @@ export class AdminService {
   }
 
   public async sendNotification(uuid: string, data: AdminNotificationDTO) {
-    const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
+    const requestingUser = await this._userRepository.findOne(uuid, {
+      relations: ['roles'],
+    });
 
     if (!this._hasPermission(requestingUser.roles, PERMISSION.VERIFY)) {
-      throw new HttpException(
-        'Permission denied.',
-        HttpStatus.FORBIDDEN
-      );
+      throw new HttpException('Permission denied.', HttpStatus.FORBIDDEN);
     }
 
     const user = await this._userRepository.findOne(data.userId);
 
     if (!user) {
-      throw new HttpException(
-        'User not found.',
-        HttpStatus.BAD_REQUEST
-      );
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
 
     const notification = new Notification();
@@ -539,14 +495,16 @@ export class AdminService {
     await this._notificationRepository.save(notification);
   }
 
-  public async broadcastNotification(uuid: string, data: Partial<Notification>) {
-    const requestingUser = await this._userRepository.findOne(uuid, { relations: ['roles'] });
+  public async broadcastNotification(
+    uuid: string,
+    data: Partial<Notification>,
+  ) {
+    const requestingUser = await this._userRepository.findOne(uuid, {
+      relations: ['roles'],
+    });
 
     if (!this._hasPermission(requestingUser.roles, PERMISSION.ADMIN)) {
-      throw new HttpException(
-        'Permission denied.',
-        HttpStatus.FORBIDDEN
-      );
+      throw new HttpException('Permission denied.', HttpStatus.FORBIDDEN);
     }
 
     const users = await this._userRepository.find();
@@ -562,5 +520,4 @@ export class AdminService {
 
     return;
   }
-
 }

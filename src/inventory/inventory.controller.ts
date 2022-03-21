@@ -6,7 +6,7 @@ import { InventoryService } from './inventory.service';
 
 @Controller('inventory')
 export class InventoryController {
-  constructor(private _inventoryService: InventoryService) { }
+  constructor(private _inventoryService: InventoryService) {}
 
   @UseGuards(AuthGuard)
   @Get('')
@@ -16,7 +16,10 @@ export class InventoryController {
 
   @UseGuards(AuthGuard)
   @Put('')
-  updateInventory(@UserDecorator('id') uuid: string, @Body() data: InventoryUpdateDTO) {
+  updateInventory(
+    @UserDecorator('id') uuid: string,
+    @Body() data: InventoryUpdateDTO,
+  ) {
     return this._inventoryService.updateInventory(data, uuid);
   }
 }

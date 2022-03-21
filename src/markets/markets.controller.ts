@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { UserDecorator } from '../users/decorators/user.decorator';
 import { OfferCreateDTO } from './dtos/offerCreate.dto';
@@ -17,7 +27,7 @@ export class MarketsController {
     private _marketsService: MarketsService,
     private _offersService: OffersService,
     private _wishesService: WishesService,
-  ) { }
+  ) {}
 
   @Get('')
   getMarkets() {
@@ -46,7 +56,6 @@ export class MarketsController {
     return this._marketsService.getPrices();
   }
 
-
   @UseGuards(AuthGuard)
   @Post('offers')
   createOffer(@Body() data: OfferCreateDTO, @UserDecorator('id') uuid: string) {
@@ -55,7 +64,11 @@ export class MarketsController {
 
   @UseGuards(AuthGuard)
   @Put('offers/:id')
-  editOffer(@Param('id') id: number, @Body() data: OfferUpdateDTO, @UserDecorator('id') uuid: string) {
+  editOffer(
+    @Param('id') id: number,
+    @Body() data: OfferUpdateDTO,
+    @UserDecorator('id') uuid: string,
+  ) {
     return this._offersService.editOffer(id, data, uuid);
   }
 
@@ -77,7 +90,6 @@ export class MarketsController {
     return this._offersService.syncOffers(data, uuid);
   }
 
-
   @UseGuards(AuthGuard)
   @Post('wishes')
   createWish(@Body() data: WishCreateDTO, @UserDecorator('id') uuid: string) {
@@ -86,7 +98,11 @@ export class MarketsController {
 
   @UseGuards(AuthGuard)
   @Put('wishes/:id')
-  editWish(@Param('id') id: number, @Body() data: WishUpdateDTO, @UserDecorator('id') uuid: string) {
+  editWish(
+    @Param('id') id: number,
+    @Body() data: WishUpdateDTO,
+    @UserDecorator('id') uuid: string,
+  ) {
     return this._wishesService.editWish(id, data, uuid);
   }
 

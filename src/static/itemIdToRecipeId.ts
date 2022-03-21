@@ -89,7 +89,7 @@ const itemIdToRecipeId = {
   1514: 5089,
   1524: 5090,
   1527: 5069,
-  1540: 5070
+  1540: 5070,
 };
 
 export function getRecipeOfItemId(itemId: number): number {

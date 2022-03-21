@@ -15,11 +15,19 @@ import { Notification } from 'src/notifications/entities/notification.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Market, Offer, Wish, Item, Price, Notification]),
-    NotificationsModule
+    TypeOrmModule.forFeature([
+      User,
+      Market,
+      Offer,
+      Wish,
+      Item,
+      Price,
+      Notification,
+    ]),
+    NotificationsModule,
   ],
   providers: [MarketsService, OffersService, WishesService],
   controllers: [MarketsController],
-  exports: [OffersService]
+  exports: [OffersService],
 })
-export class MarketsModule { }
+export class MarketsModule {}

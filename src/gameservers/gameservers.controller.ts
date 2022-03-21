@@ -3,7 +3,7 @@ import { GameserversService } from './gameservers.service';
 
 @Controller('gameservers')
 export class GameserversController {
-  constructor(private _gameserversService: GameserversService) { }
+  constructor(private _gameserversService: GameserversService) {}
 
   @Get()
   getGameServers() {

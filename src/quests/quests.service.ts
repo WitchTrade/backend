@@ -20,35 +20,39 @@ export class QuestsService {
     private _questRepository: Repository<Quest>,
     @InjectRepository(Item)
     private _itemRepository: Repository<Item>,
-    private _httpService: HttpService
-  ) { }
+    private _httpService: HttpService,
+  ) {}
 
   public async getQuests(uuid: string) {
     const user = await this._userRepository.findOne(uuid);
     if (!user) {
-      throw new HttpException(
-        'User not found.',
-        HttpStatus.BAD_REQUEST
-      );
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
     if (!user.verifiedSteamProfileLink) {
       throw new HttpException(
         'Steam profile link not verified.',
-        HttpStatus.UNAUTHORIZED
+        HttpStatus.UNAUTHORIZED,
       );
     }
 
     if (user.questsCachedAt && this._cacheIsValid(user.questsCachedAt)) {
-      const cachedQuests = await this._userQuestRepository.find({ where: { user: { id: uuid } }, relations: ['quest', 'rewardItem'] });
+      const cachedQuests = await this._userQuestRepository.find({
+        where: { user: { id: uuid } },
+        relations: ['quest', 'rewardItem'],
+      });
       return { quests: cachedQuests, cachedAt: user.questsCachedAt };
     }
 
-    const steamUrlIdRegex = user.steamProfileLink.match(/^https:\/\/steamcommunity\.com\/profiles\/([^/]+).*$/);
+    const steamUrlIdRegex = user.steamProfileLink.match(
+      /^https:\/\/steamcommunity\.com\/profiles\/([^/]+).*$/,
+    );
     const steamProfileId = steamUrlIdRegex[1];
 
     const questResponse = (await this._getQuests(steamProfileId)).data;
     if (!questResponse.success) {
-      console.error(`Failed to get quests from steam account ${steamProfileId}`);
+      console.error(
+        `Failed to get quests from steam account ${steamProfileId}`,
+      );
       console.error(questResponse.errorCode);
       throw new HttpException(
         `Failed to get quests`,
@@ -58,34 +62,44 @@ export class QuestsService {
 
     await this._saveQuests(questResponse.quests, user);
 
-    const quests = await this._userQuestRepository.find({ where: { user: { id: uuid } }, relations: ['quest', 'rewardItem'] })
+    const quests = await this._userQuestRepository.find({
+      where: { user: { id: uuid } },
+      relations: ['quest', 'rewardItem'],
+    });
     return { quests, cachedAt: user.questsCachedAt };
   }
 
   private _cacheIsValid(cachedAt: Date) {
-    return (new Date().getTime() - cachedAt.getTime()) < parseInt(process.env.QUEST_CACHETIME, 10);
+    return (
+      new Date().getTime() - cachedAt.getTime() <
+      parseInt(process.env.QUEST_CACHETIME, 10)
+    );
   }
 
   private _getQuests(steamId: string) {
-    return firstValueFrom(this._httpService.get<QuestResponse>(
-      `${process.env.QUEST_ENDPOINT}community/getActiveQuests?authToken=${process.env.QUEST_AUTH_TOKEN}&accountName=${steamId}`
-    ).pipe(
-      catchError(e => {
-        console.error(`Failed to get quests from steam account ${steamId}`);
-        console.error(e);
-        throw new HttpException(
-          `Failed to get quests`,
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }),
-    ));
+    return firstValueFrom(
+      this._httpService
+        .get<QuestResponse>(
+          `${process.env.QUEST_ENDPOINT}community/getActiveQuests?authToken=${process.env.QUEST_AUTH_TOKEN}&accountName=${steamId}`,
+        )
+        .pipe(
+          catchError((e) => {
+            console.error(`Failed to get quests from steam account ${steamId}`);
+            console.error(e);
+            throw new HttpException(
+              `Failed to get quests`,
+              HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+          }),
+        ),
+    );
   }
 
   private async _saveQuests(responseQuests: QuestType[], user: User) {
     await this._userQuestRepository.delete({ user: { id: user.id } });
     const quests = [];
     for (const resQuest of responseQuests) {
-      const quest = new UserQuest;
+      const quest = new UserQuest();
       quest.user = user;
       quest.quest = await this._questRepository.findOne(resQuest.questId);
       if (!quest.quest) {
@@ -94,9 +108,13 @@ export class QuestsService {
       }
       quest.completed = resQuest.isCompleted;
       quest.type = resQuest.type.toLowerCase() as 'daily' | 'weekly';
-      quest.rewardItem = await this._itemRepository.findOne(parseInt(resQuest.rewardVal.split('x')[0]));
+      quest.rewardItem = await this._itemRepository.findOne(
+        parseInt(resQuest.rewardVal.split('x')[0]),
+      );
       if (!quest.rewardItem) {
-        console.error(`Item for quest not found. questId: ${resQuest.questId}, rewardVal: ${resQuest.rewardVal}`);
+        console.error(
+          `Item for quest not found. questId: ${resQuest.questId}, rewardVal: ${resQuest.rewardVal}`,
+        );
         continue;
       }
       quest.rewardAmount = parseInt(resQuest.rewardVal.split('x')[1]);

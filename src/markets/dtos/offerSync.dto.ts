@@ -1,14 +1,20 @@
-import { IsArray, IsBoolean, IsIn, IsNumber, IsObject, IsOptional, IsString, Max, Min } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsIn,
+  IsNumber,
+  IsObject,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
 import { Item } from 'src/items/entities/item.entity';
 import { Price } from '../entities/price.entity';
 
 export class OfferSyncDTO {
   @IsString()
-  @IsIn([
-    'both',
-    'new',
-    'existing'
-  ])
+  @IsIn(['both', 'new', 'existing'])
   mode: string;
 
   @IsNumber()

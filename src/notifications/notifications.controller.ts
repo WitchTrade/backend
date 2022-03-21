@@ -5,7 +5,7 @@ import { NotificationsService } from './notifications.service';
 
 @Controller('notifications')
 export class NotificationsController {
-  constructor(private _notificationsService: NotificationsService) { }
+  constructor(private _notificationsService: NotificationsService) {}
 
   @UseGuards(AuthGuard)
   @Get('')
@@ -15,7 +15,10 @@ export class NotificationsController {
 
   @UseGuards(AuthGuard)
   @Delete(':id')
-  deleteNotification(@Param('id') id: number, @UserDecorator('id') uuid: string) {
+  deleteNotification(
+    @Param('id') id: number,
+    @UserDecorator('id') uuid: string,
+  ) {
     return this._notificationsService.deleteNotification(id, uuid);
   }
 

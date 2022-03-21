@@ -4,12 +4,7 @@ export class SearchDTO {
   @IsOptional()
   itemId: number;
 
-  @IsIn([
-    'any',
-    'none',
-    'hunter',
-    'witch'
-  ])
+  @IsIn(['any', 'none', 'hunter', 'witch'])
   character: string;
 
   @IsIn([
@@ -25,7 +20,7 @@ export class SearchDTO {
     'melee weapon',
     'projectile',
     'broom',
-    'recipe'
+    'recipe',
   ])
   slot: string;
 
@@ -48,26 +43,14 @@ export class SearchDTO {
     'winterdream2020',
     'winterdream2021',
     'witchforest',
-    'mystic sands'
+    'mystic sands',
   ])
   event: string;
 
-  @IsIn([
-    'any',
-    'common',
-    'uncommon',
-    'rare',
-    'veryrare',
-    'whimsical'
-  ])
+  @IsIn(['any', 'common', 'uncommon', 'rare', 'veryrare', 'whimsical'])
   rarity: string;
 
-  @IsIn([
-    'any',
-    'owned',
-    'duplicateown',
-    'notowned'
-  ])
+  @IsIn(['any', 'owned', 'duplicateown', 'notowned'])
   inventoryType: string;
 
   @IsBoolean()

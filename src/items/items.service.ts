@@ -11,7 +11,7 @@ export class ItemsService {
     private _itemRepository: Repository<Item>,
     @InjectRepository(ItemSet)
     private _itemSetRepository: Repository<ItemSet>,
-  ) { }
+  ) {}
 
   getAll(): Promise<Item[]> {
     return this._itemRepository.find({ relations: ['itemSets'] });

@@ -10,7 +10,6 @@ import { Price } from './entities/price.entity';
 
 @Injectable()
 export class MarketsService {
-
   constructor(
     @InjectRepository(User)
     private _userRepository: Repository<User>,
@@ -22,7 +21,7 @@ export class MarketsService {
     private _wishRepository: Repository<Wish>,
     @InjectRepository(Price)
     private _priceRepository: Repository<Price>,
-  ) { }
+  ) {}
 
   public async getMarkets() {
     const oneMonthAgo = new Date();
@@ -32,22 +31,31 @@ export class MarketsService {
       .createQueryBuilder('user')
       .select(['user.username', 'user.displayName', 'user.verified'])
       .leftJoinAndSelect('user.market', 'market')
-      .where('user.hidden = 0 AND user.banned = 0 AND market.lastUpdated > :oneMonthAgo', { oneMonthAgo })
+      .where(
+        'user.hidden = 0 AND user.banned = 0 AND market.lastUpdated > :oneMonthAgo',
+        { oneMonthAgo },
+      )
       .getMany();
 
     const markets: any[] = [];
     for (const user of users) {
-      const offerCount = await this._offerRepository.count({ where: { market: user.market, quantity: MoreThan(0) } });
+      const offerCount = await this._offerRepository.count({
+        where: { market: user.market, quantity: MoreThan(0) },
+      });
 
       if (offerCount !== 0) {
-        const offers: { count: number, rarity: string; }[] = await this._offerRepository.createQueryBuilder('offer')
-          .select('count(*)', 'count')
-          .leftJoin('offer.item', 'item')
-          .addSelect('item.tagRarity', 'rarity')
-          .leftJoin('offer.market', 'market')
-          .where('market.id = :marketId AND offer.quantity > 0', { marketId: user.market.id })
-          .groupBy('item.tagRarity')
-          .getRawMany();
+        const offers: { count: number; rarity: string }[] =
+          await this._offerRepository
+            .createQueryBuilder('offer')
+            .select('count(*)', 'count')
+            .leftJoin('offer.item', 'item')
+            .addSelect('item.tagRarity', 'rarity')
+            .leftJoin('offer.market', 'market')
+            .where('market.id = :marketId AND offer.quantity > 0', {
+              marketId: user.market.id,
+            })
+            .groupBy('item.tagRarity')
+            .getRawMany();
 
         markets.push({ ...user, offerCount, offers });
       }
@@ -59,19 +67,15 @@ export class MarketsService {
   }
 
   public async editMarket(data: MarketUpdateDTO, uuid: string) {
-    const user = await this._userRepository.findOne(uuid, { relations: ['market'] });
+    const user = await this._userRepository.findOne(uuid, {
+      relations: ['market'],
+    });
     if (!user) {
-      throw new HttpException(
-        'User not found.',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
 
     if (!user.market) {
-      throw new HttpException(
-        'User has no market.',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new HttpException('User has no market.', HttpStatus.NOT_FOUND);
     }
 
     user.market.offerlistNote = data.offerlistNote;
@@ -83,50 +87,50 @@ export class MarketsService {
   }
 
   public async getOwnMarket(uuid: string) {
-    const user = await this._userRepository.findOne(uuid, { relations: ['market'] });
+    const user = await this._userRepository.findOne(uuid, {
+      relations: ['market'],
+    });
     if (!user) {
-      throw new HttpException(
-        'User not found.',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
 
     if (!user.market) {
-      throw new HttpException(
-        'User has no market.',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new HttpException('User has no market.', HttpStatus.NOT_FOUND);
     }
 
     return this._getUserMarket(user.market.id, false);
   }
 
   public async getPublicMarket(username: string) {
-    const user = await this._userRepository.findOne({ username }, { relations: ['market'] });
+    const user = await this._userRepository.findOne(
+      { username },
+      { relations: ['market'] },
+    );
     if (!user) {
-      throw new HttpException(
-        'User not found.',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
 
     if (!user.market) {
-      throw new HttpException(
-        'User has no market.',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new HttpException('User has no market.', HttpStatus.NOT_FOUND);
     }
 
     return this._getUserMarket(user.market.id, true);
   }
 
   private async _getUserMarket(marketId: number, onlyPublicOffers: boolean) {
-    const market = await this._marketRepository.createQueryBuilder('market')
-      .select(['market.id', 'market.offerlistNote', 'market.wishlistNote', 'market.lastUpdated'])
+    const market = await this._marketRepository
+      .createQueryBuilder('market')
+      .select([
+        'market.id',
+        'market.offerlistNote',
+        'market.wishlistNote',
+        'market.lastUpdated',
+      ])
       .where('market.id = :marketId', { marketId })
       .getOne();
 
-    const offersQuery = this._offerRepository.createQueryBuilder('offer')
+    const offersQuery = this._offerRepository
+      .createQueryBuilder('offer')
       .leftJoin('offer.market', 'market')
       .leftJoinAndSelect('offer.mainPrice', 'mainPrice')
       .leftJoinAndSelect('offer.secondaryPrice', 'secondaryPrice')
@@ -140,7 +144,8 @@ export class MarketsService {
 
     const offers = await offersQuery.getMany();
 
-    const wishes = await this._wishRepository.createQueryBuilder('wish')
+    const wishes = await this._wishRepository
+      .createQueryBuilder('wish')
       .leftJoin('wish.market', 'market')
       .leftJoinAndSelect('wish.mainPrice', 'mainPrice')
       .leftJoinAndSelect('wish.secondaryPrice', 'secondaryPrice')
@@ -155,5 +160,4 @@ export class MarketsService {
   public getPrices() {
     return this._priceRepository.find();
   }
-
 }

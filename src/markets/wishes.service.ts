@@ -11,7 +11,6 @@ import { WishUpdateDTO } from './dtos/wishUpdate.dto';
 
 @Injectable()
 export class WishesService {
-
   constructor(
     @InjectRepository(User)
     private _userRepository: Repository<User>,
@@ -23,25 +22,24 @@ export class WishesService {
     private _itemRepository: Repository<Item>,
     @InjectRepository(Price)
     private _priceRepository: Repository<Price>,
-  ) { }
+  ) {}
 
   public async createWish(data: WishCreateDTO, uuid: string) {
-    const user = await this._userRepository.findOne(uuid, { relations: ['market'] });
+    const user = await this._userRepository.findOne(uuid, {
+      relations: ['market'],
+    });
     if (!user) {
-      throw new HttpException(
-        'User not found.',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
 
     if (!user.market) {
-      throw new HttpException(
-        'User has no market.',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new HttpException('User has no market.', HttpStatus.NOT_FOUND);
     }
 
-    const existingWish = await this._wishRepository.findOne({ where: { item: { id: data.itemId }, market: user.market }, relations: ['item', 'market'] });
+    const existingWish = await this._wishRepository.findOne({
+      where: { item: { id: data.itemId }, market: user.market },
+      relations: ['item', 'market'],
+    });
     if (existingWish) {
       throw new HttpException(
         'Item is already an wish',
@@ -67,7 +65,9 @@ export class WishesService {
 
     let secondaryPrice: Price;
     if (data.secondaryPriceId) {
-      secondaryPrice = await this._priceRepository.findOne(data.secondaryPriceId);
+      secondaryPrice = await this._priceRepository.findOne(
+        data.secondaryPriceId,
+      );
       if (!secondaryPrice) {
         throw new HttpException(
           `Secondary price with id "${data.secondaryPriceId}" not found.`,
@@ -138,12 +138,17 @@ export class WishesService {
   }
 
   public async editWish(id: number, data: WishUpdateDTO, uuid: string) {
-    const wish = await this._wishRepository.findOne(id, { relations: ['item', 'mainPrice', 'secondaryPrice', 'market', 'market.user'] });
+    const wish = await this._wishRepository.findOne(id, {
+      relations: [
+        'item',
+        'mainPrice',
+        'secondaryPrice',
+        'market',
+        'market.user',
+      ],
+    });
     if (!wish) {
-      throw new HttpException(
-        'Wishlist item not found.',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new HttpException('Wishlist item not found.', HttpStatus.NOT_FOUND);
     }
     if (wish.market.user.id !== uuid) {
       throw new HttpException(
@@ -181,7 +186,9 @@ export class WishesService {
     }
 
     if (data.secondaryPriceId && wish.mainPrice.id !== data.secondaryPriceId) {
-      const secondaryPrice = await this._priceRepository.findOne(data.secondaryPriceId);
+      const secondaryPrice = await this._priceRepository.findOne(
+        data.secondaryPriceId,
+      );
       if (!secondaryPrice) {
         throw new HttpException(
           `Secondary price with id "${data.secondaryPriceId}" not found.`,
@@ -230,12 +237,11 @@ export class WishesService {
   }
 
   public async deleteWish(id: number, uuid: string) {
-    const wish = await this._wishRepository.findOne(id, { relations: ['market', 'market.user'] });
+    const wish = await this._wishRepository.findOne(id, {
+      relations: ['market', 'market.user'],
+    });
     if (!wish) {
-      throw new HttpException(
-        'Wishlist item not found.',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new HttpException('Wishlist item not found.', HttpStatus.NOT_FOUND);
     }
     if (wish.market.user.id !== uuid) {
       throw new HttpException(
@@ -252,22 +258,21 @@ export class WishesService {
   }
 
   public async deleteAllWishes(uuid: string) {
-    const user = await this._userRepository.findOne(uuid, { relations: ['market'] });
+    const user = await this._userRepository.findOne(uuid, {
+      relations: ['market'],
+    });
     if (!user) {
-      throw new HttpException(
-        'User not found.',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
 
     if (!user.market) {
-      throw new HttpException(
-        'User has no market.',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new HttpException('User has no market.', HttpStatus.NOT_FOUND);
     }
 
-    const wishes = await this._wishRepository.find({ where: { market: { user: { id: uuid } } }, relations: ['market', 'market.user'] });
+    const wishes = await this._wishRepository.find({
+      where: { market: { user: { id: uuid } } },
+      relations: ['market', 'market.user'],
+    });
 
     await this._wishRepository.remove(wishes);
 

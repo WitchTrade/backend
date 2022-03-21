@@ -1,5 +1,11 @@
 import { User } from '../../users/entities/user.entity';
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, OneToOne } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  OneToOne,
+} from 'typeorm';
 import { Offer } from './offer.entity';
 import { Wish } from './wish.entity';
 
@@ -8,7 +14,7 @@ export class Market {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: true})
+  @Column({ nullable: true })
   offerlistNote: string;
 
   @Column({ nullable: true })
@@ -17,12 +23,12 @@ export class Market {
   @Column()
   lastUpdated: Date;
 
-  @OneToMany(() => Offer, offer => offer.market)
+  @OneToMany(() => Offer, (offer) => offer.market)
   offers: Offer[];
 
-  @OneToMany(() => Wish, wish => wish.market)
+  @OneToMany(() => Wish, (wish) => wish.market)
   wishes: Wish[];
 
-  @OneToOne(() => User, user => user.market)
+  @OneToOne(() => User, (user) => user.market)
   user: User;
 }

@@ -12,15 +12,18 @@ export class InventoryService {
     private _inventoryRepository: Repository<Inventory>,
     @InjectRepository(User)
     private _userRepository: Repository<User>,
-  ) { }
+  ) {}
 
   public async getInventory(uuid: string) {
-    const user = await this._userRepository.findOne(uuid, { relations: ['inventory', 'inventory.inventoryItems', 'inventory.inventoryItems.item'] });
+    const user = await this._userRepository.findOne(uuid, {
+      relations: [
+        'inventory',
+        'inventory.inventoryItems',
+        'inventory.inventoryItems.item',
+      ],
+    });
     if (!user) {
-      throw new HttpException(
-        'User not found.',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
     if (!user.inventory) {
       throw new HttpException(
@@ -32,13 +35,19 @@ export class InventoryService {
     return user.inventory;
   }
 
-  public async updateInventory(inventoryChange: InventoryUpdateDTO, uuid: string) {
-    const user = await this._userRepository.findOne(uuid, { relations: ['inventory', 'inventory.inventoryItems', 'inventory.inventoryItems.item'] });
+  public async updateInventory(
+    inventoryChange: InventoryUpdateDTO,
+    uuid: string,
+  ) {
+    const user = await this._userRepository.findOne(uuid, {
+      relations: [
+        'inventory',
+        'inventory.inventoryItems',
+        'inventory.inventoryItems.item',
+      ],
+    });
     if (!user) {
-      throw new HttpException(
-        'User not found.',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
     if (!user.inventory) {
       throw new HttpException(

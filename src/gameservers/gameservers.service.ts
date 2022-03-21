@@ -1,6 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import 'dotenv/config';
-import { InfoResponse, PlayerResponse, queryGameServerInfo, queryGameServerPlayer, queryMasterServer, REGIONS } from 'steam-server-query';
+import {
+  InfoResponse,
+  PlayerResponse,
+  queryGameServerInfo,
+  queryGameServerPlayer,
+  queryMasterServer,
+  REGIONS,
+} from 'steam-server-query';
 import { FetchStatus } from './dtos/FetchStatus.dto';
 
 import { ServerCache } from './dtos/ServerCache.dto';
@@ -14,7 +21,12 @@ export class GameserversService {
     if (this._serverCache && this._cacheIsValid()) {
       return this._serverCache.cache;
     }
-    let serverWithPlayers = await queryMasterServer(process.env.STEAMMASTERSERVER, REGIONS.ALL, { appid: parseInt(process.env.WITCHITAPPID), empty: 1 }, 1000);
+    const serverWithPlayers = await queryMasterServer(
+      process.env.STEAMMASTERSERVER,
+      REGIONS.ALL,
+      { appid: parseInt(process.env.WITCHITAPPID), empty: 1 },
+      1000,
+    );
     return this._fetchServerInfos(serverWithPlayers);
   }
 
@@ -29,7 +41,7 @@ export class GameserversService {
       fetchedServers: 0,
       serversWithPlayers: 0,
       resolvedPlayers: 0,
-      finisher
+      finisher,
     };
     for (const server of serverHosts) {
       this._fetchServer(server, fetchStatus, serverInfos);
@@ -59,7 +71,11 @@ export class GameserversService {
     return serverInfos;
   }
 
-  private async _fetchServer(server: string, fetchStatus: FetchStatus, serverInfos: ServerInfo[]) {
+  private async _fetchServer(
+    server: string,
+    fetchStatus: FetchStatus,
+    serverInfos: ServerInfo[],
+  ) {
     let serverRes: InfoResponse;
     try {
       serverRes = await queryGameServerInfo(server, 2, 2000);
@@ -70,20 +86,31 @@ export class GameserversService {
       return;
     }
     const infos: any = {};
-    (serverRes.keywords as string).split(',').forEach(e => {
+    (serverRes.keywords as string).split(',').forEach((e) => {
       const keyVal = e.split(':');
       infos[keyVal[0]] = keyVal[1];
     });
     if (parseInt(infos.PlayerCount_i) > 0) {
       fetchStatus.serversWithPlayers++;
-      serverInfos.push({ name: serverRes.name, playerCount: parseInt(infos.PlayerCount_i), maxPlayers: serverRes.maxPlayers, gameMode: infos.GameMode_s, players: null });
+      serverInfos.push({
+        name: serverRes.name,
+        playerCount: parseInt(infos.PlayerCount_i),
+        maxPlayers: serverRes.maxPlayers,
+        gameMode: infos.GameMode_s,
+        players: null,
+      });
       this._fetchPlayers(server, serverRes.name, fetchStatus, serverInfos);
     }
     fetchStatus.fetchedServers++;
     this._checkIfFinished(fetchStatus);
   }
 
-  private async _fetchPlayers(server: string, serverName: string, fetchStatus: FetchStatus, serverInfos: ServerInfo[]) {
+  private async _fetchPlayers(
+    server: string,
+    serverName: string,
+    fetchStatus: FetchStatus,
+    serverInfos: ServerInfo[],
+  ) {
     let playerRes: PlayerResponse;
     try {
       playerRes = await queryGameServerPlayer(server, 3, [2000, 2000, 4000]);
@@ -93,22 +120,30 @@ export class GameserversService {
       this._checkIfFinished(fetchStatus);
       return;
     }
-    const players = playerRes.players.filter(p => p.name).map(p => {
-      return { name: p.name, playingFor: p.duration };
-    });
-    const index = serverInfos.findIndex(s => s.name === serverName);
+    const players = playerRes.players
+      .filter((p) => p.name)
+      .map((p) => {
+        return { name: p.name, playingFor: p.duration };
+      });
+    const index = serverInfos.findIndex((s) => s.name === serverName);
     serverInfos[index].players = players;
     fetchStatus.resolvedPlayers++;
     this._checkIfFinished(fetchStatus);
   }
 
   private _checkIfFinished(fetchStatus: FetchStatus) {
-    if (fetchStatus.totalServers === fetchStatus.fetchedServers && fetchStatus.serversWithPlayers === fetchStatus.resolvedPlayers) {
+    if (
+      fetchStatus.totalServers === fetchStatus.fetchedServers &&
+      fetchStatus.serversWithPlayers === fetchStatus.resolvedPlayers
+    ) {
       fetchStatus.finisher(null);
     }
   }
 
   private _cacheIsValid() {
-    return (new Date().getTime() - this._serverCache.created.getTime()) < parseInt(process.env.GAMESERVERCACHETIME, 10);
+    return (
+      new Date().getTime() - this._serverCache.created.getTime() <
+      parseInt(process.env.GAMESERVERCACHETIME, 10)
+    );
   }
 }

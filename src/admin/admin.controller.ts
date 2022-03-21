@@ -15,7 +15,7 @@ import { AdminNotificationDTO } from './dtos/notification.dto';
 
 @Controller('admin')
 export class AdminController {
-  constructor(private _adminService: AdminService) { }
+  constructor(private _adminService: AdminService) {}
 
   @UseGuards(AuthGuard)
   @Get('users')
@@ -25,13 +25,19 @@ export class AdminController {
 
   @UseGuards(AuthGuard)
   @Post('ban')
-  public banUser(@UserDecorator('id') uuid: string, @Body() banData: AdminBanDTO): Promise<AdminUser> {
+  public banUser(
+    @UserDecorator('id') uuid: string,
+    @Body() banData: AdminBanDTO,
+  ): Promise<AdminUser> {
     return this._adminService.banUser(uuid, banData);
   }
 
   @UseGuards(AuthGuard)
   @Delete('ban')
-  public unbanUser(@UserDecorator('id') uuid: string, @Body() unbanData: AdminUnbanDTO): Promise<AdminUser> {
+  public unbanUser(
+    @UserDecorator('id') uuid: string,
+    @Body() unbanData: AdminUnbanDTO,
+  ): Promise<AdminUser> {
     return this._adminService.unbanUser(uuid, unbanData);
   }
 
@@ -43,13 +49,19 @@ export class AdminController {
 
   @UseGuards(AuthGuard)
   @Post('badge')
-  public addBadge(@UserDecorator('id') uuid: string, @Body() badgeData: AdminBadgeDTO): Promise<AdminUser> {
+  public addBadge(
+    @UserDecorator('id') uuid: string,
+    @Body() badgeData: AdminBadgeDTO,
+  ): Promise<AdminUser> {
     return this._adminService.addBadge(uuid, badgeData);
   }
 
   @UseGuards(AuthGuard)
   @Delete('badge')
-  public removeBadge(@UserDecorator('id') uuid: string, @Body() badgeData: AdminBadgeDTO): Promise<AdminUser> {
+  public removeBadge(
+    @UserDecorator('id') uuid: string,
+    @Body() badgeData: AdminBadgeDTO,
+  ): Promise<AdminUser> {
     return this._adminService.removeBadge(uuid, badgeData);
   }
 
@@ -61,25 +73,37 @@ export class AdminController {
 
   @UseGuards(AuthGuard)
   @Post('role')
-  public addRole(@UserDecorator('id') uuid: string, @Body() roleData: AdminRoleDTO): Promise<AdminUser> {
+  public addRole(
+    @UserDecorator('id') uuid: string,
+    @Body() roleData: AdminRoleDTO,
+  ): Promise<AdminUser> {
     return this._adminService.addRole(uuid, roleData);
   }
 
   @UseGuards(AuthGuard)
   @Delete('role')
-  public removeRole(@UserDecorator('id') uuid: string, @Body() roleData: AdminRoleDTO): Promise<AdminUser> {
+  public removeRole(
+    @UserDecorator('id') uuid: string,
+    @Body() roleData: AdminRoleDTO,
+  ): Promise<AdminUser> {
     return this._adminService.removeRole(uuid, roleData);
   }
 
   @UseGuards(AuthGuard)
   @Post('verify')
-  public verifyUser(@UserDecorator('id') uuid: string, @Body() verifyData: AdminVerifyDTO): Promise<AdminUser> {
+  public verifyUser(
+    @UserDecorator('id') uuid: string,
+    @Body() verifyData: AdminVerifyDTO,
+  ): Promise<AdminUser> {
     return this._adminService.verifyUser(uuid, verifyData);
   }
 
   @UseGuards(AuthGuard)
   @Delete('verify')
-  public unverifyUser(@UserDecorator('id') uuid: string, @Body() verifyData: AdminVerifyDTO): Promise<AdminUser> {
+  public unverifyUser(
+    @UserDecorator('id') uuid: string,
+    @Body() verifyData: AdminVerifyDTO,
+  ): Promise<AdminUser> {
     return this._adminService.unverifyUser(uuid, verifyData);
   }
 
@@ -91,13 +115,19 @@ export class AdminController {
 
   @UseGuards(AuthGuard)
   @Post('notification')
-  public sendNotification(@UserDecorator('id') uuid: string, @Body() notificationInfo: AdminNotificationDTO): Promise<void> {
+  public sendNotification(
+    @UserDecorator('id') uuid: string,
+    @Body() notificationInfo: AdminNotificationDTO,
+  ): Promise<void> {
     return this._adminService.sendNotification(uuid, notificationInfo);
   }
 
   @UseGuards(AuthGuard)
   @Post('broadcast')
-  public broadcastNotification(@UserDecorator('id') uuid: string, @Body() notification: Partial<Notification>): Promise<void> {
+  public broadcastNotification(
+    @UserDecorator('id') uuid: string,
+    @Body() notification: Partial<Notification>,
+  ): Promise<void> {
     return this._adminService.broadcastNotification(uuid, notification);
   }
 }

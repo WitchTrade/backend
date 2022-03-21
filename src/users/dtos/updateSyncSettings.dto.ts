@@ -1,4 +1,14 @@
-import { IsArray, IsBoolean, IsIn, IsNumber, IsObject, IsOptional, IsString, Max, Min } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsIn,
+  IsNumber,
+  IsObject,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
 import { Item } from 'src/items/entities/item.entity';
 import { Price } from 'src/markets/entities/price.entity';
 
@@ -10,11 +20,7 @@ export class SyncSettingsUpdateDTO {
   syncMarket: boolean;
 
   @IsString()
-  @IsIn([
-    'both',
-    'new',
-    'existing'
-  ])
+  @IsIn(['both', 'new', 'existing'])
   mode: string;
 
   @IsNumber()

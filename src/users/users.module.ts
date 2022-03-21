@@ -10,8 +10,10 @@ import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, SyncSettings, Market, Price, Item])],
+  imports: [
+    TypeOrmModule.forFeature([User, SyncSettings, Market, Price, Item]),
+  ],
   controllers: [UsersController],
-  providers: [UsersService]
+  providers: [UsersService],
 })
-export class UsersModule { }
+export class UsersModule {}

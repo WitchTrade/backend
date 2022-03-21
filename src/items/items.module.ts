@@ -8,6 +8,6 @@ import { ItemsService } from './items.service';
 @Module({
   imports: [TypeOrmModule.forFeature([Item, ItemSet])],
   controllers: [ItemsController],
-  providers: [ItemsService]
+  providers: [ItemsService],
 })
 export class ItemsModule {}

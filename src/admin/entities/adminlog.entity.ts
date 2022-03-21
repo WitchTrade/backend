@@ -1,5 +1,11 @@
 import { User } from '../../users/entities/user.entity';
-import { Entity, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  ManyToOne,
+  Column,
+} from 'typeorm';
 
 @Entity()
 export class AdminLog {
@@ -29,11 +35,11 @@ export enum ACTIONGROUP {
   BAN,
   ROLES,
   BADGES,
-  VERIFY
+  VERIFY,
 }
 
 export enum ACTIONTYPE {
   POST,
   PUT,
-  DELETE
+  DELETE,
 }

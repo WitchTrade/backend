@@ -1,6 +1,13 @@
 import { Item } from 'src/items/entities/item.entity';
 import { Price } from 'src/markets/entities/price.entity';
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class SyncSettings {
@@ -71,5 +78,5 @@ export enum RARITY {
   VERYRARE = 'veryrare',
   RARE = 'rare',
   UNCOMMON = 'uncommon',
-  COMMON = 'common'
+  COMMON = 'common',
 }

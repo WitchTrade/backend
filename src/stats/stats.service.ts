@@ -4,7 +4,8 @@ import { Offer } from 'src/markets/entities/offer.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { Stats } from './entities/stats.entity';
-var appversion = require('../../package.json').version;
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const appversion = require('../../package.json').version;
 
 @Injectable()
 export class StatsService {
@@ -15,7 +16,7 @@ export class StatsService {
     private _offerRepository: Repository<Offer>,
     @InjectRepository(Stats, 'wistats')
     private statsRepository: Repository<Stats>,
-  ) { }
+  ) {}
 
   public getVersion() {
     return appversion;
@@ -24,11 +25,15 @@ export class StatsService {
   public async getWitchTradeStats() {
     const oneMonthAgo = new Date();
     oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
-    const offerCountRequest = await this._offerRepository.createQueryBuilder('offer')
+    const offerCountRequest = await this._offerRepository
+      .createQueryBuilder('offer')
       .select('count(*)', 'count')
       .leftJoin('offer.market', 'market')
       .leftJoin('market.user', 'user')
-      .where('offer.quantity > 0 AND user.hidden = 0 AND user.banned = 0 AND market.lastUpdated > :oneMonthAgo', { oneMonthAgo })
+      .where(
+        'offer.quantity > 0 AND user.hidden = 0 AND user.banned = 0 AND market.lastUpdated > :oneMonthAgo',
+        { oneMonthAgo },
+      )
       .getRawOne();
 
     const userCount = await this._userRepository.count({ banned: false });

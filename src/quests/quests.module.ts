@@ -14,6 +14,6 @@ import { QuestsService } from './quests.service';
     HttpModule,
   ],
   controllers: [QuestsController],
-  providers: [QuestsService]
+  providers: [QuestsService],
 })
-export class QuestsModule { }
+export class QuestsModule {}

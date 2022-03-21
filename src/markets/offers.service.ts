@@ -16,7 +16,6 @@ import { Notification } from 'src/notifications/entities/notification.entity';
 
 @Injectable()
 export class OffersService {
-
   constructor(
     @InjectRepository(User)
     private _userRepository: Repository<User>,
@@ -32,26 +31,25 @@ export class OffersService {
     private _priceRepository: Repository<Price>,
     @InjectRepository(Notification)
     private _notificationReposity: Repository<Notification>,
-    private _notificationService: NotificationsService
-  ) { }
+    private _notificationService: NotificationsService,
+  ) {}
 
   public async createOffer(data: OfferCreateDTO, uuid: string) {
-    const user = await this._userRepository.findOne(uuid, { relations: ['market'] });
+    const user = await this._userRepository.findOne(uuid, {
+      relations: ['market'],
+    });
     if (!user) {
-      throw new HttpException(
-        'User not found.',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
 
     if (!user.market) {
-      throw new HttpException(
-        'User has no market.',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new HttpException('User has no market.', HttpStatus.NOT_FOUND);
     }
 
-    const existingOffer = await this._offerRepository.findOne({ where: { item: { id: data.itemId }, market: user.market }, relations: ['item', 'market'] });
+    const existingOffer = await this._offerRepository.findOne({
+      where: { item: { id: data.itemId }, market: user.market },
+      relations: ['item', 'market'],
+    });
     if (existingOffer) {
       throw new HttpException(
         'Item is already an offer',
@@ -77,7 +75,9 @@ export class OffersService {
 
     let secondaryPrice: Price;
     if (data.secondaryPriceId) {
-      secondaryPrice = await this._priceRepository.findOne(data.secondaryPriceId);
+      secondaryPrice = await this._priceRepository.findOne(
+        data.secondaryPriceId,
+      );
       if (!secondaryPrice) {
         throw new HttpException(
           `Secondary price with id "${data.secondaryPriceId}" not found.`,
@@ -153,12 +153,17 @@ export class OffersService {
   }
 
   public async editOffer(id: number, data: OfferUpdateDTO, uuid: string) {
-    const offer = await this._offerRepository.findOne(id, { relations: ['item', 'mainPrice', 'secondaryPrice', 'market', 'market.user'] });
+    const offer = await this._offerRepository.findOne(id, {
+      relations: [
+        'item',
+        'mainPrice',
+        'secondaryPrice',
+        'market',
+        'market.user',
+      ],
+    });
     if (!offer) {
-      throw new HttpException(
-        'Offer not found.',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new HttpException('Offer not found.', HttpStatus.NOT_FOUND);
     }
     if (offer.market.user.id !== uuid) {
       throw new HttpException(
@@ -196,7 +201,9 @@ export class OffersService {
     }
 
     if (data.secondaryPriceId && offer.mainPrice.id !== data.secondaryPriceId) {
-      const secondaryPrice = await this._priceRepository.findOne(data.secondaryPriceId);
+      const secondaryPrice = await this._priceRepository.findOne(
+        data.secondaryPriceId,
+      );
       if (!secondaryPrice) {
         throw new HttpException(
           `Secondary price with id "${data.secondaryPriceId}" not found.`,
@@ -253,12 +260,11 @@ export class OffersService {
   }
 
   public async deleteOffer(id: number, uuid: string) {
-    const offer = await this._offerRepository.findOne(id, { relations: ['item', 'market', 'market.user'] });
+    const offer = await this._offerRepository.findOne(id, {
+      relations: ['item', 'market', 'market.user'],
+    });
     if (!offer) {
-      throw new HttpException(
-        'Offer not found.',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new HttpException('Offer not found.', HttpStatus.NOT_FOUND);
     }
     if (offer.market.user.id !== uuid) {
       throw new HttpException(
@@ -277,22 +283,21 @@ export class OffersService {
   }
 
   public async deleteAllOffers(uuid: string) {
-    const user = await this._userRepository.findOne(uuid, { relations: ['market'] });
+    const user = await this._userRepository.findOne(uuid, {
+      relations: ['market'],
+    });
     if (!user) {
-      throw new HttpException(
-        'User not found.',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
 
     if (!user.market) {
-      throw new HttpException(
-        'User has no market.',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new HttpException('User has no market.', HttpStatus.NOT_FOUND);
     }
 
-    const offers = await this._offerRepository.find({ where: { market: { user: { id: uuid } } }, relations: ['item', 'market', 'market.user'] });
+    const offers = await this._offerRepository.find({
+      where: { market: { user: { id: uuid } } },
+      relations: ['item', 'market', 'market.user'],
+    });
 
     await this._offerRepository.remove(offers);
 
@@ -304,19 +309,20 @@ export class OffersService {
   }
 
   public async syncOffers(data: OfferSyncDTO, uuid: string) {
-    const user = await this._userRepository.findOne(uuid, { relations: ['market', 'inventory', 'inventory.inventoryItems', 'inventory.inventoryItems.item'] });
+    const user = await this._userRepository.findOne(uuid, {
+      relations: [
+        'market',
+        'inventory',
+        'inventory.inventoryItems',
+        'inventory.inventoryItems.item',
+      ],
+    });
     if (!user) {
-      throw new HttpException(
-        'User not found.',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
 
     if (!user.market) {
-      throw new HttpException(
-        'User has no market.',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new HttpException('User has no market.', HttpStatus.NOT_FOUND);
     }
 
     if (!user.inventory) {
@@ -326,29 +332,44 @@ export class OffersService {
       );
     }
 
-    const response = { newOffers: [], newOffersCount: 0, updatedOffersCount: 0, deletedOffersCount: 0 };
+    const response = {
+      newOffers: [],
+      newOffersCount: 0,
+      updatedOffersCount: 0,
+      deletedOffersCount: 0,
+    };
     const changedOffers: Offer[] = [];
     const deletedOffers: Offer[] = [];
 
-    let existingOffers = await this._offerRepository.find({ where: { market: user.market }, relations: ['market', 'item'] });
+    let existingOffers = await this._offerRepository.find({
+      where: { market: user.market },
+      relations: ['market', 'item'],
+    });
     let rarities: string[] = [];
     if (data.rarity !== 31) {
       rarities = this._getRarityStrings(data.rarity);
-      existingOffers = existingOffers.filter(eo => rarities.includes(eo.item.tagRarity));
+      existingOffers = existingOffers.filter((eo) =>
+        rarities.includes(eo.item.tagRarity),
+      );
     }
 
     let wishes: Wish[];
     if (data.ignoreWishlistItems) {
-      wishes = await this._wishRepository.find({ where: { market: user.market }, relations: ['market', 'item'] });
+      wishes = await this._wishRepository.find({
+        where: { market: user.market },
+        relations: ['market', 'item'],
+      });
     }
 
-    let prices = await this._priceRepository.find();
+    const prices = await this._priceRepository.find();
 
     if (
-      !prices.some(p => p.id === data.mainPriceItem.id) ||
-      (data.secondaryPriceItem && !prices.some(p => p.id === data.secondaryPriceItem.id)) ||
-      !prices.some(p => p.id === data.mainPriceRecipe.id) ||
-      (data.secondaryPriceRecipe && !prices.some(p => p.id === data.secondaryPriceRecipe.id))
+      !prices.some((p) => p.id === data.mainPriceItem.id) ||
+      (data.secondaryPriceItem &&
+        !prices.some((p) => p.id === data.secondaryPriceItem.id)) ||
+      !prices.some((p) => p.id === data.mainPriceRecipe.id) ||
+      (data.secondaryPriceRecipe &&
+        !prices.some((p) => p.id === data.secondaryPriceRecipe.id))
     ) {
       throw new HttpException(
         'Some prices were not found in the database',
@@ -357,8 +378,8 @@ export class OffersService {
     }
 
     if (
-      !prices.find(p => p.id === data.mainPriceItem.id).canBeMain ||
-      !prices.find(p => p.id === data.mainPriceRecipe.id).canBeMain
+      !prices.find((p) => p.id === data.mainPriceItem.id).canBeMain ||
+      !prices.find((p) => p.id === data.mainPriceRecipe.id).canBeMain
     ) {
       throw new HttpException(
         'Some prices which cannot be the main price are configured as the main price.',
@@ -366,20 +387,25 @@ export class OffersService {
       );
     }
 
-    let ignoreListItems = (await this._itemRepository.findByIds(data.ignoreList.map(i => i.id))).filter(i => i.tradeable);
+    const ignoreListItems = (
+      await this._itemRepository.findByIds(data.ignoreList.map((i) => i.id))
+    ).filter((i) => i.tradeable);
 
     if (data.mode === 'both' || data.mode === 'new') {
-      const itemsToInsert = user.inventory.inventoryItems.filter(
-        ii => {
-          const toKeep = ii.item.tagSlot === 'recipe' ? data.keepRecipe : data.keepItem;
-          return (data.rarity === 31 || rarities.includes(ii.item.tagRarity)) &&
-            ii.amount > toKeep &&
-            !existingOffers.find(o => o.item.id === ii.item.id) &&
-            (!data.ignoreWishlistItems || !wishes.some(w => w.item.id === ii.item.id)) &&
-            !ignoreListItems.some(ili => ili.id === ii.item.id) &&
-            ii.item.tradeable &&
-            ii.item.tagSlot !== 'ingredient';
-        });
+      const itemsToInsert = user.inventory.inventoryItems.filter((ii) => {
+        const toKeep =
+          ii.item.tagSlot === 'recipe' ? data.keepRecipe : data.keepItem;
+        return (
+          (data.rarity === 31 || rarities.includes(ii.item.tagRarity)) &&
+          ii.amount > toKeep &&
+          !existingOffers.find((o) => o.item.id === ii.item.id) &&
+          (!data.ignoreWishlistItems ||
+            !wishes.some((w) => w.item.id === ii.item.id)) &&
+          !ignoreListItems.some((ili) => ili.id === ii.item.id) &&
+          ii.item.tradeable &&
+          ii.item.tagSlot !== 'ingredient'
+        );
+      });
 
       const offers: Offer[] = [];
       for (const itemToInsert of itemsToInsert) {
@@ -389,38 +415,61 @@ export class OffersService {
 
         let inStock: number;
         if (itemToInsert.item.tagSlot === 'recipe') {
-          inStock = itemToInsert.amount - data.keepRecipe >= 0 ? itemToInsert.amount - data.keepRecipe : 0;
+          inStock =
+            itemToInsert.amount - data.keepRecipe >= 0
+              ? itemToInsert.amount - data.keepRecipe
+              : 0;
         } else {
-          inStock = itemToInsert.amount - data.keepItem >= 0 ? itemToInsert.amount - data.keepItem : 0;
+          inStock =
+            itemToInsert.amount - data.keepItem >= 0
+              ? itemToInsert.amount - data.keepItem
+              : 0;
         }
         offer.quantity = inStock;
 
-        let mainPrice = itemToInsert.item.tagSlot === 'recipe' ?
-          prices.find(p => p.id === data.mainPriceRecipe.id) :
-          prices.find(p => p.id === data.mainPriceItem.id);
+        const mainPrice =
+          itemToInsert.item.tagSlot === 'recipe'
+            ? prices.find((p) => p.id === data.mainPriceRecipe.id)
+            : prices.find((p) => p.id === data.mainPriceItem.id);
         if (mainPrice.priceKey.startsWith('dynamic')) {
-          offer.mainPrice = this._resolveDynamicPrice(itemToInsert.item, mainPrice, prices);
+          offer.mainPrice = this._resolveDynamicPrice(
+            itemToInsert.item,
+            mainPrice,
+            prices,
+          );
         } else {
           offer.mainPrice = mainPrice;
         }
         if (offer.mainPrice.withAmount) {
-          offer.mainPriceAmount = itemToInsert.item.tagSlot === 'recipe' ? data.mainPriceAmountRecipe : data.mainPriceAmountItem;
+          offer.mainPriceAmount =
+            itemToInsert.item.tagSlot === 'recipe'
+              ? data.mainPriceAmountRecipe
+              : data.mainPriceAmountItem;
         }
 
-        let secondaryPrice = itemToInsert.item.tagSlot === 'recipe' ?
-          prices.find(p => p.id === data.secondaryPriceRecipe?.id) :
-          prices.find(p => p.id === data.secondaryPriceItem?.id);
-        let wantsBoth = itemToInsert.item.tagSlot === 'recipe' ?
-          data.wantsBothRecipe :
-          data.wantsBothItem;
+        const secondaryPrice =
+          itemToInsert.item.tagSlot === 'recipe'
+            ? prices.find((p) => p.id === data.secondaryPriceRecipe?.id)
+            : prices.find((p) => p.id === data.secondaryPriceItem?.id);
+        const wantsBoth =
+          itemToInsert.item.tagSlot === 'recipe'
+            ? data.wantsBothRecipe
+            : data.wantsBothItem;
         if (secondaryPrice) {
           if (secondaryPrice.priceKey.startsWith('dynamic')) {
-            offer.secondaryPrice = this._resolveDynamicPrice(itemToInsert.item, secondaryPrice, prices);
+            offer.secondaryPrice = this._resolveDynamicPrice(
+              itemToInsert.item,
+              secondaryPrice,
+              prices,
+            );
           } else {
             offer.secondaryPrice = secondaryPrice;
           }
           if (offer.secondaryPrice && offer.secondaryPrice.withAmount) {
-            offer.secondaryPriceAmount = itemToInsert.item.tagSlot === 'recipe' ? data.secondaryPriceAmountRecipe : data.secondaryPriceAmountItem;
+            offer.secondaryPriceAmount =
+              itemToInsert.item.tagSlot === 'recipe'
+                ? data.secondaryPriceAmountRecipe
+                : data.secondaryPriceAmountItem;
           }
           offer.wantsBoth = wantsBoth;
         }
@@ -430,7 +479,7 @@ export class OffersService {
       }
       const insertedNewOffers = await this._offerRepository.save(offers);
       response.newOffersCount = offers.length;
-      response.newOffers = insertedNewOffers.map(ino => ino.id);
+      response.newOffers = insertedNewOffers.map((ino) => ino.id);
       changedOffers.push(...offers);
     }
     if (data.mode === 'both' || data.mode === 'existing') {
@@ -439,15 +488,37 @@ export class OffersService {
       for (const offer of existingOffers) {
         // don't change items that are in the user's wishlist or in the ignoreList
         if (
-          data.ignoreWishlistItems && wishes.some(w => w.item.id === offer.item.id) ||
-          ignoreListItems.some(ili => ili.id === offer.item.id)
-          ) {
+          (data.ignoreWishlistItems &&
+            wishes.some((w) => w.item.id === offer.item.id)) ||
+          ignoreListItems.some((ili) => ili.id === offer.item.id)
+        ) {
           continue;
         }
-        if (user.inventory.inventoryItems.find(ii => ii.item.id === offer.item.id)) {
-          const toKeep = user.inventory.inventoryItems.find(ii => ii.item.id === offer.item.id).item.tagSlot === 'recipe' ? data.keepRecipe : data.keepItem;
-          const inStock = user.inventory.inventoryItems.find(ii => ii.item.id === offer.item.id).amount - toKeep >= 0 ? user.inventory.inventoryItems.find(ii => ii.item.id === offer.item.id).amount - toKeep : 0;
-          if (offer.quantity !== inStock && (!data.removeNoneOnStock || inStock !== 0)) {
+        if (
+          user.inventory.inventoryItems.find(
+            (ii) => ii.item.id === offer.item.id,
+          )
+        ) {
+          const toKeep =
+            user.inventory.inventoryItems.find(
+              (ii) => ii.item.id === offer.item.id,
+            ).item.tagSlot === 'recipe'
+              ? data.keepRecipe
+              : data.keepItem;
+          const inStock =
+            user.inventory.inventoryItems.find(
+              (ii) => ii.item.id === offer.item.id,
+            ).amount -
+              toKeep >=
+            0
+              ? user.inventory.inventoryItems.find(
+                  (ii) => ii.item.id === offer.item.id,
+                ).amount - toKeep
+              : 0;
+          if (
+            offer.quantity !== inStock &&
+            (!data.removeNoneOnStock || inStock !== 0)
+          ) {
             offer.quantity = inStock;
             offersToUpdate.push(offer);
           }
@@ -472,52 +543,62 @@ export class OffersService {
       deletedOffers.push(...offersToDelete);
     }
 
-    this._checkNotificationFor(changedOffers.filter(co => co.quantity !== 0), user);
+    this._checkNotificationFor(
+      changedOffers.filter((co) => co.quantity !== 0),
+      user,
+    );
 
-    this._checkDeleteNotificationFor([...deletedOffers, ...changedOffers.filter(co => co.quantity === 0)], user);
+    this._checkDeleteNotificationFor(
+      [...deletedOffers, ...changedOffers.filter((co) => co.quantity === 0)],
+      user,
+    );
 
     this._setLastUpdated(user.market);
 
     return response;
   }
 
-  private _resolveDynamicPrice(item: Item, dynamicPrice: Price, prices: Price[]): Price {
+  private _resolveDynamicPrice(
+    item: Item,
+    dynamicPrice: Price,
+    prices: Price[],
+  ): Price {
     switch (dynamicPrice.priceKey) {
       case 'dynamicRarity':
-        return prices.find(p => p.priceKey === item.tagRarity);
+        return prices.find((p) => p.priceKey === item.tagRarity);
       case 'dynamicCharacter':
         switch (item.tagCharacter) {
           case 'hunter':
-            return prices.find(p => p.priceKey === 'rusty_nails');
+            return prices.find((p) => p.priceKey === 'rusty_nails');
           case 'witch':
-            return prices.find(p => p.priceKey === 'odd_mushroom');
+            return prices.find((p) => p.priceKey === 'odd_mushroom');
           default:
             return null;
         }
       case 'dynamicEvent':
         switch (item.tagEvent) {
           case 'summerevent':
-            return prices.find(p => p.priceKey === 'shell');
+            return prices.find((p) => p.priceKey === 'shell');
           case 'halloween':
           case 'halloween2018':
           case 'halloween2019':
           case 'halloween2020':
-            return prices.find(p => p.priceKey === 'ectoplasm');
+            return prices.find((p) => p.priceKey === 'ectoplasm');
           case 'theater':
-            return prices.find(p => p.priceKey === 'red_string');
+            return prices.find((p) => p.priceKey === 'red_string');
           case 'plunderparty':
-            return prices.find(p => p.priceKey === 'coin');
+            return prices.find((p) => p.priceKey === 'coin');
           case 'winterdream':
           case 'winterdream witch':
           case 'winterdream2018':
           case 'winterdream2019':
           case 'winterdream2020':
           case 'winterdream2021':
-            return prices.find(p => p.priceKey === 'candy_cane');
+            return prices.find((p) => p.priceKey === 'candy_cane');
           case 'witchforest':
-            return prices.find(p => p.priceKey === 'morgaryll_flower');
+            return prices.find((p) => p.priceKey === 'morgaryll_flower');
           case 'mystic sands':
-            return prices.find(p => p.priceKey === 'scarab');
+            return prices.find((p) => p.priceKey === 'scarab');
           default:
             return null;
         }
@@ -527,18 +608,25 @@ export class OffersService {
   }
 
   private async _checkNotificationFor(offers: Offer[], user: User) {
-    let users = await this._userRepository.createQueryBuilder('user')
+    let users = await this._userRepository
+      .createQueryBuilder('user')
       .select('user.id')
       .leftJoinAndSelect('user.market', 'market')
       .leftJoinAndSelect('market.wishes', 'wishes')
       .leftJoinAndSelect('wishes.item', 'item')
       .getMany();
-    users = users.filter(u => u.id !== user.id);
+    users = users.filter((u) => u.id !== user.id);
     for (const userToNotify of users) {
       for (const wish of userToNotify.market.wishes) {
-        const offer = offers.find(o => o.item.id === wish.item.id && o.quantity > 0);
+        const offer = offers.find(
+          (o) => o.item.id === wish.item.id && o.quantity > 0,
+        );
         if (offer) {
-          this._notificationService.sendNotification(userToNotify.id, user, wish.item);
+          this._notificationService.sendNotification(
+            userToNotify.id,
+            user,
+            wish.item,
+          );
         }
       }
     }
@@ -548,7 +636,13 @@ export class OffersService {
     if (offers.length === 0) {
       return;
     }
-    let notifications = await this._notificationReposity.find({ where: { targetUser: { id: user.id }, targetItem: { id: In(offers.map(o => o.item.id)) } }, relations: ['targetUser', 'targetItem'] });
+    const notifications = await this._notificationReposity.find({
+      where: {
+        targetUser: { id: user.id },
+        targetItem: { id: In(offers.map((o) => o.item.id)) },
+      },
+      relations: ['targetUser', 'targetItem'],
+    });
     if (notifications.length === 0) {
       return;
     }
@@ -568,12 +662,16 @@ export class OffersService {
     const filler = new Array(rarityLength + 1).join('0');
     const negativeRarityLength = -Math.abs(rarityLength);
 
-    const binaryRarityString = (filler + rarityNumber.toString(2)).slice(negativeRarityLength);
+    const binaryRarityString = (filler + rarityNumber.toString(2)).slice(
+      negativeRarityLength,
+    );
 
     const rarities = [];
 
     for (const rarityEntry in RARITY) {
-      if (binaryRarityString[Object.keys(RARITY).indexOf(rarityEntry)] === '1') {
+      if (
+        binaryRarityString[Object.keys(RARITY).indexOf(rarityEntry)] === '1'
+      ) {
         rarities.push(RARITY[rarityEntry]);
       }
     }

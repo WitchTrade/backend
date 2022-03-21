@@ -5,7 +5,7 @@ import { QuestsService } from './quests.service';
 
 @Controller('quests')
 export class QuestsController {
-  constructor(private _questsService: QuestsService) { }
+  constructor(private _questsService: QuestsService) {}
 
   @UseGuards(AuthGuard)
   @Get()

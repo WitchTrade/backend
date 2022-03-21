@@ -9,7 +9,7 @@ import { SearchDTO } from './dtos/search.dto';
 
 enum QUERYTYPE {
   OFFERS,
-  WISHES
+  WISHES,
 }
 
 @Injectable()
@@ -20,14 +20,18 @@ export class SearchService {
     @InjectRepository(Offer)
     private _offerRepository: Repository<Offer>,
     @InjectRepository(Wish)
-    private _wishRepository: Repository<Wish>
-  ) { }
+    private _wishRepository: Repository<Wish>,
+  ) {}
 
   public async search(data: SearchDTO, uuid?: string) {
-    const tempOffers = await this._searchQuery(QUERYTYPE.OFFERS, data, uuid) as Offer[];
+    const tempOffers = (await this._searchQuery(
+      QUERYTYPE.OFFERS,
+      data,
+      uuid,
+    )) as Offer[];
     const offers = [];
     for (const tempOffer of tempOffers) {
-      const existingOffer = offers.find(o => o.id === tempOffer.item.id);
+      const existingOffer = offers.find((o) => o.id === tempOffer.item.id);
       if (existingOffer) {
         existingOffer.markets.push({
           quantity: tempOffer.quantity,
@@ -39,8 +43,8 @@ export class SearchService {
           user: {
             username: tempOffer.market.user.username,
             displayName: tempOffer.market.user.displayName,
-            verified: tempOffer.market.user.verified
-          }
+            verified: tempOffer.market.user.verified,
+          },
         });
       } else {
         offers.push({
@@ -56,10 +60,10 @@ export class SearchService {
               user: {
                 username: tempOffer.market.user.username,
                 displayName: tempOffer.market.user.displayName,
-                verified: tempOffer.market.user.verified
-              }
-            }
-          ]
+                verified: tempOffer.market.user.verified,
+              },
+            },
+          ],
         });
       }
     }
@@ -67,7 +71,7 @@ export class SearchService {
     const tempWishes = await this._searchQuery(QUERYTYPE.WISHES, data, uuid);
     const wishes = [];
     for (const tempWish of tempWishes) {
-      const existingWish = wishes.find(o => o.id === tempWish.item.id);
+      const existingWish = wishes.find((o) => o.id === tempWish.item.id);
       if (existingWish) {
         existingWish.markets.push({
           mainPrice: tempWish.mainPrice,
@@ -78,8 +82,8 @@ export class SearchService {
           user: {
             username: tempWish.market.user.username,
             displayName: tempWish.market.user.displayName,
-            verified: tempWish.market.user.verified
-          }
+            verified: tempWish.market.user.verified,
+          },
         });
       } else {
         wishes.push({
@@ -94,10 +98,10 @@ export class SearchService {
               user: {
                 username: tempWish.market.user.username,
                 displayName: tempWish.market.user.displayName,
-                verified: tempWish.market.user.verified
-              }
-            }
-          ]
+                verified: tempWish.market.user.verified,
+              },
+            },
+          ],
         });
       }
     }
@@ -105,14 +109,25 @@ export class SearchService {
     return { offers, wishes };
   }
 
-  private async _searchQuery(type: QUERYTYPE, data: SearchDTO, uuid?: string): Promise<Offer[] | Wish[]> {
+  private async _searchQuery(
+    type: QUERYTYPE,
+    data: SearchDTO,
+    uuid?: string,
+  ): Promise<Offer[] | Wish[]> {
     const oneMonthAgo = new Date();
     oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
 
     let query: SelectQueryBuilder<Offer> | SelectQueryBuilder<Wish>;
     if (type === QUERYTYPE.OFFERS) {
-      query = this._offerRepository.createQueryBuilder('offer')
-        .select(['offer.id', 'offer.quantity', 'offer.mainPriceAmount', 'offer.wantsBoth', 'offer.secondaryPriceAmount'])
+      query = this._offerRepository
+        .createQueryBuilder('offer')
+        .select([
+          'offer.id',
+          'offer.quantity',
+          'offer.mainPriceAmount',
+          'offer.wantsBoth',
+          'offer.secondaryPriceAmount',
+        ])
         .leftJoin('offer.mainPrice', 'mainPrice')
         .addSelect('mainPrice.priceKey')
         .leftJoin('offer.secondaryPrice', 'secondaryPrice')
@@ -123,10 +138,19 @@ export class SearchService {
         .addSelect(['user.username', 'user.displayName', 'user.verified'])
         .leftJoin('offer.item', 'item')
         .addSelect('item.id')
-        .where('offer.quantity > 0 AND user.hidden = 0 AND user.banned = 0 AND market.lastUpdated > :oneMonthAgo', { oneMonthAgo });
+        .where(
+          'offer.quantity > 0 AND user.hidden = 0 AND user.banned = 0 AND market.lastUpdated > :oneMonthAgo',
+          { oneMonthAgo },
+        );
     } else {
-      query = this._wishRepository.createQueryBuilder('wish')
-        .select(['wish.id', 'wish.mainPriceAmount', 'wish.wantsBoth', 'wish.secondaryPriceAmount'])
+      query = this._wishRepository
+        .createQueryBuilder('wish')
+        .select([
+          'wish.id',
+          'wish.mainPriceAmount',
+          'wish.wantsBoth',
+          'wish.secondaryPriceAmount',
+        ])
         .leftJoin('wish.mainPrice', 'mainPrice')
         .addSelect('mainPrice.priceKey')
         .leftJoin('wish.secondaryPrice', 'secondaryPrice')
@@ -137,7 +161,10 @@ export class SearchService {
         .addSelect(['user.username', 'user.displayName', 'user.verified'])
         .leftJoin('wish.item', 'item')
         .addSelect('item.id')
-        .where('user.hidden = 0 AND user.banned = 0 AND market.lastUpdated > :oneMonthAgo', { oneMonthAgo });
+        .where(
+          'user.hidden = 0 AND user.banned = 0 AND market.lastUpdated > :oneMonthAgo',
+          { oneMonthAgo },
+        );
     }
 
     if (data.itemId) {
@@ -146,45 +173,55 @@ export class SearchService {
       if (recipeId) {
         properties.push(':recipeId');
       }
-      query.andWhere(this._whereString('id', '=', properties), { itemId: data.itemId, recipeId });
+      query.andWhere(this._whereString('id', '=', properties), {
+        itemId: data.itemId,
+        recipeId,
+      });
     }
 
     if (data.character !== 'any') {
       const noneCharacter = data.character === 'none';
-      query.andWhere(this._whereString(
-        'tagCharacter',
-        noneCharacter ? 'IS' : '=',
-        [noneCharacter ? 'NULL' : ':character']
-      ), { character: data.character });
+      query.andWhere(
+        this._whereString('tagCharacter', noneCharacter ? 'IS' : '=', [
+          noneCharacter ? 'NULL' : ':character',
+        ]),
+        { character: data.character },
+      );
     }
 
     if (data.slot !== 'any') {
-      query.andWhere(this._whereString(
-        'tagSlot',
-        '=',
-        [':slot']
-      ), { slot: data.slot });
+      query.andWhere(this._whereString('tagSlot', '=', [':slot']), {
+        slot: data.slot,
+      });
     }
 
     if (data.event !== 'any') {
       const noneEvent = data.event === 'none';
-      query.andWhere(this._whereString(
-        'tagEvent',
-        noneEvent ? 'IS' : '=',
-        [noneEvent ? 'NULL' : ':event']
-      ), { event: data.event });
+      query.andWhere(
+        this._whereString('tagEvent', noneEvent ? 'IS' : '=', [
+          noneEvent ? 'NULL' : ':event',
+        ]),
+        { event: data.event },
+      );
     }
 
     if (data.rarity !== 'any') {
-      query.andWhere(this._whereString(
-        'tagRarity',
-        '=',
-        [':rarity']
-      ), { rarity: data.rarity });
+      query.andWhere(this._whereString('tagRarity', '=', [':rarity']), {
+        rarity: data.rarity,
+      });
     }
 
     if (uuid) {
-      const user = await this._userRepository.findOne(uuid, { relations: ['inventory', 'inventory.inventoryItems', 'inventory.inventoryItems.item', 'market', 'market.wishes', 'market.wishes.item'] });
+      const user = await this._userRepository.findOne(uuid, {
+        relations: [
+          'inventory',
+          'inventory.inventoryItems',
+          'inventory.inventoryItems.item',
+          'market',
+          'market.wishes',
+          'market.wishes.item',
+        ],
+      });
       if (data.inventoryType !== 'any') {
         if (!user.inventory) {
           throw new HttpException(
@@ -194,20 +231,29 @@ export class SearchService {
         }
         let inventoryItems = user.inventory.inventoryItems;
         if (data.inventoryType === 'duplicateown') {
-          inventoryItems = inventoryItems.filter(ii => ii.amount > 1);
+          inventoryItems = inventoryItems.filter((ii) => ii.amount > 1);
         }
-        if (data.inventoryType === 'owned' || data.inventoryType === 'duplicateown') {
-          query.andWhere(this._whereString('id', 'IN', ['(:...ids)']), { ids: inventoryItems.map(ii => ii.item.id) });
+        if (
+          data.inventoryType === 'owned' ||
+          data.inventoryType === 'duplicateown'
+        ) {
+          query.andWhere(this._whereString('id', 'IN', ['(:...ids)']), {
+            ids: inventoryItems.map((ii) => ii.item.id),
+          });
         }
         if (data.inventoryType === 'notowned') {
-          const ids = user.inventory.inventoryItems.map(ii => ii.item.id);
-          query.andWhere(this._whereString('id', 'NOT IN', ['(:...ids)']), { ids });
-          query.andWhere(this._whereString('tagSlot', '!=', ['\'recipe\'']));
-          query.andWhere(this._whereString('tagSlot', '!=', ['\'ingredient\'']));
+          const ids = user.inventory.inventoryItems.map((ii) => ii.item.id);
+          query.andWhere(this._whereString('id', 'NOT IN', ['(:...ids)']), {
+            ids,
+          });
+          query.andWhere(this._whereString('tagSlot', '!=', ["'recipe'"]));
+          query.andWhere(this._whereString('tagSlot', '!=', ["'ingredient'"]));
         }
       }
       if (data.onlyWishlistItems && user.market.wishes.length > 0) {
-        query.andWhere(this._whereString('id', 'IN', ['(:...wishIds)']), { wishIds: user.market.wishes.map(wish => wish.item.id) });
+        query.andWhere(this._whereString('id', 'IN', ['(:...wishIds)']), {
+          wishIds: user.market.wishes.map((wish) => wish.item.id),
+        });
       } else if (data.onlyWishlistItems) {
         return [];
       }
@@ -216,8 +262,12 @@ export class SearchService {
     return query.getMany();
   }
 
-  private _whereString(itemKey: string, comparer: string, properties: string[]) {
-    const parts = properties.map(property => {
+  private _whereString(
+    itemKey: string,
+    comparer: string,
+    properties: string[],
+  ) {
+    const parts = properties.map((property) => {
       return `item.${itemKey} ${comparer} ${property}`;
     });
     return `(${parts.join(' OR ')})`;

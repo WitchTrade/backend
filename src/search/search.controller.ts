@@ -6,12 +6,15 @@ import { SearchService } from './search.service';
 
 @Controller('search')
 export class SearchController {
-  constructor(private _searchService: SearchService) { }
+  constructor(private _searchService: SearchService) {}
 
   @UseGuards(OptionalAuthGuard)
   @Post()
   @HttpCode(200)
-  search(@Body() searchParameters: SearchDTO, @UserDecorator('id') uuid: string) {
+  search(
+    @Body() searchParameters: SearchDTO,
+    @UserDecorator('id') uuid: string,
+  ) {
     return this._searchService.search(searchParameters, uuid);
   }
 }

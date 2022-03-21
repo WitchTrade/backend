@@ -90,4 +90,4 @@ import { Quest } from './quests/entities/quest.entity';
   controllers: [],
   providers: [],
 })
-export class AppModule { }
+export class AppModule {}

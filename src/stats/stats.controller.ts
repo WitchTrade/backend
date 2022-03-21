@@ -3,7 +3,7 @@ import { StatsService } from './stats.service';
 
 @Controller('stats')
 export class StatsController {
-  constructor(private _statsService: StatsService) { }
+  constructor(private _statsService: StatsService) {}
 
   @Get('version')
   getVersion() {

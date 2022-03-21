@@ -9,6 +9,6 @@ import { SearchService } from './search.service';
 @Module({
   imports: [TypeOrmModule.forFeature([User, Offer, Wish])],
   controllers: [SearchController],
-  providers: [SearchService]
+  providers: [SearchService],
 })
-export class SearchModule { }
+export class SearchModule {}

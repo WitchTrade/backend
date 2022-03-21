@@ -13,19 +13,18 @@ export class NotificationsService {
     private _notificationRepository: Repository<Notification>,
     @InjectRepository(User)
     private _userRepository: Repository<User>,
-  ) { }
+  ) {}
 
   public async getNotificationsOfUser(uuid: string) {
     return this._notificationRepository.find({ where: { user: { id: uuid } } });
   }
 
   public async deleteNotification(id: number, uuid: string) {
-    const notification = await this._notificationRepository.findOne(id, { relations: ['user'] });
+    const notification = await this._notificationRepository.findOne(id, {
+      relations: ['user'],
+    });
     if (!notification) {
-      throw new HttpException(
-        'Notification not found.',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new HttpException('Notification not found.', HttpStatus.NOT_FOUND);
     }
     if (notification.user.id !== uuid) {
       throw new HttpException(
@@ -40,23 +39,36 @@ export class NotificationsService {
   }
 
   public async deleteAllNotifications(uuid: string) {
-    const notifications = await this._notificationRepository.find({ where: { user: { id: uuid } }, relations: ['user'] });
+    const notifications = await this._notificationRepository.find({
+      where: { user: { id: uuid } },
+      relations: ['user'],
+    });
 
     await this._notificationRepository.remove(notifications);
 
     return;
   }
 
-  public async sendNotification(wantUserId: string, haveUser: User, item: Item) {
+  public async sendNotification(
+    wantUserId: string,
+    haveUser: User,
+    item: Item,
+  ) {
     const notification = new Notification();
     notification.text = `in ${haveUser.displayName}'s market`;
-    notification.link = `https://witchtrade.org/@/${haveUser.username}?searchString=${item.name.split(' ').join('+')}&itemSlot=${getIdOfItemSlot(item.tagSlot)}`;
+    notification.link = `https://witchtrade.org/@/${
+      haveUser.username
+    }?searchString=${item.name.split(' ').join('+')}&itemSlot=${getIdOfItemSlot(
+      item.tagSlot,
+    )}`;
     notification.iconLink = item.iconUrl;
     notification.user = await this._userRepository.findOne(wantUserId);
     notification.targetUser = haveUser;
     notification.targetItem = item;
 
-    const alreadyExisting = await this._notificationRepository.findOne(notification);
+    const alreadyExisting = await this._notificationRepository.findOne(
+      notification,
+    );
     if (alreadyExisting) {
       return;
     }

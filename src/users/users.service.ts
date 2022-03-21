@@ -28,13 +28,13 @@ export class UsersService {
     private _priceRepository: Repository<Price>,
     @InjectRepository(Item)
     private _itemRepository: Repository<Item>,
-  ) { }
+  ) {}
 
   public async register(user: UserRegisterDTO): Promise<UserWithToken> {
     if (!user.steamProfileLink && !user.steamTradeLink) {
       throw new HttpException(
         'Please provide either a steam profile link or trade link.',
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
 
@@ -45,37 +45,47 @@ export class UsersService {
       where: [
         { username: user.username },
         { email: user.email },
-        { displayName: user.displayName }
-      ]
+        { displayName: user.displayName },
+      ],
     });
     if (existingUser) {
-      const duplicate = existingUser.username === user.username ? 'username' : existingUser.email === user.email ? 'email' : 'displayName';
+      const duplicate =
+        existingUser.username === user.username
+          ? 'username'
+          : existingUser.email === user.email
+          ? 'email'
+          : 'displayName';
       throw new HttpException(
         `User with this ${duplicate} already exists`,
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
 
-
     const createdUser = this._userRepository.create(user);
 
-    const dynamicRarityPrice = await this._priceRepository.findOne({ where: { priceKey: 'dynamicRarity' } });
+    const dynamicRarityPrice = await this._priceRepository.findOne({
+      where: { priceKey: 'dynamicRarity' },
+    });
 
     if (!dynamicRarityPrice) {
-      console.error('Dynamic rarity price not found while registering a new account.');
+      console.error(
+        'Dynamic rarity price not found while registering a new account.',
+      );
       throw new HttpException(
         'There was an error while creating your account.',
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
 
     const syncSettings = await this._syncSettingsRepository.save({
       mainPriceItem: dynamicRarityPrice,
-      mainPriceRecipe: dynamicRarityPrice
+      mainPriceRecipe: dynamicRarityPrice,
     });
     createdUser.syncSettings = syncSettings;
 
-    const market = await this._marketRepository.save({ lastUpdated: new Date() });
+    const market = await this._marketRepository.save({
+      lastUpdated: new Date(),
+    });
     createdUser.market = market;
 
     await this._userRepository.save(createdUser);
@@ -93,7 +103,10 @@ export class UsersService {
     const username = user.username.toLowerCase();
     const password = user.password;
 
-    const dbUser = await this._userRepository.findOne({ where: { username }, relations: ['roles', 'badges'] });
+    const dbUser = await this._userRepository.findOne({
+      where: { username },
+      relations: ['roles', 'badges'],
+    });
     if (!dbUser || !(await dbUser.comparePassword(password))) {
       throw new HttpException(
         'Invalid username or password.',
@@ -112,22 +125,28 @@ export class UsersService {
   }
 
   public async refresh(tokens: UserRefreshDTO): Promise<UserRefreshDTO> {
-    let decodedToken: { id: string, username: string, type: string, iat: number, exp: number; };
+    let decodedToken: {
+      id: string;
+      username: string;
+      type: string;
+      iat: number;
+      exp: number;
+    };
     try {
-      decodedToken = jwt.decode(tokens.token) as { id: string, username: string, type: string, iat: number, exp: number; };
+      decodedToken = jwt.decode(tokens.token) as {
+        id: string;
+        username: string;
+        type: string;
+        iat: number;
+        exp: number;
+      };
     } catch {
-      throw new HttpException(
-        'Invalid token provided',
-        HttpStatus.FORBIDDEN,
-      );
+      throw new HttpException('Invalid token provided', HttpStatus.FORBIDDEN);
     }
 
     const user = await this._userRepository.findOne(decodedToken.id);
     if (!user) {
-      throw new HttpException(
-        `User not found`,
-        HttpStatus.FORBIDDEN,
-      );
+      throw new HttpException(`User not found`, HttpStatus.FORBIDDEN);
     }
     if (user.banned) {
       throw new HttpException(
@@ -147,16 +166,18 @@ export class UsersService {
     }
 
     const newTokenUser = user.tokenResponse();
-    return { token: newTokenUser.token, refreshToken: newTokenUser.refreshToken };
+    return {
+      token: newTokenUser.token,
+      refreshToken: newTokenUser.refreshToken,
+    };
   }
 
   public async getCurrentUser(uuid: string): Promise<User> {
-    const user = await this._userRepository.findOne(uuid, { relations: ['roles', 'badges'] });
+    const user = await this._userRepository.findOne(uuid, {
+      relations: ['roles', 'badges'],
+    });
     if (!user) {
-      throw new HttpException(
-        'User not found.',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
 
     user.lastOnline = new Date();
@@ -174,35 +195,36 @@ export class UsersService {
         'syncSettings.secondaryPriceItem',
         'syncSettings.mainPriceRecipe',
         'syncSettings.secondaryPriceRecipe',
-        'syncSettings.ignoreList'
-      ]
+        'syncSettings.ignoreList',
+      ],
     });
     if (!user) {
-      throw new HttpException(
-        'User not found.',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
 
     return user.syncSettings;
   }
 
-  public async updateSyncSettings(data: SyncSettingsUpdateDTO, uuid: string): Promise<SyncSettings> {
-    const user = await this._userRepository.findOne(uuid, { relations: ['syncSettings'] });
+  public async updateSyncSettings(
+    data: SyncSettingsUpdateDTO,
+    uuid: string,
+  ): Promise<SyncSettings> {
+    const user = await this._userRepository.findOne(uuid, {
+      relations: ['syncSettings'],
+    });
     if (!user) {
-      throw new HttpException(
-        'User not found.',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
 
     const prices = await this._priceRepository.find();
 
     if (
-      !prices.some(p => p.id === data.mainPriceItem.id) ||
-      (data.secondaryPriceItem && !prices.some(p => p.id === data.secondaryPriceItem.id)) ||
-      !prices.some(p => p.id === data.mainPriceRecipe.id) ||
-      (data.secondaryPriceRecipe && !prices.some(p => p.id === data.secondaryPriceRecipe.id))
+      !prices.some((p) => p.id === data.mainPriceItem.id) ||
+      (data.secondaryPriceItem &&
+        !prices.some((p) => p.id === data.secondaryPriceItem.id)) ||
+      !prices.some((p) => p.id === data.mainPriceRecipe.id) ||
+      (data.secondaryPriceRecipe &&
+        !prices.some((p) => p.id === data.secondaryPriceRecipe.id))
     ) {
       throw new HttpException(
         'Some prices were not found in the database',
@@ -211,8 +233,8 @@ export class UsersService {
     }
 
     if (
-      !prices.find(p => p.id === data.mainPriceItem.id).canBeMain ||
-      !prices.find(p => p.id === data.mainPriceRecipe.id).canBeMain
+      !prices.find((p) => p.id === data.mainPriceItem.id).canBeMain ||
+      !prices.find((p) => p.id === data.mainPriceRecipe.id).canBeMain
     ) {
       throw new HttpException(
         'Some prices which cannot be the main price are configured as the main price.',
@@ -227,7 +249,9 @@ export class UsersService {
     syncSettings.mode = data.mode;
     syncSettings.rarity = data.rarity;
 
-    syncSettings.mainPriceItem = prices.find(p => p.id === data.mainPriceItem.id);
+    syncSettings.mainPriceItem = prices.find(
+      (p) => p.id === data.mainPriceItem.id,
+    );
     if (syncSettings.mainPriceItem.withAmount) {
       if (!data.mainPriceAmountItem) {
         throw new HttpException(
@@ -238,9 +262,10 @@ export class UsersService {
       syncSettings.mainPriceAmountItem = data.mainPriceAmountItem;
     }
 
-
     if (data.secondaryPriceItem) {
-      syncSettings.secondaryPriceItem = prices.find(p => p.id === data.secondaryPriceItem.id);
+      syncSettings.secondaryPriceItem = prices.find(
+        (p) => p.id === data.secondaryPriceItem.id,
+      );
       if (syncSettings.secondaryPriceItem.withAmount) {
         if (!data.secondaryPriceAmountItem) {
           throw new HttpException(
@@ -255,7 +280,9 @@ export class UsersService {
       syncSettings.secondaryPriceItem = null;
     }
 
-    syncSettings.mainPriceRecipe = prices.find(p => p.id === data.mainPriceRecipe.id);
+    syncSettings.mainPriceRecipe = prices.find(
+      (p) => p.id === data.mainPriceRecipe.id,
+    );
     if (syncSettings.mainPriceRecipe.withAmount) {
       if (!data.mainPriceAmountRecipe) {
         throw new HttpException(
@@ -267,7 +294,9 @@ export class UsersService {
     }
 
     if (data.secondaryPriceRecipe) {
-      syncSettings.secondaryPriceRecipe = prices.find(p => p.id === data.secondaryPriceRecipe.id);
+      syncSettings.secondaryPriceRecipe = prices.find(
+        (p) => p.id === data.secondaryPriceRecipe.id,
+      );
       if (syncSettings.secondaryPriceRecipe.withAmount) {
         if (!data.secondaryPriceAmountRecipe) {
           throw new HttpException(
@@ -275,7 +304,8 @@ export class UsersService {
             HttpStatus.NOT_FOUND,
           );
         }
-        syncSettings.secondaryPriceAmountRecipe = data.secondaryPriceAmountRecipe;
+        syncSettings.secondaryPriceAmountRecipe =
+          data.secondaryPriceAmountRecipe;
       }
       syncSettings.wantsBothRecipe = data.wantsBothRecipe;
     } else {
@@ -287,26 +317,32 @@ export class UsersService {
     syncSettings.ignoreWishlistItems = data.ignoreWishlistItems;
     syncSettings.removeNoneOnStock = data.removeNoneOnStock;
 
-    syncSettings.ignoreList = (await this._itemRepository.findByIds(data.ignoreList.map(i => i.id))).filter(i => i.tradeable);
+    syncSettings.ignoreList = (
+      await this._itemRepository.findByIds(data.ignoreList.map((i) => i.id))
+    ).filter((i) => i.tradeable);
 
-    const updatedSyncSettings = await this._syncSettingsRepository.save(syncSettings);
+    const updatedSyncSettings = await this._syncSettingsRepository.save(
+      syncSettings,
+    );
 
     return updatedSyncSettings;
   }
 
-  public async updateUser(data: UserUpdateDTO, uuid: string): Promise<UserWithToken> {
-    const user = await this._userRepository.findOne(uuid, { relations: ['roles', 'badges'] });
+  public async updateUser(
+    data: UserUpdateDTO,
+    uuid: string,
+  ): Promise<UserWithToken> {
+    const user = await this._userRepository.findOne(uuid, {
+      relations: ['roles', 'badges'],
+    });
     if (!user) {
-      throw new HttpException(
-        'User not found.',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
 
     if (!data.steamProfileLink && !data.steamTradeLink) {
       throw new HttpException(
         'Please provide either a steam profile link or trade link.',
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
 
@@ -332,7 +368,9 @@ export class UsersService {
 
     user.email = data.email;
     user.displayName = data.displayName;
-    user.steamProfileLink = data.steamProfileLink ? data.steamProfileLink : null;
+    user.steamProfileLink = data.steamProfileLink
+      ? data.steamProfileLink
+      : null;
     user.steamTradeLink = data.steamTradeLink ? data.steamTradeLink : null;
     user.discordTag = data.discordTag ? data.discordTag : null;
     user.usingSteamGuard = data.usingSteamGuard;
@@ -341,14 +379,15 @@ export class UsersService {
     const existingUser = await this._userRepository.findOne({
       where: [
         { username: Not(user.username), email: user.email },
-        { username: Not(user.username), displayName: user.displayName }
-      ]
+        { username: Not(user.username), displayName: user.displayName },
+      ],
     });
     if (existingUser) {
-      const duplicate = existingUser.email === user.email ? 'email' : 'displayName';
+      const duplicate =
+        existingUser.email === user.email ? 'email' : 'displayName';
       throw new HttpException(
         `User with this ${duplicate} already exists`,
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
 
@@ -361,19 +400,15 @@ export class UsersService {
   }
 
   public async changePassword(data: UserChangePasswordDTO, uuid: string) {
-    const user = await this._userRepository.findOne(uuid, { relations: ['roles', 'badges'] });
+    const user = await this._userRepository.findOne(uuid, {
+      relations: ['roles', 'badges'],
+    });
     if (!user) {
-      throw new HttpException(
-        'User not found.',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
 
     if (!(await user.comparePassword(data.oldPassword))) {
-      throw new HttpException(
-        'Invalid old password.',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('Invalid old password.', HttpStatus.BAD_REQUEST);
     }
 
     user.password = data.password;
@@ -388,7 +423,10 @@ export class UsersService {
   }
 
   public async getPublicUser(username: string): Promise<PublicUser> {
-    const user = await this._userRepository.findOne({ where: { username, banned: false }, relations: ['roles', 'badges'] });
+    const user = await this._userRepository.findOne({
+      where: { username, banned: false },
+      relations: ['roles', 'badges'],
+    });
     if (!user) {
       throw new HttpException(
         'User not found or has been banned.',

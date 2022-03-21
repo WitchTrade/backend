@@ -6,7 +6,8 @@ export class UserChangePasswordDTO {
 
   @IsString()
   @Matches(/^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d\w\W]{8,}$/, {
-    message: 'Password must be at least 8 characters long, contain at least 1 letter and 1 number'
+    message:
+      'Password must be at least 8 characters long, contain at least 1 letter and 1 number',
   })
   password: string;
 }
