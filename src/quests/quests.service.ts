@@ -46,8 +46,7 @@ export class QuestsService {
     const steamUrlIdRegex = user.steamProfileLink.match(/^https:\/\/steamcommunity\.com\/profiles\/([^/]+).*$/);
     const steamProfileId = steamUrlIdRegex[1];
 
-    // TODO: Replace 1234 with steamProfileId
-    const questResponse = (await this._getQuests('1234')).data;
+    const questResponse = (await this._getQuests(steamProfileId)).data;
     if (!questResponse.success) {
       console.error(`Failed to get quests from steam account ${steamProfileId}`);
       console.error(questResponse.errorCode);
