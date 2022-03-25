@@ -10,6 +10,7 @@ import { SteamItemAsset } from './models/steamItemAsset.model';
 import { SteamItemDescription } from './models/steamItemDescription.model';
 import { SteamFetcherService } from './steamFetcher.service';
 import { Badge } from 'src/users/entities/badge.entity';
+import { isKnownEventItem } from 'src/static/knownEventItems';
 
 @Injectable()
 export class SteamService {
@@ -88,9 +89,12 @@ export class SteamService {
       );
       // if weird stuff happens, this is being called
       if (!item) {
-        console.error(
-          `Item "${ai.name}" not found in WitchTrade database. Steam Profile Id: ${steamProfileId}`,
-        );
+        // Ignore known event items that sometimes appear in inventories
+        if (!isKnownEventItem(ai.name, ai.tagSlot)) {
+          console.error(
+            `Item "${ai.name}" not found in WitchTrade database. Steam Profile Id: ${steamProfileId}`,
+          );
+        }
       } else {
         newInventoryItems.push({ item, amount: ai.amount });
       }

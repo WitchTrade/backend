@@ -33,7 +33,7 @@ export class GameserversService {
   public async _fetchServerInfos(serverHosts: string[]) {
     let serverInfos: ServerInfo[] = [];
     let finisher: (value: unknown) => void;
-    const finished = new Promise((resolve, reject) => {
+    const finished = new Promise((resolve) => {
       finisher = resolve;
     });
     const fetchStatus: FetchStatus = {
