@@ -93,7 +93,7 @@ export class User {
   @JoinTable()
   badges: Badge[];
 
-  @Column()
+  @Column({ nullable: true })
   questsCachedAt: Date;
 
   @OneToMany(() => UserQuest, (userQuest) => userQuest.user)
