@@ -335,7 +335,9 @@ export class OffersService {
     const response = {
       newOffers: [],
       newOffersCount: 0,
+      updatedOffers: [],
       updatedOffersCount: 0,
+      deletedOffers: [],
       deletedOffersCount: 0,
     };
     const changedOffers: Offer[] = [];
@@ -483,6 +485,7 @@ export class OffersService {
       changedOffers.push(...offers);
     }
     if (data.mode === 'both' || data.mode === 'existing') {
+      const updatedOffers = [];
       const offersToUpdate: Offer[] = [];
       const offersToDelete: Offer[] = [];
       for (const offer of existingOffers) {
@@ -519,6 +522,11 @@ export class OffersService {
             offer.quantity !== inStock &&
             (!data.removeNoneOnStock || inStock !== 0)
           ) {
+            updatedOffers.push({
+              id: offer.id,
+              oldQuantity: offer.quantity,
+              newQuantity: inStock,
+            });
             offer.quantity = inStock;
             offersToUpdate.push(offer);
           }
@@ -527,6 +535,11 @@ export class OffersService {
           }
         } else {
           if (offer.quantity !== 0 && !data.removeNoneOnStock) {
+            updatedOffers.push({
+              id: offer.id,
+              oldQuantity: offer.quantity,
+              newQuantity: 0,
+            });
             offer.quantity = 0;
             offersToUpdate.push(offer);
           }
@@ -538,8 +551,12 @@ export class OffersService {
       await this._offerRepository.save(offersToUpdate);
       await this._offerRepository.remove(offersToDelete);
       response.updatedOffersCount = offersToUpdate.length;
+      response.updatedOffers = updatedOffers;
       response.deletedOffersCount = offersToDelete.length;
       changedOffers.push(...offersToUpdate);
+      response.deletedOffers = deletedOffers.map(
+        (deletedOffer) => deletedOffer.id,
+      );
       deletedOffers.push(...offersToDelete);
     }
 
