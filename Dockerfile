@@ -1,16 +1,16 @@
 # Install dependencies only when needed
 FROM node:16.12.0-alpine3.14 AS deps
 WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
 
 # Rebuild the source code only when needed
 FROM node:16.12.0-alpine3.14 AS builder
 WORKDIR /app
-COPY package.json package-lock.json tsconfig.json tsconfig.build.json nest-cli.json ./
+COPY package.json yarn.lock tsconfig.json tsconfig.build.json nest-cli.json ./
 COPY ./src ./src
 COPY --from=deps /app/node_modules ./node_modules
-RUN npm run build && npm install
+RUN yarn build && yarn install
 
 # Production image, copy all the files and run nest
 FROM node:16.12.0-alpine3.14 AS runner
@@ -29,4 +29,4 @@ USER nestjs
 
 EXPOSE 3001
 
-CMD ["npm", "run", "start:prod"]
+CMD ["yarn", "start:prod"]
