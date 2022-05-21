@@ -345,7 +345,7 @@ export class OffersService {
 
     let existingOffers = await this._offerRepository.find({
       where: { market: user.market },
-      relations: ['market', 'item'],
+      relations: ['market', 'item', 'mainPrice', 'secondaryPrice'],
     });
     let rarities: string[] = [];
     if (data.rarity !== 31) {
@@ -550,14 +550,13 @@ export class OffersService {
       }
       await this._offerRepository.save(offersToUpdate);
       await this._offerRepository.remove(offersToDelete);
+      deletedOffers.push(...offersToDelete);
+      changedOffers.push(...offersToUpdate);
+
       response.updatedOffersCount = offersToUpdate.length;
       response.updatedOffers = updatedOffers;
       response.deletedOffersCount = offersToDelete.length;
-      changedOffers.push(...offersToUpdate);
-      response.deletedOffers = deletedOffers.map(
-        (deletedOffer) => deletedOffer.id,
-      );
-      deletedOffers.push(...offersToDelete);
+      response.deletedOffers = deletedOffers;
     }
 
     this._checkNotificationFor(
