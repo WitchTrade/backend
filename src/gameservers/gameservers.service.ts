@@ -99,7 +99,7 @@ export class GameserversService {
         name: serverRes.name,
         playerCount:
           infos.PlayerCount_i === undefined
-            ? serverRes.players
+            ? undefined
             : parseInt(infos.PlayerCount_i),
         maxPlayers: serverRes.maxPlayers,
         gameMode: infos.GameMode_s,
@@ -121,6 +121,8 @@ export class GameserversService {
     try {
       playerRes = await queryGameServerPlayer(server, 3, [2000, 2000, 4000]);
     } catch (err) {
+      const index = serverInfos.findIndex((s) => s.name === serverName);
+      serverInfos[index].playerCount = 0;
       console.error(`Error getting players for ${server}, ${serverName}`);
       fetchStatus.resolvedPlayers++;
       this._checkIfFinished(fetchStatus);
@@ -133,6 +135,9 @@ export class GameserversService {
       });
     const index = serverInfos.findIndex((s) => s.name === serverName);
     serverInfos[index].players = players;
+    if (serverInfos[index].playerCount === undefined) {
+      serverInfos[index].playerCount = players.length;
+    }
     fetchStatus.resolvedPlayers++;
     this._checkIfFinished(fetchStatus);
   }
