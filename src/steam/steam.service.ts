@@ -242,10 +242,10 @@ export class SteamService {
     const missingItemCount = (
       await this._itemRepository.query(
         `SELECT i.id FROM item as i ` +
-          `where NOT EXISTS (SELECT ii.itemId FROM inventory_item as ii where ii.inventoryId = ${user.inventory.id} ` +
-          `AND ii.itemId = i.id) ` +
-          `AND i.tagSlot != 'ingredient' ` +
-          `AND i.tagSlot != 'recipe' ` +
+          `where NOT EXISTS (SELECT ii."itemId" FROM inventory_item as ii where ii."inventoryId" = ${user.inventory.id} ` +
+          `AND ii."itemId" = i.id) ` +
+          `AND i."tagSlot" != 'ingredient' ` +
+          `AND i."tagSlot" != 'recipe' ` +
           `AND i.tradeable = TRUE;`,
       )
     ).length;
