@@ -35,7 +35,7 @@ import { Quest } from './quests/entities/quest.entity';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      type: 'mariadb',
+      type: 'postgres',
       host: process.env.DATABASEHOST,
       port: parseInt(process.env.DATABASEPORT, 10),
       username: process.env.DATABASEUSER,
@@ -59,19 +59,17 @@ import { Quest } from './quests/entities/quest.entity';
         UserQuest,
         Quest,
       ],
-      charset: 'utf8mb4_general_ci',
       synchronize: true,
     }),
     TypeOrmModule.forRoot({
       name: 'wistats',
-      type: 'mariadb',
+      type: 'postgres',
       host: process.env.STATS_DATABASEHOST,
       port: parseInt(process.env.STATS_DATABASEPORT, 10),
       username: process.env.STATS_DATABASEUSER,
       password: process.env.STATS_DATABASEPW,
       database: 'wistats',
       entities: [Stats],
-      charset: 'utf8mb4_general_ci',
       synchronize: false,
     }),
     ScheduleModule.forRoot(),
