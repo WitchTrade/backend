@@ -32,7 +32,7 @@ export class MarketsService {
       .select(['user.username', 'user.displayName', 'user.verified'])
       .leftJoinAndSelect('user.market', 'market')
       .where(
-        'user.hidden = 0 AND user.banned = 0 AND market.lastUpdated > :oneMonthAgo',
+        'user.hidden = FALSE AND user.banned = FALSE AND market.lastUpdated > :oneMonthAgo',
         { oneMonthAgo },
       )
       .getMany();

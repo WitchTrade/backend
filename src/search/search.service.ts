@@ -139,7 +139,7 @@ export class SearchService {
         .leftJoin('offer.item', 'item')
         .addSelect('item.id')
         .where(
-          'offer.quantity > 0 AND user.hidden = 0 AND user.banned = 0 AND market.lastUpdated > :oneMonthAgo',
+          'offer.quantity > 0 AND user.hidden = FALSE AND user.banned = FALSE AND market.lastUpdated > :oneMonthAgo',
           { oneMonthAgo },
         );
     } else {
@@ -162,7 +162,7 @@ export class SearchService {
         .leftJoin('wish.item', 'item')
         .addSelect('item.id')
         .where(
-          'user.hidden = 0 AND user.banned = 0 AND market.lastUpdated > :oneMonthAgo',
+          'user.hidden = FALSE AND user.banned = FALSE AND market.lastUpdated > :oneMonthAgo',
           { oneMonthAgo },
         );
     }

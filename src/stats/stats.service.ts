@@ -31,7 +31,7 @@ export class StatsService {
       .leftJoin('offer.market', 'market')
       .leftJoin('market.user', 'user')
       .where(
-        'offer.quantity > 0 AND user.hidden = 0 AND user.banned = 0 AND market.lastUpdated > :oneMonthAgo',
+        'offer.quantity > 0 AND user.hidden = FALSE AND user.banned = FALSE AND market.lastUpdated > :oneMonthAgo',
         { oneMonthAgo },
       )
       .getRawOne();

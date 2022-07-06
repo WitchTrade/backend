@@ -246,14 +246,14 @@ export class SteamService {
           `AND ii.itemId = i.id) ` +
           `AND i.tagSlot != 'ingredient' ` +
           `AND i.tagSlot != 'recipe' ` +
-          `AND i.tradeable = 1;`,
+          `AND i.tradeable = TRUE;`,
       )
     ).length;
     const totalItemCount = await this._itemRepository
       .createQueryBuilder('i')
       .where("i.tagSlot != 'ingredient'")
       .andWhere("i.tagSlot != 'recipe'")
-      .andWhere('i.tradeable = 1')
+      .andWhere('i.tradeable = TRUE')
       .getCount();
 
     const steps = [100, 75, 50, 25];
