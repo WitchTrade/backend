@@ -33,6 +33,7 @@ export class SearchDTO {
     'halloween2018',
     'halloween2019',
     'halloween2020',
+    'halloween2022',
     'plunderparty',
     'springfever',
     'summerevent',

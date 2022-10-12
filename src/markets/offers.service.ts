@@ -599,6 +599,7 @@ export class OffersService {
           case 'halloween2018':
           case 'halloween2019':
           case 'halloween2020':
+          case 'halloween2022':
             return prices.find((p) => p.priceKey === 'ectoplasm');
           case 'theater':
             return prices.find((p) => p.priceKey === 'red_string');
