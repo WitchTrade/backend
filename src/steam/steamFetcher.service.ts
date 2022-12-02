@@ -91,6 +91,9 @@ export class SteamFetcherService {
                   HttpStatus.BAD_REQUEST,
                 );
               } else if (e.response.status === 429) {
+                console.error(
+                  `429 by ${steamProfileId} at ${new Date().toISOString()}`,
+                );
                 throw new HttpException(
                   `Steam rate limit reached, please try again later.`,
                   HttpStatus.BAD_REQUEST,
