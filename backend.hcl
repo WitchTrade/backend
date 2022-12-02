@@ -16,7 +16,7 @@ job "witchtrade-be" {
       name = "witchtrade-be"
       port = "http"
       provider = "nomad"
-      
+
       tags = [
         "traefik.enable=true",
         "traefik.http.routers.wtbe.rule=Host(`witchtrade.org`)&&PathPrefix(`/api`)",
@@ -53,7 +53,7 @@ job "witchtrade-be" {
         SECRET = "SECRET"
         REFRESHSECRET = "SECRET"
         GAMESERVERCACHETIME = "10000"
-        STEAMINVCACHETIME = "600000"
+        STEAMINVCACHETIME = "1800000"
         STEAMAPIKEY = "KEY"
         AUTOSYNCDELAY = "10000"
         STEAM_REALM = "https://witchtrade.org"
@@ -63,6 +63,7 @@ job "witchtrade-be" {
         QUEST_CACHETIME = "300000"
         QUEST_ENDPOINT ="ENDPOINT"
         QUEST_AUTH_TOKEN = "TOKEN"
+        USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36"
       }
 
       config {

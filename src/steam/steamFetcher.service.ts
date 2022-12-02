@@ -70,6 +70,14 @@ export class SteamFetcherService {
           `https://steamcommunity.com/inventory/${steamProfileId}/559650/2?l=english&count=5000${
             lastAssedId ? `&start_assetid=${lastAssedId}` : ''
           }`,
+          {
+            headers: {
+              'User-Agent': process.env.USER_AGENT,
+              Referer: `https://steamcommunity.com/inventory/${steamProfileId}/559650/2?l=english&count=5000${
+                lastAssedId ? `&start_assetid=${lastAssedId}` : ''
+              }`,
+            },
+          },
         )
         .pipe(
           catchError((e) => {
@@ -80,6 +88,11 @@ export class SteamFetcherService {
               if (e.response.status === 403) {
                 throw new HttpException(
                   `Your steam inventory is not public. witchtrade.org can't access it.`,
+                  HttpStatus.BAD_REQUEST,
+                );
+              } else if (e.response.status === 429) {
+                throw new HttpException(
+                  `Steam rate limit reached, please try again later.`,
                   HttpStatus.BAD_REQUEST,
                 );
               } else {
