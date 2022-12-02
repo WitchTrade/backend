@@ -55,7 +55,6 @@ job "witchtrade-be" {
         GAMESERVERCACHETIME = "10000"
         STEAMINVCACHETIME = "1800000"
         STEAMAPIKEY = "KEY"
-        AUTOSYNCDELAY = "10000"
         STEAM_REALM = "https://witchtrade.org"
         STEAM_RETURNURL = "https://witchtrade.org/user/settings/account"
         STEAMMASTERSERVER = "hl2master.steampowered.com:27011"

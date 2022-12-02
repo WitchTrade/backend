@@ -1,17 +1,13 @@
 import { HttpService } from '@nestjs/axios';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { catchError, EMPTY, firstValueFrom } from 'rxjs';
+import { catchError, firstValueFrom } from 'rxjs';
 import { SteamInventoryResponse } from './models/steamInventoryResponse.model';
 
 @Injectable()
 export class SteamFetcherService {
   constructor(private _httpService: HttpService) {}
 
-  public async getSteamProfileId(
-    steamUrl: string,
-    autoSync?: boolean,
-    failed?: any,
-  ): Promise<string> {
+  public async getSteamProfileId(steamUrl: string): Promise<string> {
     let steamProfileId: string;
 
     const steamUrlUsernameRegex = steamUrl.match(
@@ -27,10 +23,6 @@ export class SteamFetcherService {
       if (response.status === 200 && response.data.response.success === 1) {
         steamProfileId = response.data.response.steamid;
       } else {
-        if (autoSync) {
-          failed(response.status === 200);
-          return;
-        }
         throw new HttpException(
           `Steam profile not found. Please check your configured Steam profile in the account settings.`,
           HttpStatus.BAD_REQUEST,
@@ -46,10 +38,6 @@ export class SteamFetcherService {
     }
 
     if (!steamProfileId) {
-      if (autoSync) {
-        failed(true);
-        return;
-      }
       throw new HttpException(
         `Steam profile not found. Please check your configured Steam profile in the account settings.`,
         HttpStatus.BAD_REQUEST,
@@ -61,8 +49,6 @@ export class SteamFetcherService {
   public async fetchInventoryPage(
     steamProfileId: string,
     lastAssedId?: string,
-    autoSync?: boolean,
-    failed?: any,
   ) {
     return firstValueFrom(
       this._httpService
@@ -81,9 +67,11 @@ export class SteamFetcherService {
         )
         .pipe(
           catchError((e) => {
-            if (autoSync) {
-              failed(e.response.status === 403);
-              return EMPTY;
+            if (e.response.status === 403) {
+              throw new HttpException(
+                `Your steam inventory is not public. witchtrade.org can't access it.`,
+                HttpStatus.BAD_REQUEST,
+              );
             } else {
               if (e.response.status === 403) {
                 throw new HttpException(

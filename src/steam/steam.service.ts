@@ -30,20 +30,16 @@ export class SteamService {
     private _steamFetcherService: SteamFetcherService,
   ) {}
 
-  public async syncInventory(uuid: string, autoSync?: boolean, failed?: any) {
+  public async syncInventory(uuid: string) {
     const user = await this._userRepository.findOne(uuid, {
       relations: ['inventory', 'badges'],
     });
     if (!user) {
-      if (autoSync) {
-        failed(true);
-        return;
-      }
       throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
 
     const now = new Date();
-    if (user.inventory && !autoSync) {
+    if (user.inventory) {
       const sinceLastSync = now.getTime() - user.inventory.lastSynced.getTime();
       if (sinceLastSync < this._steamInvCacheTime) {
         throw new HttpException(
@@ -56,10 +52,6 @@ export class SteamService {
     }
 
     if (!user.steamProfileLink) {
-      if (autoSync) {
-        failed(true);
-        return;
-      }
       throw new HttpException(
         `No steam profile link set. Please configure one in your account settings.`,
         HttpStatus.BAD_REQUEST,
@@ -68,15 +60,9 @@ export class SteamService {
 
     const steamProfileId = await this._steamFetcherService.getSteamProfileId(
       user.steamProfileLink,
-      autoSync,
-      failed,
     );
 
-    const abstractItems = await this._getAbstractSteamItems(
-      steamProfileId,
-      autoSync,
-      failed,
-    );
+    const abstractItems = await this._getAbstractSteamItems(steamProfileId);
 
     const items = await this._itemRepository.find();
 
@@ -123,8 +109,6 @@ export class SteamService {
 
   private async _getAbstractSteamItems(
     steamProfileId: string,
-    autoSync: boolean,
-    failed: any,
   ): Promise<AbstractItem[]> {
     const descriptions: SteamItemDescription[] = [];
     const assets: SteamItemAsset[] = [];
@@ -136,8 +120,6 @@ export class SteamService {
       const response = await this._steamFetcherService.fetchInventoryPage(
         steamProfileId,
         lastAssedId,
-        autoSync,
-        failed,
       );
       console.log(`200 by ${steamProfileId} at ${new Date().toISOString()}`);
       assets.push(...response.data.assets);

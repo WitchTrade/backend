@@ -16,7 +16,6 @@ import { UserLoginDTO } from './dtos/login.dto';
 import { UserRefreshDTO } from './dtos/refresh.dto';
 import { UserRegisterDTO } from './dtos/register.dto';
 import { UserUpdateDTO } from './dtos/update.dto';
-import { SyncSettingsUpdateDTO } from './dtos/updateSyncSettings.dto';
 import { SyncSettings } from './entities/syncSettings.entity';
 import { PublicUser, User, UserWithToken } from './entities/user.entity';
 import { UsersService } from './users.service';
@@ -54,15 +53,6 @@ export class UsersController {
     @UserDecorator('id') uuid: string,
   ): Promise<SyncSettings> {
     return this._usersService.getSyncSettings(uuid);
-  }
-
-  @UseGuards(AuthGuard)
-  @Put('syncsettings')
-  public updateSyncSettings(
-    @UserDecorator('id') uuid: string,
-    @Body() data: SyncSettingsUpdateDTO,
-  ): Promise<SyncSettings> {
-    return this._usersService.updateSyncSettings(data, uuid);
   }
 
   @UseGuards(AuthGuard)

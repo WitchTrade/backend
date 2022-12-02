@@ -12,6 +12,7 @@ import { Wish } from './entities/wish.entity';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { WishesService } from './wishes.service';
 import { Notification } from 'src/notifications/entities/notification.entity';
+import { SyncSettings } from 'src/users/entities/syncSettings.entity';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { Notification } from 'src/notifications/entities/notification.entity';
       Item,
       Price,
       Notification,
+      SyncSettings,
     ]),
     NotificationsModule,
   ],

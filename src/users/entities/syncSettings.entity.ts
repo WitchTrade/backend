@@ -14,12 +14,6 @@ export class SyncSettings {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ default: false })
-  syncInventory: boolean;
-
-  @Column({ default: false })
-  syncMarket: boolean;
-
   @Column({ default: 'both' })
   mode: string;
 

@@ -9,7 +9,6 @@ import { PublicUser, User, UserWithToken } from './entities/user.entity';
 import { UserUpdateDTO } from './dtos/update.dto';
 import { UserChangePasswordDTO } from './dtos/changePassword.dto';
 import { SyncSettings } from './entities/syncSettings.entity';
-import { SyncSettingsUpdateDTO } from './dtos/updateSyncSettings.dto';
 import { Market } from '../markets/entities/market.entity';
 import { UserRefreshDTO } from './dtos/refresh.dto';
 import { Price } from 'src/markets/entities/price.entity';
@@ -203,129 +202,6 @@ export class UsersService {
     }
 
     return user.syncSettings;
-  }
-
-  public async updateSyncSettings(
-    data: SyncSettingsUpdateDTO,
-    uuid: string,
-  ): Promise<SyncSettings> {
-    const user = await this._userRepository.findOne(uuid, {
-      relations: ['syncSettings'],
-    });
-    if (!user) {
-      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
-    }
-
-    const prices = await this._priceRepository.find();
-
-    if (
-      !prices.some((p) => p.id === data.mainPriceItem.id) ||
-      (data.secondaryPriceItem &&
-        !prices.some((p) => p.id === data.secondaryPriceItem.id)) ||
-      !prices.some((p) => p.id === data.mainPriceRecipe.id) ||
-      (data.secondaryPriceRecipe &&
-        !prices.some((p) => p.id === data.secondaryPriceRecipe.id))
-    ) {
-      throw new HttpException(
-        'Some prices were not found in the database',
-        HttpStatus.NOT_FOUND,
-      );
-    }
-
-    if (
-      !prices.find((p) => p.id === data.mainPriceItem.id).canBeMain ||
-      !prices.find((p) => p.id === data.mainPriceRecipe.id).canBeMain
-    ) {
-      throw new HttpException(
-        'Some prices which cannot be the main price are configured as the main price.',
-        HttpStatus.NOT_FOUND,
-      );
-    }
-
-    const syncSettings = user.syncSettings;
-
-    syncSettings.syncInventory = data.syncInventory;
-    syncSettings.syncMarket = data.syncMarket;
-    syncSettings.mode = data.mode;
-    syncSettings.rarity = data.rarity;
-
-    syncSettings.mainPriceItem = prices.find(
-      (p) => p.id === data.mainPriceItem.id,
-    );
-    if (syncSettings.mainPriceItem.withAmount) {
-      if (!data.mainPriceAmountItem) {
-        throw new HttpException(
-          'Main item price requires amount.',
-          HttpStatus.NOT_FOUND,
-        );
-      }
-      syncSettings.mainPriceAmountItem = data.mainPriceAmountItem;
-    }
-
-    if (data.secondaryPriceItem) {
-      syncSettings.secondaryPriceItem = prices.find(
-        (p) => p.id === data.secondaryPriceItem.id,
-      );
-      if (syncSettings.secondaryPriceItem.withAmount) {
-        if (!data.secondaryPriceAmountItem) {
-          throw new HttpException(
-            'Secondary item price requires amount.',
-            HttpStatus.NOT_FOUND,
-          );
-        }
-        syncSettings.secondaryPriceAmountItem = data.secondaryPriceAmountItem;
-      }
-      syncSettings.wantsBothItem = data.wantsBothItem;
-    } else {
-      syncSettings.secondaryPriceItem = null;
-    }
-
-    syncSettings.mainPriceRecipe = prices.find(
-      (p) => p.id === data.mainPriceRecipe.id,
-    );
-    if (syncSettings.mainPriceRecipe.withAmount) {
-      if (!data.mainPriceAmountRecipe) {
-        throw new HttpException(
-          'Main recipe price requires amount.',
-          HttpStatus.NOT_FOUND,
-        );
-      }
-      syncSettings.mainPriceAmountRecipe = data.mainPriceAmountRecipe;
-    }
-
-    if (data.secondaryPriceRecipe) {
-      syncSettings.secondaryPriceRecipe = prices.find(
-        (p) => p.id === data.secondaryPriceRecipe.id,
-      );
-      if (syncSettings.secondaryPriceRecipe.withAmount) {
-        if (!data.secondaryPriceAmountRecipe) {
-          throw new HttpException(
-            'Secondary recipe price requires amount.',
-            HttpStatus.NOT_FOUND,
-          );
-        }
-        syncSettings.secondaryPriceAmountRecipe =
-          data.secondaryPriceAmountRecipe;
-      }
-      syncSettings.wantsBothRecipe = data.wantsBothRecipe;
-    } else {
-      syncSettings.secondaryPriceRecipe = null;
-    }
-
-    syncSettings.keepItem = data.keepItem;
-    syncSettings.keepRecipe = data.keepRecipe;
-    syncSettings.ignoreWishlistItems = data.ignoreWishlistItems;
-    syncSettings.removeNoneOnStock = data.removeNoneOnStock;
-
-    syncSettings.ignoreList = (
-      await this._itemRepository.findByIds(data.ignoreList.map((i) => i.id))
-    ).filter((i) => i.tradeable);
-
-    const updatedSyncSettings = await this._syncSettingsRepository.save(
-      syncSettings,
-    );
-
-    return updatedSyncSettings;
   }
 
   public async updateUser(

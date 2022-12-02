@@ -11,7 +11,7 @@ import { Price } from './entities/price.entity';
 import { Wish } from './entities/wish.entity';
 import { OfferUpdateDTO } from './dtos/offerUpdate.dto';
 import { OfferSyncDTO } from './dtos/offerSync.dto';
-import { RARITY } from '../users/entities/syncSettings.entity';
+import { RARITY, SyncSettings } from '../users/entities/syncSettings.entity';
 import { Notification } from 'src/notifications/entities/notification.entity';
 
 @Injectable()
@@ -31,6 +31,8 @@ export class OffersService {
     private _priceRepository: Repository<Price>,
     @InjectRepository(Notification)
     private _notificationReposity: Repository<Notification>,
+    @InjectRepository(SyncSettings)
+    private _syncSettingsRepository: Repository<SyncSettings>,
     private _notificationService: NotificationsService,
   ) {}
 
@@ -571,6 +573,8 @@ export class OffersService {
 
     this._setLastUpdated(user.market);
 
+    this._updateSyncSettings(data, uuid);
+
     return response;
   }
 
@@ -694,5 +698,126 @@ export class OffersService {
     }
 
     return rarities;
+  }
+
+  public async _updateSyncSettings(data: OfferSyncDTO, uuid: string) {
+    const user = await this._userRepository.findOne(uuid, {
+      relations: ['syncSettings'],
+    });
+    if (!user) {
+      console.error(
+        `User not found when trying to save sync settings. uuid: ${uuid}`,
+      );
+      return;
+    }
+
+    const prices = await this._priceRepository.find();
+
+    if (
+      !prices.some((p) => p.id === data.mainPriceItem.id) ||
+      (data.secondaryPriceItem &&
+        !prices.some((p) => p.id === data.secondaryPriceItem.id)) ||
+      !prices.some((p) => p.id === data.mainPriceRecipe.id) ||
+      (data.secondaryPriceRecipe &&
+        !prices.some((p) => p.id === data.secondaryPriceRecipe.id))
+    ) {
+      console.error(
+        `Some prices were not found in the database when trying to save sync settings. price ids: ${data.mainPriceItem.id}, ${data.secondaryPriceItem.id}, ${data.mainPriceRecipe.id}, ${data.secondaryPriceRecipe.id}`,
+      );
+      return;
+    }
+
+    if (
+      !prices.find((p) => p.id === data.mainPriceItem.id).canBeMain ||
+      !prices.find((p) => p.id === data.mainPriceRecipe.id).canBeMain
+    ) {
+      console.error(
+        `'Some prices which cannot be the main price are configured as the main price when trying to save sync settings. price ids: ${data.mainPriceItem.id}, ${data.mainPriceRecipe.id}`,
+      );
+      return;
+    }
+
+    const syncSettings = user.syncSettings;
+
+    syncSettings.mode = data.mode;
+    syncSettings.rarity = data.rarity;
+
+    syncSettings.mainPriceItem = prices.find(
+      (p) => p.id === data.mainPriceItem.id,
+    );
+    if (syncSettings.mainPriceItem.withAmount) {
+      if (!data.mainPriceAmountItem) {
+        console.error(
+          `Main item price requires amount when trying to save sync settings. main price id: ${syncSettings.mainPriceItem.id}`,
+        );
+        return;
+      }
+      syncSettings.mainPriceAmountItem = data.mainPriceAmountItem;
+    }
+
+    if (data.secondaryPriceItem) {
+      syncSettings.secondaryPriceItem = prices.find(
+        (p) => p.id === data.secondaryPriceItem.id,
+      );
+      if (syncSettings.secondaryPriceItem.withAmount) {
+        if (!data.secondaryPriceAmountItem) {
+          console.error(
+            `'Secondary item price requires amount when trying to save sync settings. main price id: ${syncSettings.secondaryPriceItem.id}`,
+          );
+          return;
+        }
+        syncSettings.secondaryPriceAmountItem = data.secondaryPriceAmountItem;
+      }
+      syncSettings.wantsBothItem = data.wantsBothItem;
+    } else {
+      syncSettings.secondaryPriceItem = null;
+    }
+
+    syncSettings.mainPriceRecipe = prices.find(
+      (p) => p.id === data.mainPriceRecipe.id,
+    );
+    if (syncSettings.mainPriceRecipe.withAmount) {
+      if (!data.mainPriceAmountRecipe) {
+        console.error(
+          `'Main recipe price requires amount when trying to save sync settings. main price id: ${syncSettings.mainPriceRecipe.id}`,
+        );
+        return;
+      }
+      syncSettings.mainPriceAmountRecipe = data.mainPriceAmountRecipe;
+    }
+
+    if (data.secondaryPriceRecipe) {
+      syncSettings.secondaryPriceRecipe = prices.find(
+        (p) => p.id === data.secondaryPriceRecipe.id,
+      );
+      if (syncSettings.secondaryPriceRecipe.withAmount) {
+        if (!data.secondaryPriceAmountRecipe) {
+          console.error(
+            `'Secondary recipe price requires amount when trying to save sync settings. main price id: ${syncSettings.secondaryPriceRecipe.id}`,
+          );
+          return;
+        }
+        syncSettings.secondaryPriceAmountRecipe =
+          data.secondaryPriceAmountRecipe;
+      }
+      syncSettings.wantsBothRecipe = data.wantsBothRecipe;
+    } else {
+      syncSettings.secondaryPriceRecipe = null;
+    }
+
+    syncSettings.keepItem = data.keepItem;
+    syncSettings.keepRecipe = data.keepRecipe;
+    syncSettings.ignoreWishlistItems = data.ignoreWishlistItems;
+    syncSettings.removeNoneOnStock = data.removeNoneOnStock;
+
+    syncSettings.ignoreList = (
+      await this._itemRepository.findByIds(data.ignoreList.map((i) => i.id))
+    ).filter((i) => i.tradeable);
+
+    const updatedSyncSettings = await this._syncSettingsRepository.save(
+      syncSettings,
+    );
+
+    return updatedSyncSettings;
   }
 }

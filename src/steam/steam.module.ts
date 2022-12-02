@@ -9,7 +9,6 @@ import { SyncSettings } from '../users/entities/syncSettings.entity';
 import { User } from '../users/entities/user.entity';
 import { SteamController } from './steam.controller';
 import { SteamService } from './steam.service';
-import { SteamAutoSyncService } from './steamAutoSync.service';
 import { SteamFetcherService } from './steamFetcher.service';
 import { SteamAuthService } from './steamAuth.service';
 import { Badge } from 'src/users/entities/badge.entity';
@@ -28,11 +27,6 @@ import { Badge } from 'src/users/entities/badge.entity';
     MarketsModule,
   ],
   controllers: [SteamController],
-  providers: [
-    SteamService,
-    SteamAuthService,
-    SteamFetcherService,
-    SteamAutoSyncService,
-  ],
+  providers: [SteamService, SteamAuthService, SteamFetcherService],
 })
 export class SteamModule {}
