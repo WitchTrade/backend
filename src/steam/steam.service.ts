@@ -139,6 +139,7 @@ export class SteamService {
         autoSync,
         failed,
       );
+      console.log(`200 by ${steamProfileId} at ${new Date().toISOString()}`);
       assets.push(...response.data.assets);
       descriptions.push(
         ...response.data.descriptions.filter(

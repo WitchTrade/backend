@@ -91,7 +91,7 @@ export class SteamFetcherService {
                   HttpStatus.BAD_REQUEST,
                 );
               } else if (e.response.status === 429) {
-                console.error(
+                console.log(
                   `429 by ${steamProfileId} at ${new Date().toISOString()}`,
                 );
                 throw new HttpException(
