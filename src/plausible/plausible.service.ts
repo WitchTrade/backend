@@ -22,7 +22,7 @@ export class PlausibleService {
       'X-Forwarded-Proto': request.headers['cf-visitor']
         ? JSON.parse(request.headers['cf-visitor'] as string).scheme
         : request.protocol,
-      'X-Forwarded-For': request.headers['cf-connecting-ip']
+      'cf-connecting-ip': request.headers['cf-connecting-ip']
         ? (request.headers['cf-connecting-ip'] as string)
         : request.ip,
       'X-Forwarded-Host': request.hostname,
@@ -34,9 +34,6 @@ export class PlausibleService {
       const raw = await rawbody(request);
       body = raw.toString().trim();
     }
-
-    console.log(body);
-    console.log(forwardedHeaders);
 
     await this.httpService.axiosRef.post(
       `${process.env.PLAUSIBLE_HOST}/api/event`,
