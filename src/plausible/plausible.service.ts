@@ -35,6 +35,9 @@ export class PlausibleService {
       body = raw.toString().trim();
     }
 
+    console.log(body);
+    console.log(forwardedHeaders);
+
     await this.httpService.axiosRef.post(
       `${process.env.PLAUSIBLE_HOST}/api/event`,
       body,
