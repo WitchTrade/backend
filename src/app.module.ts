@@ -31,6 +31,7 @@ import { Stats } from './stats/entities/stats.entity';
 import { QuestsModule } from './quests/quests.module';
 import { UserQuest } from './quests/entities/userQuest.entity';
 import { Quest } from './quests/entities/quest.entity';
+import { PlausibleModule } from './plausible/plausible.module';
 
 @Module({
   imports: [
@@ -84,6 +85,7 @@ import { Quest } from './quests/entities/quest.entity';
     SearchModule,
     StatsModule,
     QuestsModule,
+    PlausibleModule,
   ],
   controllers: [],
   providers: [],
