@@ -38,7 +38,6 @@ export class UserUpdateDTO {
 
   @IsOptional()
   @IsString()
-  @Matches(/^.{2,32}#[0-9]{4}$/)
   discordTag: string;
 
   @IsBoolean()
