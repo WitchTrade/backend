@@ -145,6 +145,10 @@ export class SteamService {
         .map((a) => parseInt(a.amount, 10))
         .reduce((a, c) => a + c);
 
+      if (description.tags === undefined) {
+        console.log(description);
+      }
+
       return {
         name: description.name,
         amount,
