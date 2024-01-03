@@ -145,15 +145,22 @@ export class SteamService {
         .map((a) => parseInt(a.amount, 10))
         .reduce((a, c) => a + c);
 
-      if (description.tags === undefined) {
-        console.log(description);
+      let tagSlot: string;
+
+      if (description.tags) {
+        tagSlot = description.tags.find(
+          (t) => t.category === 'slot',
+        ).internal_name;
+      } else if (description.name === 'Saturated') {
+        tagSlot = 'skin color';
+      } else {
+        console.error('No tagSlot found for item: ', description.name);
       }
 
       return {
         name: description.name,
         amount,
-        tagSlot: description.tags.find((t) => t.category === 'slot')
-          .internal_name,
+        tagSlot,
       };
     });
 
