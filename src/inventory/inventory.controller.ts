@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Put, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { UserDecorator } from '../users/decorators/user.decorator';
 import { InventoryUpdateDTO } from './dtos/update.dto';
@@ -21,5 +21,11 @@ export class InventoryController {
     @Body() data: InventoryUpdateDTO,
   ) {
     return this._inventoryService.updateInventory(data, uuid);
+  }
+
+  @UseGuards(AuthGuard)
+  @Patch('')
+  syncInventory(@UserDecorator('id') uuid: string) {
+    return this._inventoryService.syncInventory(uuid);
   }
 }

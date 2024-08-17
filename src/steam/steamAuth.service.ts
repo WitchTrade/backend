@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { SteamFetcherService } from './steamFetcher.service';
+import { WitchItService } from 'src/witchit/witchIt.service';
 
 @Injectable()
 export class SteamAuthService {
@@ -16,6 +17,7 @@ export class SteamAuthService {
     @InjectRepository(User)
     private _userRepository: Repository<User>,
     private _steamFetcherService: SteamFetcherService,
+    private _witchItService: WitchItService,
   ) {
     this._steamAuth = new SteamAuth();
   }
@@ -77,6 +79,16 @@ export class SteamAuthService {
 
     user.steamProfileLink = `https://steamcommunity.com/profiles/${steamId}`;
     user.verifiedSteamProfileLink = true;
+
+    const witchItResponse = (
+      await this._witchItService.getWitchItUserId(
+        'steam',
+        user.steamProfileLink,
+      )
+    ).data;
+    if (witchItResponse.success) {
+      user.witchItUserId = witchItResponse.witchItId;
+    }
 
     const updatedUser = await this._userRepository.save(user);
 

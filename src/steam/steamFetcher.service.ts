@@ -1,7 +1,6 @@
 import { HttpService } from '@nestjs/axios';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { catchError, firstValueFrom } from 'rxjs';
-import { SteamInventoryResponse } from './models/steamInventoryResponse.model';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class SteamFetcherService {
@@ -44,90 +43,5 @@ export class SteamFetcherService {
       );
     }
     return steamProfileId;
-  }
-
-  public async fetchInventoryPage(
-    steamProfileId: string,
-    lastAssedId?: string,
-  ) {
-    return firstValueFrom(
-      this._httpService
-        .get<SteamInventoryResponse>(
-          `https://steamcommunity.com/inventory/${steamProfileId}/559650/2?l=english&count=5000${
-            lastAssedId ? `&start_assetid=${lastAssedId}` : ''
-          }`,
-          {
-            headers: {
-              'User-Agent': process.env.USER_AGENT,
-              Referer: `https://steamcommunity.com/inventory/${steamProfileId}/559650/2?l=english&count=5000${
-                lastAssedId ? `&start_assetid=${lastAssedId}` : ''
-              }`,
-            },
-          },
-        )
-        .pipe(
-          catchError((e) => {
-            if (e.response.status === 403) {
-              throw new HttpException(
-                `Your steam inventory is not public. witchtrade.org can't access it.`,
-                HttpStatus.BAD_REQUEST,
-              );
-            } else {
-              if (e.response.status === 403) {
-                throw new HttpException(
-                  `Your steam inventory is not public. witchtrade.org can't access it.`,
-                  HttpStatus.BAD_REQUEST,
-                );
-              } else if (e.response.status === 429) {
-                console.log(
-                  `429 by ${steamProfileId} at ${new Date().toISOString()}`,
-                );
-                throw new HttpException(
-                  `Steam rate limit reached, please try again later.`,
-                  HttpStatus.BAD_REQUEST,
-                );
-              } else {
-                throw new HttpException(e.response.data, e.response.status);
-              }
-            }
-          }),
-        ),
-    );
-  }
-
-  public async getSteamFriendIds(steamId: string) {
-    return firstValueFrom(
-      this._httpService
-        .get<any>(
-          `https://api.steampowered.com/ISteamUser/GetFriendList/v1/?key=${process.env.STEAMAPIKEY}&steamid=${steamId}&relationship=friend`,
-        )
-        .pipe(
-          catchError((e) => {
-            if (e.response.status === 401) {
-              throw new HttpException(
-                `Your steam friend list is private. witchtrade.org can't access it.`,
-                HttpStatus.BAD_REQUEST,
-              );
-            }
-            throw new HttpException(e.response.data, e.response.status);
-          }),
-        ),
-    );
-  }
-
-  public async getSteamNamesfromIds(steamIds: string[]) {
-    return firstValueFrom(
-      this._httpService
-        .get<any>(
-          `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=${
-            process.env.STEAMAPIKEY
-          }&steamids=${steamIds.join(',')}`,
-        )
-        .pipe(
-          catchError((e) => {
-            throw new HttpException(e.response.data, e.response.status);
-          }),
-        ),
-    );
   }
 }
