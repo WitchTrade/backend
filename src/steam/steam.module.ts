@@ -3,13 +3,12 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../users/entities/user.entity';
 import { SteamController } from './steam.controller';
-import { SteamFetcherService } from './steamFetcher.service';
 import { SteamAuthService } from './steamAuth.service';
 import { WitchItModule } from 'src/witchit/witchit.module';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User]), HttpModule, WitchItModule],
   controllers: [SteamController],
-  providers: [SteamAuthService, SteamFetcherService],
+  providers: [SteamAuthService],
 })
 export class SteamModule {}

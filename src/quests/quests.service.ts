@@ -27,9 +27,9 @@ export class QuestsService {
     if (!user) {
       throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
-    if (!user.verifiedSteamProfileLink || !user.witchItUserId) {
+    if (!user.witchItUserId) {
       throw new HttpException(
-        'Steam profile not verified. Please go to your profile settings and verify it.',
+        'Steam profile linked. Please go to your profile settings and authorize with Steam.',
         HttpStatus.UNAUTHORIZED,
       );
     }

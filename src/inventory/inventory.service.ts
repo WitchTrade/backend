@@ -104,13 +104,9 @@ export class InventoryService {
       }
     }
 
-    if (
-      !user.steamProfileLink ||
-      !user.verifiedSteamProfileLink ||
-      !user.witchItUserId
-    ) {
+    if (!user.steamProfileLink || !user.witchItUserId) {
       throw new HttpException(
-        `You need to have a verified steam profile link to be able to sync your witch it inventory. Please configure one in your account settings.`,
+        `You need to have a steam profile linked to be able to sync your witch it inventory. Please configure one in your account settings.`,
         HttpStatus.BAD_REQUEST,
       );
     }

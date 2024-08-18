@@ -6,7 +6,6 @@ import { SteamAuth } from './steamAuth';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
-import { SteamFetcherService } from './steamFetcher.service';
 import { WitchItService } from 'src/witchit/witchIt.service';
 
 @Injectable()
@@ -16,7 +15,6 @@ export class SteamAuthService {
   constructor(
     @InjectRepository(User)
     private _userRepository: Repository<User>,
-    private _steamFetcherService: SteamFetcherService,
     private _witchItService: WitchItService,
   ) {
     this._steamAuth = new SteamAuth();
@@ -29,9 +27,9 @@ export class SteamAuthService {
       throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
 
-    if (user.verifiedSteamProfileLink) {
+    if (user.steamProfileLink) {
       throw new HttpException(
-        'User already has a verified steam profile url.',
+        'User already has a steam profile linked.',
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -66,19 +64,7 @@ export class SteamAuthService {
       throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
 
-    const steamIdFromUser = await this._steamFetcherService.getSteamProfileId(
-      user.steamProfileLink,
-    );
-
-    if (steamId !== steamIdFromUser) {
-      throw new HttpException(
-        'Authenticated Steam account is not configured as your steam profile.',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
     user.steamProfileLink = `https://steamcommunity.com/profiles/${steamId}`;
-    user.verifiedSteamProfileLink = true;
 
     const witchItResponse = (
       await this._witchItService.getWitchItUserId(

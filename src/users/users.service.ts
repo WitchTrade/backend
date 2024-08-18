@@ -204,27 +204,8 @@ export class UsersService {
     if (!user) {
       throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
-
-    if (!data.steamProfileLink) {
-      data.steamProfileLink = null;
-    }
-
-    if (user.verified && user.steamProfileLink !== data.steamProfileLink) {
-      user.verified = false;
-    }
-    if (
-      user.verifiedSteamProfileLink &&
-      user.steamProfileLink !== data.steamProfileLink
-    ) {
-      user.verifiedSteamProfileLink = false;
-      user.witchItUserId = null;
-    }
-
     user.email = data.email;
     user.displayName = data.displayName;
-    user.steamProfileLink = data.steamProfileLink
-      ? data.steamProfileLink
-      : null;
     user.discordTag = data.discordTag ? data.discordTag : null;
     user.hidden = data.hidden;
 
@@ -242,6 +223,25 @@ export class UsersService {
         HttpStatus.BAD_REQUEST,
       );
     }
+
+    const updatedUser = await this._userRepository.save(user);
+
+    updatedUser.roles = user.roles;
+    updatedUser.badges = user.badges;
+
+    return updatedUser.tokenResponse();
+  }
+
+  public async unlinkSteam(uuid: string): Promise<UserWithToken> {
+    const user = await this._userRepository.findOne(uuid, {
+      relations: ['roles', 'badges'],
+    });
+    if (!user) {
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
+    }
+
+    user.steamProfileLink = null;
+    user.witchItUserId = null;
 
     const updatedUser = await this._userRepository.save(user);
 

@@ -49,9 +49,6 @@ export class User {
   @Column({ nullable: true })
   steamProfileLink: string;
 
-  @Column({ default: false })
-  verifiedSteamProfileLink: boolean;
-
   @Column({ nullable: true })
   witchItUserId: string;
 
@@ -112,7 +109,6 @@ export class User {
       lastOnline: this.lastOnline,
       displayName: this.displayName,
       steamProfileLink: this.steamProfileLink,
-      verifiedSteamProfileLink: this.verifiedSteamProfileLink,
       witchItUserId: this.witchItUserId,
       discordTag: this.discordTag,
       verified: this.verified,
@@ -156,7 +152,6 @@ export class PublicUser {
   lastOnline: Date;
   displayName: string;
   steamProfileLink: string;
-  verifiedSteamProfileLink: boolean;
   witchItUserId: string;
   discordTag: string;
   verified: boolean;
