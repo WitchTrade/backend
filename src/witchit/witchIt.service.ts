@@ -71,7 +71,10 @@ const ITEM_MAP_LIST = {
 export class WitchItService {
   constructor(private _httpService: HttpService) {}
 
-  public async getWitchItUserId(platform: 'steam', platformIdentifier: string) {
+  public async getWitchItUserId(
+    platform: 'steam' | 'epic',
+    platformIdentifier: string,
+  ) {
     if (process.env.NODE_ENV !== 'production') {
       platformIdentifier = '1234';
     }

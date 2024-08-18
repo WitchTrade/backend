@@ -251,6 +251,25 @@ export class UsersService {
     return updatedUser.tokenResponse();
   }
 
+  public async unlinkEpic(uuid: string): Promise<UserWithToken> {
+    const user = await this._userRepository.findOne(uuid, {
+      relations: ['roles', 'badges'],
+    });
+    if (!user) {
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
+    }
+
+    user.epicAccountId = null;
+    user.witchItUserId = null;
+
+    const updatedUser = await this._userRepository.save(user);
+
+    updatedUser.roles = user.roles;
+    updatedUser.badges = user.badges;
+
+    return updatedUser.tokenResponse();
+  }
+
   public async changePassword(data: UserChangePasswordDTO, uuid: string) {
     const user = await this._userRepository.findOne(uuid, {
       relations: ['roles', 'badges'],

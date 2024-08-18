@@ -18,7 +18,7 @@ import { SyncSettings } from './users/entities/syncSettings.entity';
 import { InventoryModule } from './inventory/inventory.module';
 import { InventoryItem } from './inventory/entities/inventoryItem.entity';
 import { Inventory } from './inventory/entities/inventory.entity';
-import { SteamModule } from './steam/steam.module';
+import { OAuthModule } from './oauth/oauth.module';
 import { MarketsModule } from './markets/markets.module';
 import { Market } from './markets/entities/market.entity';
 import { Offer } from './markets/entities/offer.entity';
@@ -68,7 +68,7 @@ import { WitchItModule } from 'src/witchit/witchit.module';
     NotificationsModule,
     InventoryModule,
     WitchItModule,
-    SteamModule,
+    OAuthModule,
     MarketsModule,
     SearchModule,
     StatsModule,

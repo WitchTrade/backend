@@ -2,22 +2,22 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import 'dotenv/config';
 
-import { SteamAuth } from './steamAuth';
+import { SteamOpenId } from './SteamOpenId';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { WitchItService } from 'src/witchit/witchIt.service';
 
 @Injectable()
-export class SteamAuthService {
-  private _steamAuth: SteamAuth;
+export class SteamService {
+  private _steamOpenId: SteamOpenId;
 
   constructor(
     @InjectRepository(User)
     private _userRepository: Repository<User>,
     private _witchItService: WitchItService,
   ) {
-    this._steamAuth = new SteamAuth();
+    this._steamOpenId = new SteamOpenId();
   }
 
   public async login(uuid: string) {
@@ -29,12 +29,12 @@ export class SteamAuthService {
 
     if (user.steamProfileLink) {
       throw new HttpException(
-        'User already has a steam profile linked.',
+        'User already has a verified steam profile url.',
         HttpStatus.BAD_REQUEST,
       );
     }
 
-    const redirectUrl = await this._steamAuth.getRedirectUrl();
+    const redirectUrl = await this._steamOpenId.getRedirectUrl();
 
     if (!redirectUrl) {
       throw new HttpException(
@@ -47,7 +47,7 @@ export class SteamAuthService {
   }
 
   public async auth(req: Request, uuid: string) {
-    const steamId = await this._steamAuth.authenticate(req.url);
+    const steamId = await this._steamOpenId.authenticate(req.url);
 
     if (!steamId) {
       throw new HttpException(
@@ -65,6 +65,7 @@ export class SteamAuthService {
     }
 
     user.steamProfileLink = `https://steamcommunity.com/profiles/${steamId}`;
+    user.epicAccountId = null;
 
     const witchItResponse = (
       await this._witchItService.getWitchItUserId(

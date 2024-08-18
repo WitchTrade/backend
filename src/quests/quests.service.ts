@@ -1,4 +1,3 @@
-import { HttpService } from '@nestjs/axios';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Item } from 'src/items/entities/item.entity';
@@ -29,7 +28,7 @@ export class QuestsService {
     }
     if (!user.witchItUserId) {
       throw new HttpException(
-        'Steam profile linked. Please go to your profile settings and authorize with Steam.',
+        `You need to have your Witch It Id linked to be able to sync your witch it inventory. Please configure this in your account settings.`,
         HttpStatus.UNAUTHORIZED,
       );
     }

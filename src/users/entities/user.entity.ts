@@ -50,6 +50,9 @@ export class User {
   steamProfileLink: string;
 
   @Column({ nullable: true })
+  epicAccountId: string;
+
+  @Column({ nullable: true })
   witchItUserId: string;
 
   @Column({ nullable: true })

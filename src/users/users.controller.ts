@@ -74,6 +74,12 @@ export class UsersController {
   }
 
   @UseGuards(AuthGuard)
+  @Patch('/unlink/epic')
+  public unlinkEpic(@UserDecorator('id') uuid: string): Promise<UserWithToken> {
+    return this._usersService.unlinkEpic(uuid);
+  }
+
+  @UseGuards(AuthGuard)
   @Put('password')
   public changePassword(
     @Body() data: UserChangePasswordDTO,
