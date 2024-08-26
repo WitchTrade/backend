@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   Param,
+  Patch,
   Post,
   Put,
   UseGuards,
@@ -62,6 +63,20 @@ export class UsersController {
     @Body() data: UserUpdateDTO,
   ): Promise<UserWithToken> {
     return this._usersService.updateUser(data, uuid);
+  }
+
+  @UseGuards(AuthGuard)
+  @Patch('/unlink/steam')
+  public unlinkSteam(
+    @UserDecorator('id') uuid: string,
+  ): Promise<UserWithToken> {
+    return this._usersService.unlinkSteam(uuid);
+  }
+
+  @UseGuards(AuthGuard)
+  @Patch('/unlink/epic')
+  public unlinkEpic(@UserDecorator('id') uuid: string): Promise<UserWithToken> {
+    return this._usersService.unlinkEpic(uuid);
   }
 
   @UseGuards(AuthGuard)

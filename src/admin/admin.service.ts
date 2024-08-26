@@ -520,4 +520,27 @@ export class AdminService {
 
     return;
   }
+
+  public async clearCompletionists(uuid: string) {
+    const requestingUser = await this._userRepository.findOne(uuid, {
+      relations: ['roles'],
+    });
+
+    if (!this._hasPermission(requestingUser.roles, PERMISSION.ADMIN)) {
+      throw new HttpException('Permission denied.', HttpStatus.FORBIDDEN);
+    }
+
+    const users = await this._userRepository.find({
+      relations: ['badges'],
+    });
+
+    for (const user of users) {
+      if (user.badges.some((badge) => badge.id.startsWith('completionist'))) {
+        user.badges = user.badges.filter(
+          (badge) => !badge.id.startsWith('completionist'),
+        );
+        await this._userRepository.save(user);
+      }
+    }
+  }
 }

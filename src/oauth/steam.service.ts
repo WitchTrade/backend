@@ -2,22 +2,22 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import 'dotenv/config';
 
-import { SteamAuth } from './steamAuth';
+import { SteamOpenId } from './SteamOpenId';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
-import { SteamFetcherService } from './steamFetcher.service';
+import { WitchItService } from 'src/witchit/witchIt.service';
 
 @Injectable()
-export class SteamAuthService {
-  private _steamAuth: SteamAuth;
+export class SteamService {
+  private _steamOpenId: SteamOpenId;
 
   constructor(
     @InjectRepository(User)
     private _userRepository: Repository<User>,
-    private _steamFetcherService: SteamFetcherService,
+    private _witchItService: WitchItService,
   ) {
-    this._steamAuth = new SteamAuth();
+    this._steamOpenId = new SteamOpenId();
   }
 
   public async login(uuid: string) {
@@ -27,14 +27,14 @@ export class SteamAuthService {
       throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
 
-    if (user.verifiedSteamProfileLink) {
+    if (user.steamProfileLink) {
       throw new HttpException(
         'User already has a verified steam profile url.',
         HttpStatus.BAD_REQUEST,
       );
     }
 
-    const redirectUrl = await this._steamAuth.getRedirectUrl();
+    const redirectUrl = await this._steamOpenId.getRedirectUrl();
 
     if (!redirectUrl) {
       throw new HttpException(
@@ -47,7 +47,7 @@ export class SteamAuthService {
   }
 
   public async auth(req: Request, uuid: string) {
-    const steamId = await this._steamAuth.authenticate(req.url);
+    const steamId = await this._steamOpenId.authenticate(req.url);
 
     if (!steamId) {
       throw new HttpException(
@@ -64,19 +64,16 @@ export class SteamAuthService {
       throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
 
-    const steamIdFromUser = await this._steamFetcherService.getSteamProfileId(
-      user.steamProfileLink,
-    );
-
-    if (steamId !== steamIdFromUser) {
-      throw new HttpException(
-        'Authenticated Steam account is not configured as your steam profile.',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
     user.steamProfileLink = `https://steamcommunity.com/profiles/${steamId}`;
-    user.verifiedSteamProfileLink = true;
+    user.epicAccountId = null;
+    user.verified = false;
+
+    const witchItResponse = (
+      await this._witchItService.getWitchItUserId('steam', steamId)
+    ).data;
+    if (witchItResponse.success) {
+      user.witchItUserId = witchItResponse.witchItId;
+    }
 
     const updatedUser = await this._userRepository.save(user);
 

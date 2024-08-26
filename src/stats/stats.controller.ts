@@ -14,9 +14,4 @@ export class StatsController {
   getWitchTradeStats() {
     return this._statsService.getWitchTradeStats();
   }
-
-  @Get('witchitserver')
-  getWitchItServerStats() {
-    return this._statsService.getWitchItServerStats();
-  }
 }

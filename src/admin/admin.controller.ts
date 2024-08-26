@@ -130,4 +130,10 @@ export class AdminController {
   ): Promise<void> {
     return this._adminService.broadcastNotification(uuid, notification);
   }
+
+  @UseGuards(AuthGuard)
+  @Delete('completionists')
+  public clearCompletionists(@UserDecorator('id') uuid: string): Promise<void> {
+    return this._adminService.clearCompletionists(uuid);
+  }
 }

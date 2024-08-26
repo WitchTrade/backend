@@ -1,7 +1,7 @@
-import { RelyingParty } from 'openid';
 import 'dotenv/config';
+import { RelyingParty } from 'openid';
 
-export class SteamAuth {
+export class SteamOpenId {
   private _relyingParty: RelyingParty;
 
   private _steamOpenIdRegex =
@@ -9,8 +9,8 @@ export class SteamAuth {
 
   constructor() {
     this._relyingParty = new RelyingParty(
-      process.env.STEAM_RETURNURL,
-      process.env.STEAM_REALM,
+      process.env.OAUTH_RETURNURL,
+      process.env.STEAM_OPENID_REALM,
       true,
       true,
       [],

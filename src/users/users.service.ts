@@ -12,7 +12,6 @@ import { SyncSettings } from './entities/syncSettings.entity';
 import { Market } from '../markets/entities/market.entity';
 import { UserRefreshDTO } from './dtos/refresh.dto';
 import { Price } from 'src/markets/entities/price.entity';
-import { Item } from 'src/items/entities/item.entity';
 
 @Injectable()
 export class UsersService {
@@ -25,18 +24,9 @@ export class UsersService {
     private _marketRepository: Repository<Market>,
     @InjectRepository(Price)
     private _priceRepository: Repository<Price>,
-    @InjectRepository(Item)
-    private _itemRepository: Repository<Item>,
   ) {}
 
   public async register(user: UserRegisterDTO): Promise<UserWithToken> {
-    if (!user.steamProfileLink && !user.steamTradeLink) {
-      throw new HttpException(
-        'Please provide either a steam profile link or trade link.',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
     user.username = user.username.toLowerCase();
     user.email = user.email.toLowerCase();
 
@@ -214,42 +204,9 @@ export class UsersService {
     if (!user) {
       throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
-
-    if (!data.steamProfileLink && !data.steamTradeLink) {
-      throw new HttpException(
-        'Please provide either a steam profile link or trade link.',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    if (!data.steamProfileLink) {
-      data.steamProfileLink = null;
-    }
-    if (!data.steamTradeLink) {
-      data.steamTradeLink = null;
-    }
-    if (
-      user.verified &&
-      (user.steamProfileLink !== data.steamProfileLink ||
-        user.steamTradeLink !== data.steamTradeLink)
-    ) {
-      user.verified = false;
-    }
-    if (
-      user.verifiedSteamProfileLink &&
-      user.steamProfileLink !== data.steamProfileLink
-    ) {
-      user.verifiedSteamProfileLink = false;
-    }
-
     user.email = data.email;
     user.displayName = data.displayName;
-    user.steamProfileLink = data.steamProfileLink
-      ? data.steamProfileLink
-      : null;
-    user.steamTradeLink = data.steamTradeLink ? data.steamTradeLink : null;
     user.discordTag = data.discordTag ? data.discordTag : null;
-    user.usingSteamGuard = data.usingSteamGuard;
     user.hidden = data.hidden;
 
     const existingUser = await this._userRepository.findOne({
@@ -266,6 +223,46 @@ export class UsersService {
         HttpStatus.BAD_REQUEST,
       );
     }
+
+    const updatedUser = await this._userRepository.save(user);
+
+    updatedUser.roles = user.roles;
+    updatedUser.badges = user.badges;
+
+    return updatedUser.tokenResponse();
+  }
+
+  public async unlinkSteam(uuid: string): Promise<UserWithToken> {
+    const user = await this._userRepository.findOne(uuid, {
+      relations: ['roles', 'badges'],
+    });
+    if (!user) {
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
+    }
+
+    user.steamProfileLink = null;
+    user.witchItUserId = null;
+    user.verified = false;
+
+    const updatedUser = await this._userRepository.save(user);
+
+    updatedUser.roles = user.roles;
+    updatedUser.badges = user.badges;
+
+    return updatedUser.tokenResponse();
+  }
+
+  public async unlinkEpic(uuid: string): Promise<UserWithToken> {
+    const user = await this._userRepository.findOne(uuid, {
+      relations: ['roles', 'badges'],
+    });
+    if (!user) {
+      throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
+    }
+
+    user.epicAccountId = null;
+    user.witchItUserId = null;
+    user.verified = false;
 
     const updatedUser = await this._userRepository.save(user);
 

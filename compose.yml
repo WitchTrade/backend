@@ -1,0 +1,16 @@
+name: witchtrade-v1
+services:
+  db:
+    image: postgres:alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=witchtrade
+      - POSTGRES_PASSWORD=Local123
+    ports:
+      - '5440:5432'
+    volumes:
+      - db:/var/lib/postgresql/data
+volumes:
+  db:
+    name: witchtrade-v1-db
+    driver: local

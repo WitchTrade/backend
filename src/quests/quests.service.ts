@@ -1,13 +1,11 @@
-import { HttpService } from '@nestjs/axios';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { catchError, firstValueFrom } from 'rxjs';
 import { Item } from 'src/items/entities/item.entity';
 import { User } from 'src/users/entities/user.entity';
+import { QuestType, WitchItService } from 'src/witchit/witchIt.service';
 import { Repository } from 'typeorm';
 import { Quest } from './entities/quest.entity';
 import { UserQuest } from './entities/userQuest.entity';
-import { QuestResponse, QuestType } from './models/questResponse.model';
 
 @Injectable()
 export class QuestsService {
@@ -20,7 +18,7 @@ export class QuestsService {
     private _questRepository: Repository<Quest>,
     @InjectRepository(Item)
     private _itemRepository: Repository<Item>,
-    private _httpService: HttpService,
+    private _witchItService: WitchItService,
   ) {}
 
   public async getQuests(uuid: string) {
@@ -28,9 +26,9 @@ export class QuestsService {
     if (!user) {
       throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
-    if (!user.verifiedSteamProfileLink) {
+    if (!user.witchItUserId) {
       throw new HttpException(
-        'Steam profile link not verified.',
+        `You need to have your Witch It Id linked to be able to sync your witch it inventory. Please configure this in your account settings.`,
         HttpStatus.UNAUTHORIZED,
       );
     }
@@ -43,15 +41,12 @@ export class QuestsService {
       return { quests: cachedQuests, cachedAt: user.questsCachedAt };
     }
 
-    const steamUrlIdRegex = user.steamProfileLink.match(
-      /^https:\/\/steamcommunity\.com\/profiles\/([^/]+).*$/,
-    );
-    const steamProfileId = steamUrlIdRegex[1];
-
-    const questResponse = (await this._getQuests(steamProfileId)).data;
+    const questResponse = (
+      await this._witchItService.getQuests(user.witchItUserId)
+    ).data;
     if (!questResponse.success) {
       console.error(
-        `Failed to get quests from steam account ${steamProfileId}`,
+        `Failed to get quests for witch it user ${user.witchItUserId}`,
       );
       console.error(questResponse.errorCode);
       throw new HttpException(
@@ -73,25 +68,6 @@ export class QuestsService {
     return (
       new Date().getTime() - cachedAt.getTime() <
       parseInt(process.env.QUEST_CACHETIME, 10)
-    );
-  }
-
-  private _getQuests(steamId: string) {
-    return firstValueFrom(
-      this._httpService
-        .get<QuestResponse>(
-          `${process.env.QUEST_ENDPOINT}community/getActiveQuests?authToken=${process.env.QUEST_AUTH_TOKEN}&accountName=${steamId}`,
-        )
-        .pipe(
-          catchError((e) => {
-            console.error(`Failed to get quests from steam account ${steamId}`);
-            console.error(e);
-            throw new HttpException(
-              `Failed to get quests`,
-              HttpStatus.INTERNAL_SERVER_ERROR,
-            );
-          }),
-        ),
     );
   }
 

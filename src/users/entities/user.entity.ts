@@ -49,17 +49,14 @@ export class User {
   @Column({ nullable: true })
   steamProfileLink: string;
 
-  @Column({ default: false })
-  verifiedSteamProfileLink: boolean;
+  @Column({ nullable: true })
+  epicAccountId: string;
 
   @Column({ nullable: true })
-  steamTradeLink: string;
+  witchItUserId: string;
 
   @Column({ nullable: true })
   discordTag: string;
-
-  @Column({ default: false })
-  usingSteamGuard: boolean;
 
   @Column({ default: false })
   verified: boolean;
@@ -115,10 +112,8 @@ export class User {
       lastOnline: this.lastOnline,
       displayName: this.displayName,
       steamProfileLink: this.steamProfileLink,
-      verifiedSteamProfileLink: this.verifiedSteamProfileLink,
-      steamTradeLink: this.steamTradeLink,
+      witchItUserId: this.witchItUserId,
       discordTag: this.discordTag,
-      usingSteamGuard: this.usingSteamGuard,
       verified: this.verified,
       hidden: this.hidden,
       roles: this.roles,
@@ -160,10 +155,8 @@ export class PublicUser {
   lastOnline: Date;
   displayName: string;
   steamProfileLink: string;
-  verifiedSteamProfileLink: boolean;
-  steamTradeLink: string;
+  witchItUserId: string;
   discordTag: string;
-  usingSteamGuard: boolean;
   verified: boolean;
   hidden: boolean;
   roles: Role[];

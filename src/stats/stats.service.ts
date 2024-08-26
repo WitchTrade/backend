@@ -3,9 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Offer } from 'src/markets/entities/offer.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
-import { Stats } from './entities/stats.entity';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const appversion = require('../../package.json').version;
+import appInformation from '../../package.json';
 
 @Injectable()
 export class StatsService {
@@ -14,12 +12,10 @@ export class StatsService {
     private _userRepository: Repository<User>,
     @InjectRepository(Offer)
     private _offerRepository: Repository<Offer>,
-    @InjectRepository(Stats, 'wistats')
-    private statsRepository: Repository<Stats>,
   ) {}
 
   public getVersion() {
-    return appversion;
+    return appInformation.version;
   }
 
   public async getWitchTradeStats() {
@@ -39,14 +35,5 @@ export class StatsService {
     const userCount = await this._userRepository.count({ banned: false });
 
     return { users: userCount, offers: parseInt(offerCountRequest.count, 10) };
-  }
-
-  public async getWitchItServerStats(): Promise<any[]> {
-    const stats = await this.statsRepository.find();
-    const formattedStats = stats.map((stat: any) => {
-      stat.value = parseFloat(stat.value);
-      return stat;
-    });
-    return formattedStats;
   }
 }
