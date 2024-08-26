@@ -1,11 +1,11 @@
 # Install dependencies only when needed
-FROM node:16.12.0-alpine3.14 AS deps
+FROM node:lts-alpine3.14 AS deps
 WORKDIR /app
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 
 # Rebuild the source code only when needed
-FROM node:16.12.0-alpine3.14 AS builder
+FROM node:lts-alpine3.14 AS builder
 WORKDIR /app
 COPY package.json yarn.lock tsconfig.json tsconfig.build.json nest-cli.json ./
 COPY ./src ./src
@@ -13,7 +13,7 @@ COPY --from=deps /app/node_modules ./node_modules
 RUN yarn build && yarn install
 
 # Production image, copy all the files and run nest
-FROM node:16.12.0-alpine3.14 AS runner
+FROM node:lts-alpine3.14 AS runner
 WORKDIR /app
 
 ENV NODE_ENV production
