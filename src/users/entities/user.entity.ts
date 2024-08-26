@@ -112,7 +112,6 @@ export class User {
       lastOnline: this.lastOnline,
       displayName: this.displayName,
       steamProfileLink: this.steamProfileLink,
-      witchItUserId: this.witchItUserId,
       discordTag: this.discordTag,
       verified: this.verified,
       hidden: this.hidden,
@@ -155,7 +154,6 @@ export class PublicUser {
   lastOnline: Date;
   displayName: string;
   steamProfileLink: string;
-  witchItUserId: string;
   discordTag: string;
   verified: boolean;
   hidden: boolean;
