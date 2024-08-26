@@ -68,6 +68,7 @@ export class EpicService {
 
     user.epicAccountId = epicAccountId;
     user.steamProfileLink = null;
+    user.verified = false;
 
     const witchItResponse = (
       await this._witchItService.getWitchItUserId('epic', user.epicAccountId)

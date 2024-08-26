@@ -66,12 +66,10 @@ export class SteamService {
 
     user.steamProfileLink = `https://steamcommunity.com/profiles/${steamId}`;
     user.epicAccountId = null;
+    user.verified = false;
 
     const witchItResponse = (
-      await this._witchItService.getWitchItUserId(
-        'steam',
-        user.steamProfileLink,
-      )
+      await this._witchItService.getWitchItUserId('steam', steamId)
     ).data;
     if (witchItResponse.success) {
       user.witchItUserId = witchItResponse.witchItId;

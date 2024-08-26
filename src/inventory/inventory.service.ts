@@ -104,7 +104,7 @@ export class InventoryService {
       }
     }
 
-    if (!user.steamProfileLink || !user.witchItUserId) {
+    if (!user.witchItUserId) {
       throw new HttpException(
         `You need to have your Witch It Id linked to be able to sync your witch it inventory. Please configure this in your account settings.`,
         HttpStatus.BAD_REQUEST,

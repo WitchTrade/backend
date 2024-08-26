@@ -75,10 +75,6 @@ export class WitchItService {
     platform: 'steam' | 'epic',
     platformIdentifier: string,
   ) {
-    if (process.env.NODE_ENV !== 'production') {
-      platformIdentifier = '1234';
-    }
-
     return firstValueFrom(
       this._httpService
         .get<UserLookup>(

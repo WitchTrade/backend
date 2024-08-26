@@ -242,6 +242,7 @@ export class UsersService {
 
     user.steamProfileLink = null;
     user.witchItUserId = null;
+    user.verified = false;
 
     const updatedUser = await this._userRepository.save(user);
 
@@ -261,6 +262,7 @@ export class UsersService {
 
     user.epicAccountId = null;
     user.witchItUserId = null;
+    user.verified = false;
 
     const updatedUser = await this._userRepository.save(user);
 
