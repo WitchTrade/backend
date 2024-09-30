@@ -1,6 +1,7 @@
 # Install dependencies only when needed
 FROM node:lts-alpine3.14 AS deps
 WORKDIR /app
+RUN apk add --update --no-cache python3 make build-base && ln -sf python3 /usr/bin/python
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 

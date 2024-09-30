@@ -51,21 +51,9 @@ export interface QuestType {
 const ITEM_IGNORE_LIST = [
   2251, // Fireworks
   2252, // Gunpowder
+  2253, // Dreamland Chest
+  2254, // Dreamland Key
 ];
-
-// Map DLC items that have duplicate definitions
-const ITEM_MAP_LIST = {
-  2315: 1977, // Head of the Eternal Protector
-  2316: 1978, // Harness of the Eternal Protector
-  2317: 1979, // Loincloth of the Eternal Protector
-  2318: 1980, // Blade of the Eternal Protector
-  2319: 1981, // Fragment of the Eternal Protector
-  2320: 1984, // Helmet of the Winter Storm Witch
-  2321: 1985, // Hair of the Winter Storm Witch
-  2322: 1986, // Battledress of the Winter Storm Witch
-  2323: 1987, // Axe of the Winter Storm Witch
-  2324: 1988, // Frozen Gem of the Winter Storm
-};
 
 @Injectable()
 export class WitchItService {
@@ -119,12 +107,6 @@ export class WitchItService {
   ): PreparedWitchItInventoryItem[] {
     const preparedItems = inventoryItems
       .filter((item) => !ITEM_IGNORE_LIST.includes(item.id))
-      .map((item) => {
-        if (ITEM_MAP_LIST[item.id]) {
-          item.id = ITEM_MAP_LIST[item.id];
-        }
-        return item;
-      })
       .reduce((preparedItems, item) => {
         const existing = preparedItems.find(
           (preparedItem) => preparedItem.id === item.id,
