@@ -30,4 +30,4 @@ USER nestjs
 
 EXPOSE 3001
 
-CMD ["node", "./dist/src/main.js"]
+CMD ["node", "--max-old-space-size=2048", "./dist/src/main.js"]

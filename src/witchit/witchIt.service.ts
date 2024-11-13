@@ -53,6 +53,8 @@ const ITEM_IGNORE_LIST = [
   2252, // Gunpowder
   2253, // Dreamland Chest
   2254, // Dreamland Key
+  2334, // Gloomkin
+  2335, // Haunted Candy
 ];
 
 @Injectable()
