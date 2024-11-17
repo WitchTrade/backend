@@ -29,7 +29,6 @@ import { StatsModule } from './stats/stats.module';
 import { QuestsModule } from './quests/quests.module';
 import { UserQuest } from './quests/entities/userQuest.entity';
 import { Quest } from './quests/entities/quest.entity';
-import { PlausibleModule } from './plausible/plausible.module';
 import { WitchItModule } from 'src/witchit/witchit.module';
 
 @Module({
@@ -73,7 +72,6 @@ import { WitchItModule } from 'src/witchit/witchit.module';
     SearchModule,
     StatsModule,
     QuestsModule,
-    PlausibleModule,
   ],
   controllers: [],
   providers: [],
