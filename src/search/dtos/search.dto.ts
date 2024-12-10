@@ -47,6 +47,7 @@ export class SearchDTO {
     'winterdream2021',
     'winterdream2022',
     'winterdream2023',
+    'winterdream2024',
     'witchforest',
     'mystic sands',
     'dreamland',

@@ -619,6 +619,7 @@ export class OffersService {
           case 'winterdream2021':
           case 'winterdream2022':
           case 'winterdream2023':
+          case 'winterdream2024':
             return prices.find((p) => p.priceKey === 'candy_cane');
           case 'witchforest':
             return prices.find((p) => p.priceKey === 'morgaryll_flower');
