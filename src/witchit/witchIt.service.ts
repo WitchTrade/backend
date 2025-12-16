@@ -49,6 +49,10 @@ export interface QuestType {
 }
 
 const ITEM_IGNORE_LIST = [
+  950,  // Cinnamon Star
+  951,  // Filled Boot
+  952,  // Fireworks
+  953,  // Gunpowder
   2251, // Fireworks
   2252, // Gunpowder
   2253, // Dreamland Chest
@@ -61,6 +65,8 @@ const ITEM_IGNORE_LIST = [
   2358, // Gunpowder
   2400, // Jewellery Box
   2401, // Dreamy Fluff
+  2414, // Haunted Candy
+  2413, // Gloomkin
 ];
 
 @Injectable()

@@ -606,6 +606,7 @@ export class OffersService {
           case 'halloween2022':
           case 'halloween2023':
           case 'halloween2024':
+          case 'halloween2025':
             return prices.find((p) => p.priceKey === 'ectoplasm');
           case 'theater':
             return prices.find((p) => p.priceKey === 'red_string');
@@ -620,6 +621,7 @@ export class OffersService {
           case 'winterdream2022':
           case 'winterdream2023':
           case 'winterdream2024':
+          case 'winterdream2025':
             return prices.find((p) => p.priceKey === 'candy_cane');
           case 'witchforest':
             return prices.find((p) => p.priceKey === 'morgaryll_flower');
